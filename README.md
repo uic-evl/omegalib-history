@@ -1,4 +1,4 @@
-![logo](https://code.google.com/p/omegalib/logo?cct=1370629559) omegalib
+![logo](https://code.google.com/p/omegalib/logo?cct=1370642046) omegalib
 ========
 A creative framework for virtual reality and cluster-driven display systems
 
