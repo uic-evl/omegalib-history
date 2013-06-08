@@ -51,6 +51,10 @@ Entity::Entity(SceneManager* scene):
 	// By default attach new entities to the root node of the scene.
 	myEffect = new EffectNode(scene);
 	Engine* engine = mySceneManager->getEngine();
+
+	// Add an empty material by default
+	addMaterial(new Material(new osg::StateSet(), scene));
+
 	//engine->getScene()->addChild(this);
 }
 

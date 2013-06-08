@@ -94,9 +94,12 @@ bool processDefaultArguments(Material* mat, libconfig::ArgumentHelper& ah, const
 	if(wireframe) mat->setWireframe(true);
 	if(offset != 0) mat->setPolygonOffset(2.0f, offset);
 
-	if(diffuse != "")
+	if(diffuse != "" | emissive != "")
 	{
-		if(Color::isValidColor(diffuse))
+		// If a color is empty, set it to black.
+		if(diffuse == "") diffuse = "#000000ff";
+		if(emissive == "") emissive = "#000000ff";
+		if(Color::isValidColor(diffuse) || Color::isValidColor(emissive))
 		{
 			mat->setColor(Color(diffuse), Color(emissive));
 		}
