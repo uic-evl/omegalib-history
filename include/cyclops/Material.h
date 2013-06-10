@@ -54,6 +54,7 @@ namespace cyclops {
 
 	public:
 		Material(osg::StateSet* ss, SceneManager* sm);
+		~Material();
 
 		void setColor(const Color& diffuse, const Color& emissive);
 		void setShininess(float value);

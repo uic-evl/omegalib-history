@@ -99,7 +99,7 @@ bool processDefaultArguments(Material* mat, libconfig::ArgumentHelper& ah, const
 		// If a color is empty, set it to black.
 		if(diffuse == "") diffuse = "#000000ff";
 		if(emissive == "") emissive = "#000000ff";
-		if(Color::isValidColor(diffuse) || Color::isValidColor(emissive))
+		if(Color::isValidColor(diffuse) && Color::isValidColor(emissive))
 		{
 			mat->setColor(Color(diffuse), Color(emissive));
 		}
