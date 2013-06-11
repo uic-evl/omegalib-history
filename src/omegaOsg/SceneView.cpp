@@ -1,33 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * Original code adapted from Equalizer/osg
- * -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield 
- *                           2010 Stefan Eilemann <eile@eyescale.ch>
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	A customized wrapper around an openscenegraph scene
+ ******************************************************************************/
 #include "omegaOsg/SceneView.h"
 #include "omega/osystem.h"
 
@@ -53,7 +57,7 @@
 using namespace osg;
 using namespace osgUtil;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneView::SceneView( osgDB::DatabasePager* dp)
 {
 	//_displaySettings = ds;
@@ -78,7 +82,7 @@ SceneView::SceneView( osgDB::DatabasePager* dp)
     _dynamicObjectCount = 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneView::SceneView(const SceneView& rhs, const osg::CopyOp& copyop):
     osg::Object(rhs,copyop),
     osg::CullSettings(rhs)
@@ -102,7 +106,7 @@ SceneView::SceneView(const SceneView& rhs, const osg::CopyOp& copyop):
     _dynamicObjectCount = 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneView::~SceneView()
 {
 	omega::omsg("~SceneView");
@@ -118,7 +122,7 @@ SceneView::~SceneView()
 //	}
 //};
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //void SceneView::setCamera(osg::Camera* camera, bool assumeOwnershipOfCamera)
 //{
 //    if (camera)
@@ -140,7 +144,7 @@ SceneView::~SceneView()
 //    }
 //}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::setSceneData(osg::Node* node)
 {
     // take a temporary reference to node to prevent the possibility
@@ -172,7 +176,7 @@ void SceneView::setSceneData(osg::Node* node)
     } 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::initialize()
 {
     _initCalled = true;
@@ -181,13 +185,17 @@ void SceneView::initialize()
 	//osg::setNotifyHandler(new NH());
     osg::CullSettings::setDefaults();
 
-    if (!_globalStateSet) _globalStateSet = new osg::StateSet;
-    else _globalStateSet->clear();
+    //if (!_globalStateSet) _globalStateSet = new osg::StateSet;
+    //else _globalStateSet->clear();
 
     // enable lighting by default.
-    _globalStateSet->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+    //_globalStateSet->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 
-    _renderInfo.setState(new State);
+	osg::State* state = new State();
+    _renderInfo.setState(state);
+	
+	state->setGlobalDefaultModeValue(GL_DEPTH_TEST, true);
+	state->setGlobalDefaultModeValue(GL_LIGHTING, true);
     
     _stateGraph = new StateGraph;
 	_renderStage = new RenderStage();
@@ -204,13 +212,13 @@ void SceneView::initialize()
     _cullVisitor->setStateGraph(_stateGraph.get());
     _cullVisitor->setRenderStage(_renderStage.get());
 
-    _globalStateSet->setGlobalDefaults();
+    //_globalStateSet->setGlobalDefaults();
 
     // Do not clear the frame buffer - the omegalib engine takes care of this.
 	_camera->setClearMask(0);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::updateUniforms(int eye)
 {
     if (!_localStateSet)
@@ -273,7 +281,7 @@ void SceneView::updateUniforms(int eye)
     uniformEye->set(eye);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::cull(int eye)
 {
     _dynamicObjectCount = 0;
@@ -320,8 +328,14 @@ void SceneView::cull(int eye)
 	_renderInfo.popCamera();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-bool SceneView::cullStage(const osg::Matrixd& projection,const osg::Matrixd& modelview,osgUtil::CullVisitor* cullVisitor, osgUtil::StateGraph* rendergraph, osgUtil::RenderStage* renderStage, osg::Viewport *viewport)
+///////////////////////////////////////////////////////////////////////////////
+bool SceneView::cullStage(
+	const osg::Matrixd& projection,
+	const osg::Matrixd& modelview,
+	osgUtil::CullVisitor* cullVisitor, 
+	osgUtil::StateGraph* rendergraph, 
+	osgUtil::RenderStage* renderStage, 
+	osg::Viewport *viewport)
 {
     if (!_camera || !viewport) return false;
 
@@ -331,7 +345,10 @@ bool SceneView::cullStage(const osg::Matrixd& projection,const osg::Matrixd& mod
     // collect any occluder in the view frustum.
     if (_camera->containsOccluderNodes())
     {
-        if (!_collectOccludersVisitor) _collectOccludersVisitor = new osg::CollectOccludersVisitor;
+        if (!_collectOccludersVisitor) 
+		{
+			_collectOccludersVisitor = new osg::CollectOccludersVisitor;
+		}
         _collectOccludersVisitor->inheritCullSettings(*this);
         _collectOccludersVisitor->reset();
         _collectOccludersVisitor->setFrameStamp(_frameStamp.get());
@@ -357,7 +374,9 @@ bool SceneView::cullStage(const osg::Matrixd& projection,const osg::Matrixd& mod
         _collectOccludersVisitor->removeOccludedOccluders();
         
         cullVisitor->getOccluderList().clear();
-        std::copy(_collectOccludersVisitor->getCollectedOccluderSet().begin(),_collectOccludersVisitor->getCollectedOccluderSet().end(), std::back_insert_iterator<CullStack::OccluderList>(cullVisitor->getOccluderList()));
+        std::copy(
+			_collectOccludersVisitor->getCollectedOccluderSet().begin(),
+			_collectOccludersVisitor->getCollectedOccluderSet().end(), std::back_insert_iterator<CullStack::OccluderList>(cullVisitor->getOccluderList()));
     }
     
     cullVisitor->reset();
@@ -393,7 +412,7 @@ bool SceneView::cullStage(const osg::Matrixd& projection,const osg::Matrixd& mod
     
     renderStage->setCamera(_camera.get());
 
-    if (_globalStateSet.valid()) cullVisitor->pushStateSet(_globalStateSet.get());
+    //if (_globalStateSet.valid()) cullVisitor->pushStateSet(_globalStateSet.get());
     //if (_secondaryStateSet.valid()) cullVisitor->pushStateSet(_secondaryStateSet.get());
     if (_localStateSet.valid()) cullVisitor->pushStateSet(_localStateSet.get());
 
@@ -417,8 +436,8 @@ bool SceneView::cullStage(const osg::Matrixd& projection,const osg::Matrixd& mod
     cullVisitor->popViewport();
 
     if (_localStateSet.valid()) cullVisitor->popStateSet();
-    if (_secondaryStateSet.valid()) cullVisitor->popStateSet();
-    if (_globalStateSet.valid()) cullVisitor->popStateSet();
+    //if (_secondaryStateSet.valid()) cullVisitor->popStateSet();
+    //if (_globalStateSet.valid()) cullVisitor->popStateSet();
     
 	renderStage->sort();
 
@@ -432,11 +451,13 @@ bool SceneView::cullStage(const osg::Matrixd& projection,const osg::Matrixd& mod
     // set the number of dynamic objects in the scene.    
     _dynamicObjectCount += renderStage->computeNumberOfDynamicRenderLeaves();
 
-    bool computeNearFar = (cullVisitor->getComputeNearFarMode()!=osgUtil::CullVisitor::DO_NOT_COMPUTE_NEAR_FAR) && getSceneData()!=0;
+    bool computeNearFar = 
+		(cullVisitor->getComputeNearFarMode() != osgUtil::CullVisitor::DO_NOT_COMPUTE_NEAR_FAR) && 
+		getSceneData() != 0;
     return computeNearFar;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::releaseAllGLObjects()
 {
     if (!_camera) return;
@@ -447,7 +468,7 @@ void SceneView::releaseAllGLObjects()
     if (_renderInfo.getState()) _renderInfo.getState()->reset();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::flushAllDeletedGLObjects()
 {
     _requiresFlush = false;
@@ -455,7 +476,7 @@ void SceneView::flushAllDeletedGLObjects()
     osg::flushAllDeletedGLObjects(getState()->getContextID());
  }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::flushDeletedGLObjects(double& availableTime)
 {
     osg::State* state = _renderInfo.getState();
@@ -467,7 +488,7 @@ void SceneView::flushDeletedGLObjects(double& availableTime)
     osg::flushDeletedGLObjects(getState()->getContextID(), currentTime, availableTime);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::draw()
 {
     if (_camera->getNodeMask()==0) return;
@@ -533,7 +554,7 @@ void SceneView::draw()
 #endif
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 unsigned int SceneView::getTriangleCount()
 { 
 	osgUtil::Statistics osgStats;
@@ -546,19 +567,19 @@ unsigned int SceneView::getTriangleCount()
 	return _triangleCount;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::collateReferencesToDependentCameras()
 {
     if (_renderStage.valid()) _renderStage->collateReferencesToDependentCameras();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::clearReferencesToDependentCameras()
 {
     if (_renderStage.valid()) _renderStage->clearReferencesToDependentCameras();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneView::setAutoNearFar(bool value)
 {
 	if(value)
