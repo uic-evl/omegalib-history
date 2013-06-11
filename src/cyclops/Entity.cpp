@@ -1,32 +1,38 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * Contains code for the Entity class. All drawable 3D objects in the cyclops framework derive 
- * from Entity.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file:
+ * Contains code for the Entity class. All drawable 3D objects in the cyclops 
+ * framework derive from Entity.
+ ******************************************************************************/
 #include <osg/Node>
 #include <osgUtil/Optimizer>
 #include <osgDB/Archive>
@@ -39,7 +45,7 @@
 
 using namespace cyclops;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Entity::Entity(SceneManager* scene):
 	SceneNode(scene->getEngine()),
 		mySceneManager(scene),
@@ -58,13 +64,13 @@ Entity::Entity(SceneManager* scene):
 	//engine->getScene()->addChild(this);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Entity::~Entity()
 {
 	removeListener(mySceneManager);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Entity::initialize(osg::Node* node)
 {
 	myOsgNode = node;
@@ -72,9 +78,10 @@ void Entity::initialize(osg::Node* node)
 	// Make sure the shadow caster flags are up to date.
 	castShadow(myCastShadow);
 
-	// Create an omegalib scene node. The scene node will be used to manipulate some of this drawable object basic
-	// properties like transform and visibility. The scene node also gives access to the object bounding sphere and
-	// allows for simple hit tests.
+	// Create an omegalib scene node. The scene node will be used to manipulate 
+	// some of this drawable object basic properties like transform and visibility. 
+	// The scene node also gives access to the object bounding sphere and allows 
+	// for simple hit tests.
 	//Engine* engine = mySceneManager->getEngine();
 	//mySceneNode = new SceneNode(engine);
 	//engine->getScene()->addChild(mySceneNode);
@@ -90,13 +97,13 @@ void Entity::initialize(osg::Node* node)
 	getEngine()->getScene()->addChild(this);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Entity::hasEffect()
 {
 	return (myEffect != NULL);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Entity::setEffect(const String& effectDefinition)
 {
 	if(myEffect != NULL)
@@ -109,40 +116,40 @@ void Entity::setEffect(const String& effectDefinition)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Material* Entity::getMaterial()
 {
 	return getMaterialByIndex(0);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Material* Entity::getMaterialByIndex(unsigned int index)
 {
 	return myEffect->getMaterial(index);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int Entity::getMaterialCount()
 {
 	return myEffect->getMaterialCount();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Entity::addMaterial(Material* mat)
 {
-	// NOTE: We have to reset the effect definition, otherwise all materials will be refreated. This will also force
-	// an effect refresh.
+	// NOTE: We have to reset the effect definition, otherwise all materials 
+	// will be recreated. This will also force an effect refresh.
 	myEffect->addMaterial(mat);
 	myEffect->setDefinition("");
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Entity::clearMaterials()
 {
 	myEffect->clearMaterials();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Entity::castShadow(bool value)
 {
 	myCastShadow = value;
@@ -159,33 +166,33 @@ void Entity::castShadow(bool value)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Entity::doesCastShadow()
 {
 	return myCastShadow;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 omegaToolkit::ui::Menu* Entity::getContextMenu()
 {
 	return myContextMenu;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 omegaToolkit::ui::Menu* Entity::createContextMenu()
 {
 	myContextMenu = mySceneManager->createContextMenu(this);
 	return myContextMenu;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Entity::deleteContextMenu()
 {
 	mySceneManager->deleteContextMenu(this);
 	myContextMenu = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 osg::Group* Entity::findSubGroup(const String& path)
 {
 	osg::Group* target = myOsgNode->asGroup();
@@ -193,7 +200,8 @@ osg::Group* Entity::findSubGroup(const String& path)
 	// If the head node is not a group, it has no parts for sure.
 	if(target == NULL) return NULL;
 
-	// If a non-empty path has been specified, follow it to find a sub-node amd enumerate its pieces.
+	// If a non-empty path has been specified, follow it to find a sub-node 
+	// and enumerate its pieces.
 	if(path != "")
 	{
 		Vector<String> pathParts = StringUtils::split(path, "/");
@@ -223,7 +231,7 @@ osg::Group* Entity::findSubGroup(const String& path)
 	return target;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 vector<String> Entity::listPieces(const String& path)
 {
 	osg::Group* target = findSubGroup(path);
@@ -240,7 +248,7 @@ vector<String> Entity::listPieces(const String& path)
 	return pieces;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneNode* Entity::getPiece(const String& path)
 {
 	osg::Group* target = findSubGroup(path);
