@@ -230,7 +230,9 @@ BOOST_PYTHON_MODULE(cyclops)
 		PYAPI_STATIC_REF_GETTER(Text3D, create)
 		PYAPI_METHOD(Text3D, setText)
 		PYAPI_METHOD(Text3D, setFont)
+		PYAPI_METHOD(Text3D, setColor)
 		PYAPI_METHOD(Text3D, setFontSize)
+		PYAPI_METHOD(Text3D, setFontResolution)
 		;
 
 	// StaticObject
