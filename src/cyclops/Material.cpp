@@ -52,19 +52,26 @@ Material* Material::create()
 Material::Material(osg::StateSet* ss, SceneManager* sm): Uniforms(ss), 
 	myStateSet(ss), myTransparent(false), mySceneManager(sm)
 {
-	//omsg("Material");
 	reset();
+	myAlpha = addUniform("unif_Alpha", Uniform::Float);
+	myAlpha->setFloat(1.0f);
+
+	myGloss = addUniform("unif_Gloss", Uniform::Float);
+	myGloss->setFloat(1.0f);
+
+	myShininess = addUniform("unif_Shininess", Uniform::Float);
+	myGloss->setFloat(0.0f);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 Material::~Material()
 {
-	//omsg("~Material");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 bool Material::parse(const String& definition)
 {
+	reset();
 	return MaterialParser::parseMaterialString(this, definition);
 }
 
@@ -75,7 +82,7 @@ void Material::setColor(const Color& diffuse, const Color& emissive)
 	{
 		myMaterial = new osg::Material();
 		myStateSet->setAttributeAndModes(myMaterial, 
-			osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+			osg::StateAttribute::ON);
 	}
 	myMaterial->setDiffuse(osg::Material::FRONT_AND_BACK, COLOR_TO_OSG(diffuse));
 	myMaterial->setEmission(osg::Material::FRONT_AND_BACK, COLOR_TO_OSG(emissive));
@@ -143,13 +150,13 @@ void Material::setTransparent(bool value)
 	{
 		myStateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 		myStateSet->setMode(GL_BLEND, 
-			osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+			osg::StateAttribute::ON  | osg::StateAttribute::PROTECTED);
 	}
 	else
 	{
 		myStateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
 		myStateSet->setMode(GL_BLEND, 
-			osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
+			osg::StateAttribute::OFF  | osg::StateAttribute::PROTECTED);
 	}
 }
 
@@ -161,13 +168,13 @@ void Material::setAdditive(bool value)
 	{
 		osg::BlendFunc* bf = new osg::BlendFunc();
 		bf->setFunction(GL_SRC_ALPHA, GL_ONE);
-		myStateSet->setAttribute(bf, osg::StateAttribute::OVERRIDE);
+		myStateSet->setAttribute(bf, osg::StateAttribute::PROTECTED);
 	}
 	else
 	{
 		osg::BlendFunc* bf = new osg::BlendFunc();
 		bf->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		myStateSet->setAttribute(bf, osg::StateAttribute::OVERRIDE);
+		myStateSet->setAttribute(bf, osg::StateAttribute::PROTECTED);
 	}
 }
 
@@ -176,8 +183,7 @@ void Material::setDepthTestEnabled(bool value)
 {
 	myDepthTest = value;
 	myStateSet->setMode(GL_DEPTH_TEST, 
-		(myDepthTest ? osg::StateAttribute::ON : osg::StateAttribute::OFF) |
-		osg::StateAttribute::OVERRIDE);
+		(myDepthTest ? osg::StateAttribute::ON : osg::StateAttribute::OFF) | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -185,8 +191,7 @@ void Material::setDoubleFace(bool value)
 {
 	myDoubleFace = value;
 	myStateSet->setMode(GL_CULL_FACE, 
-		(myDoubleFace ? osg::StateAttribute::OFF : osg::StateAttribute::ON) |
-		osg::StateAttribute::OVERRIDE);
+		(myDoubleFace ? osg::StateAttribute::OFF : osg::StateAttribute::ON));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,18 +242,10 @@ float Material::getAlpha()
 ///////////////////////////////////////////////////////////////////////////////
 void Material::reset()
 {
-	removeAllUniforms();
-	myStateSet->clear();
-	myMaterial = NULL;
-
-	myAlpha = addUniform("unif_Alpha", Uniform::Float);
-	myAlpha->setFloat(1.0f);
-
-	myGloss = addUniform("unif_Gloss", Uniform::Float);
-	myGloss->setFloat(1.0f);
-
-	myShininess = addUniform("unif_Shininess", Uniform::Float);
-	myGloss->setFloat(0.0f);
+	if(myMaterial != NULL)
+	{
+		myStateSet->removeAttribute(myMaterial);
+	}
 
 	// Reset flags to default values.
 	setTransparent(false);
@@ -262,6 +259,15 @@ void Material::reset()
 ///////////////////////////////////////////////////////////////////////////////
 bool Material::setProgram(const String& name)
 {
+	// Shortcut: if program name is null, disable shader programs for this 
+	// material.
+	if(name == "")
+	{
+		myStateSet->setAttributeAndModes(new osg::Program(), 
+					osg::StateAttribute::ON);
+		return true;
+	}
+
 	String pname;
 	String pvar;
 
@@ -285,7 +291,7 @@ bool Material::setProgram(const String& name)
 	if(pa != NULL)
 	{
 		myStateSet->setAttributeAndModes(pa->program, 
-			osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+			osg::StateAttribute::ON);
 		return true;
 	}
 	return false;

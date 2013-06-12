@@ -57,7 +57,7 @@ bool processDefaultArguments(Material* mat, ArgumentHelper& ah, const String& de
 	double shininess = 10;
 	double gloss = 0;
 	String diffuse = "";
-	String emissive = "black";
+	String emissive = "";
 	String normal = "";
 
 	ah.newString("effectName", 

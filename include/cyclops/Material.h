@@ -114,7 +114,11 @@ namespace cyclops {
 
 		osg::StateSet* getStateSet() { return myStateSet; }
 
-		//! Resets all material properties to their default values.
+		//! Resets all material properties to their default values. Colors and 
+		//! transparency will switch back to their default values (that is, 
+		//! whatever is specified in the entity effect. Uniforms attached to the 
+		//! material will not be deleted by this call. To delete uniforms, call 
+		//! `removeAllUniforms`
 		void reset();
 
 		//! Sets the gpu program attached to this material. Returns true if the

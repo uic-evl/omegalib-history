@@ -147,6 +147,7 @@ void Entity::addMaterial(Material* mat)
 void Entity::clearMaterials()
 {
 	myEffect->clearMaterials();
+	myEffect->setDefinition("");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
