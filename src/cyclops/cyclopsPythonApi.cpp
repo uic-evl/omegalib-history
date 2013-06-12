@@ -232,6 +232,7 @@ BOOST_PYTHON_MODULE(cyclops)
 		PYAPI_METHOD(Text3D, setFont)
 		PYAPI_METHOD(Text3D, setColor)
 		PYAPI_METHOD(Text3D, setFontSize)
+		PYAPI_METHOD(Text3D, setFixedSize)
 		PYAPI_METHOD(Text3D, setFontResolution)
 		;
 

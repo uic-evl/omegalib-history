@@ -58,10 +58,17 @@ namespace cyclops {
 	public:
 		Text3D(SceneManager* scene);
 		void setColor(const Color& color);
+		//! Sets the text font name. The font name must point to a font file 
+		//! (`.ttf` extension supported)
 		void setFont(const String& fontfile);
 		void setText(const String& text);
+		//! The size of the font characters. The value is in world units, 
+		//! unless `setFixedSize(true)` has been called on this object.
 		void setFontSize(float size);
 		void setFontResolution(int resolution);
+
+		//! When set to true, the text size will be in pixels and not in world units. 
+		//! The text size will not change with distance.
 		void setFixedSize(bool value);
 
 	private:

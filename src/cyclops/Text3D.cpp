@@ -97,11 +97,11 @@ void Text3D::setFixedSize(bool value)
 {
 	if(value)
 	{
-		myTextDrawable->setCharacterSizeMode(osgText::TextBase::OBJECT_COORDS);
+		myTextDrawable->setCharacterSizeMode(osgText::TextBase::SCREEN_COORDS);
 	}
 	else
 	{
-		myTextDrawable->setCharacterSizeMode(osgText::TextBase::SCREEN_COORDS);
+		myTextDrawable->setCharacterSizeMode(osgText::TextBase::OBJECT_COORDS);
 	}
 }
 
