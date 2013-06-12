@@ -380,6 +380,9 @@ void PythonInterpreter::runFile(const String& filename)
 		DataManager* dm = SystemManager::instance()->getDataManager();
 		dm->setCurrentPath(scriptPath);
 
+		// change the current working directory to be the script root, so we can load files using the open command.
+		eval("import os; os.chdir('" + scriptPath + "')");
+
 		// Add the path to the module lookup path for the interpreter, so we can open modules 
 		// in the same directory.
 		addPythonPath(scriptPath.c_str());
