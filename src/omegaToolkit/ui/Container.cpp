@@ -1,29 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file:
+ *	A container of widgets that supports automatic layout
+ ******************************************************************************/
 #include "omegaToolkit/ui/Container.h"
 #include "omegaToolkit/UiModule.h"
 #include "omega/DisplaySystem.h"
@@ -36,7 +44,16 @@ using namespace omega;
 using namespace omegaToolkit;
 using namespace omegaToolkit::ui;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+NameGenerator sContainerNameGenerator("Container");
+
+///////////////////////////////////////////////////////////////////////////////
+Container* Container::create(Layout layout, Container* container)
+{
+	WidgetFactory* wf = UiModule::instance()->getWidgetFactory();
+	return wf->createContainer(sContainerNameGenerator.generate(), container, layout);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 Container::Container(Engine* server):
 		Widget(server),
 		myPadding(5),
@@ -51,13 +68,13 @@ Container::Container(Engine* server):
 	setAutosize(true);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Container::~Container()
 {
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::load(Setting& setting)
 {
 	if(setting.exists("layout"))
@@ -123,7 +140,7 @@ void Container::load(Setting& setting)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::addChild(Widget* child)
 {
 	requestLayoutRefresh();
@@ -132,7 +149,7 @@ void Container::addChild(Widget* child)
 	if(child->isNavigationEnabled()) updateChildrenNavigation();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::removeChild(Widget* child)
 {
 	requestLayoutRefresh();
@@ -141,7 +158,7 @@ void Container::removeChild(Widget* child)
 	if(child->isNavigationEnabled())  updateChildrenNavigation();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Widget* Container::getChildByName(const String& name)
 {
 	foreach(Widget* w, myChildren)
@@ -151,7 +168,7 @@ Widget* Container::getChildByName(const String& name)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Widget* Container::getChildBefore(const Widget* child)
 {
 	Widget* prev = NULL;
@@ -166,7 +183,7 @@ Widget* Container::getChildBefore(const Widget* child)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Widget* Container::getChildAfter(const Widget* child)
 {
 	bool found = false;
@@ -181,7 +198,7 @@ Widget* Container::getChildAfter(const Widget* child)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Widget* Container::getChildByIndex(int index)
 {
 	if(getNumChildren() > index)
@@ -196,7 +213,7 @@ Widget* Container::getChildByIndex(int index)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::updateSize(Renderer* r)
 {
 	if(needLayoutRefresh())
@@ -209,7 +226,7 @@ void Container::updateSize(Renderer* r)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::autosize(Renderer* r)
 {
 	int width = 0;
@@ -251,7 +268,7 @@ void Container::autosize(Renderer* r)
 	//setSize(Vector2f(width, height));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::updateChildrenNavigation()
 {
 	foreach(Widget* w, myChildren)
@@ -281,7 +298,7 @@ void Container::updateChildrenNavigation()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int Container::expandStep(int availableSpace, Orientation orientation)
 {
 	// Check space constraints for each child
@@ -297,7 +314,7 @@ int Container::expandStep(int availableSpace, Orientation orientation)
 	return spaceLeft;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::updateChildrenLayoutPosition(Orientation orientation)
 {
 	int p = 0;
@@ -330,7 +347,7 @@ void Container::updateChildrenLayoutPosition(Orientation orientation)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::updateChildrenFreeBounds(Orientation orientation)
 {
 	// Compute the maximum available size
@@ -367,7 +384,7 @@ void Container::updateChildrenFreeBounds(Orientation orientation)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::resetChildrenSize(Orientation orientation)
 {
 	// Initialize widget width to 0
@@ -377,7 +394,7 @@ void Container::resetChildrenSize(Orientation orientation)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::computeLinearLayout(Orientation orientation)
 {
 	int nc = getNumChildren();
@@ -396,7 +413,7 @@ void Container::computeLinearLayout(Orientation orientation)
 	updateChildrenFreeBounds(oppositeOrientation);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::computeGridLayout(Orientation orientation)
 {
 	int nc = getNumChildren();
@@ -442,7 +459,7 @@ void Container::computeGridLayout(Orientation orientation)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::layout()
 {
 	if(getNumChildren() != 0)
@@ -477,7 +494,7 @@ void Container::layout()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::update(const omega::UpdateContext& context)
 {
 	Widget::update(context);
@@ -487,7 +504,7 @@ void Container::update(const omega::UpdateContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Container::rayToPointerEvent(const Event& inEvt, Event& outEvt)
 {
 	// Shortcut: if this container is not in 3D mode, just return the original event.
@@ -568,7 +585,7 @@ bool Container::rayToPointerEvent(const Event& inEvt, Event& outEvt)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Container::isEventInside(const Event& evt)
 {
 	// Intersection with 3D containers
@@ -589,7 +606,7 @@ bool Container::isEventInside(const Event& evt)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::handleEvent(const Event& evt)
 {
 	// Only handle events if the container is visible.
@@ -624,7 +641,7 @@ void Container::handleEvent(const Event& evt)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::activate()
 {
 	if(isEnabled())
@@ -645,13 +662,13 @@ void Container::activate()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Container::isPixelOutputEnabled() 
 { 
 	return myPixelOutputEnabled; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Container::setPixelOutputEnabled(bool value)
 {
 	myPixelOutputEnabled = value;
@@ -661,19 +678,19 @@ void Container::setPixelOutputEnabled(bool value)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PixelData* Container::getPixels()
 {
 	return myPixels;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Renderable* Container::createRenderable()
 {
 	return new ContainerRenderable(this);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ContainerRenderable::drawChildren(const DrawContext& context, bool containerOnly)
 {
 	// draw children.
@@ -695,7 +712,7 @@ void ContainerRenderable::drawChildren(const DrawContext& context, bool containe
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ContainerRenderable::draw3d(const DrawContext& context)
 {
 	if(myTexture != NULL)
@@ -764,7 +781,7 @@ void ContainerRenderable::draw3d(const DrawContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ContainerRenderable::beginDraw(const DrawContext& context)
 {
 	if(myOwner->get3dSettings().enable3d || myOwner->isPixelOutputEnabled())
@@ -829,7 +846,7 @@ void ContainerRenderable::beginDraw(const DrawContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ContainerRenderable::endDraw(const DrawContext& context)
 {
 	if(myOwner->get3dSettings().enable3d || myOwner->isPixelOutputEnabled())
@@ -851,7 +868,7 @@ void ContainerRenderable::endDraw(const DrawContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ContainerRenderable::draw(const DrawContext& context)
 {
 	if(myOwner->isVisible())

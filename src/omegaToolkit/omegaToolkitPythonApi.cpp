@@ -224,6 +224,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 	// Container
 	PYAPI_REF_CLASS(Container, Widget)
 		.def("get3dSettings", &Container::get3dSettings, PYAPI_RETURN_INTERNAL_REF)
+		PYAPI_STATIC_REF_GETTER(Container, create)
 		PYAPI_METHOD(Container, isPixelOutputEnabled)
 		PYAPI_METHOD(Container, setPixelOutputEnabled)
 		PYAPI_REF_GETTER(Container, getPixels)
@@ -244,6 +245,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 
 	// Button
 	PYAPI_REF_CLASS(Button, Widget)
+		PYAPI_STATIC_REF_GETTER(Button, create)
 		PYAPI_METHOD(Button, getText)
 		PYAPI_METHOD(Button, setText)
 		PYAPI_METHOD(Button, isCheckable)
@@ -266,6 +268,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 
 	// Slider
 	PYAPI_REF_CLASS(Slider, Widget)
+		PYAPI_STATIC_REF_GETTER(Slider, create)
 		PYAPI_METHOD(Slider, getTicks)
 		PYAPI_METHOD(Slider, setTicks)
 		PYAPI_METHOD(Slider, setValue)
@@ -274,6 +277,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 
 	// Label
 	PYAPI_REF_CLASS(Label, Widget)
+		PYAPI_STATIC_REF_GETTER(Label, create)
 		PYAPI_METHOD(Label, getText)
 		PYAPI_METHOD(Label, setText)
 		PYAPI_METHOD(Label, setColor)
