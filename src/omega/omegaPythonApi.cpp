@@ -546,6 +546,18 @@ void querySceneRay(const Vector3f& origin, const Vector3f& dir, boost::python::o
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+boost::python::tuple hitNode(SceneNode* node, const Vector3f& origin, const Vector3f& dir)
+{
+	if(node != NULL)
+	{
+		Vector3f hitPoint;
+		bool hit = node->hit(Ray(origin, dir), &hitPoint, SceneNode::HitBest);
+		return boost::python::make_tuple(hit, hitPoint);
+	}
+	return boost::python::make_tuple(false, Vector3f::Zero());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 boost::python::tuple getRayFromEvent(const Event* evt)
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
@@ -1192,6 +1204,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getSoundEnvironment", getSoundEnvironment, PYAPI_RETURN_REF);
 	def("isSoundEnabled", isSoundEnabled);
 	def("querySceneRay", querySceneRay);
+	def("hitNode", hitNode);
 	def("getRayFromEvent", getRayFromEvent);
 	def("getRayFromPoint", getRayFromPoint);
 	def("printChildren", &printChildren);

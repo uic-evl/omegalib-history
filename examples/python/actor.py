@@ -17,18 +17,25 @@ class SpinningCube(Actor):
 		self.cube.setPosition(position)
 		self.cube.setEffect('colored -d #ff8080')
 		self.setUpdateEnabled(True)
+		self.setEventsEnabled(True)
 		
 	def dispose(self):
 		actors.remove(self)
 		self.cube.getParent().removeChildByRef(self.cube)
-		print('deleting spinningcube')
+		print('Deleting spinning cube')
 	
-	def __del__(self):
-		print("dtor")
-		
 	def onUpdate(self, frame, time, dt):
 		self.cube.yaw(dt)
 		self.cube.pitch(sin(time) / 5.0)
+		
+	def onEvent(self):
+		e = getEvent()
+		if(e.isButtonDown(EventFlags.Button2)):
+			r = getRayFromEvent(e)
+			hitData = hitNode(self.cube, r[1], r[2])
+			if(hitData[0]):
+				e.setProcessed()
+				self.kill()
 
 scene = getSceneManager()
 
@@ -47,20 +54,19 @@ light2.setEnabled(True)
 #------------------------------------------------------------------------------
 def onEvent():
 	e = getEvent()
-	if(e.getServiceType() == ServiceType.Pointer or e.getServiceType() == ServiceType.Wand):
-		# Button mappings are different when using wand or mouse
-		confirmButton = EventFlags.Button2
-		if(e.getServiceType() == ServiceType.Wand): confirmButton = EventFlags.Button5
-		
-		# When the confirm button is pressed:
-		if(e.isButtonDown(confirmButton)):
-			r = getRayFromEvent(e)
-			# Place objects 5 meters away from pointer.
-			pos = r[1] + r[2] * 5
-			print(pos)
-			SpinningCube(pos)
-			#s = SpinningCube(pos)
-			#s.setUpdateEnabled(True)
+	if(not e.isProcessed()):
+		t = e.getServiceType()
+		if(t == ServiceType.Pointer or t == ServiceType.Wand):
+			# Button mappings are different when using wand or mouse
+			confirmButton = EventFlags.Button2
+			if(e.getServiceType() == ServiceType.Wand): confirmButton = EventFlags.Button5
+			
+			# When the confirm button is pressed:
+			if(e.isButtonDown(confirmButton)):
+				r = getRayFromEvent(e)
+				# Place objects 5 meters away from pointer.
+				pos = r[1] + r[2] * 5
+				SpinningCube(pos)
 
 setEventFunction(onEvent)
 
