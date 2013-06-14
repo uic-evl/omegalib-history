@@ -1,32 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * What's in this file: 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
  *	The wrapper code for the omegalib python API. 
- *************************************************************************************************/
+ ******************************************************************************/
 #include "omega/PythonInterpreter.h"
 #include "omega/SystemManager.h"
 #include "omega/DisplaySystem.h"
@@ -283,8 +288,16 @@ static PyMethodDef omegaMethods[] =
 ///////////////////////////////////////////////////////////////////////////////
 Engine* getEngine() { return Engine::instance(); }
 
+// Used to make the getEvent call work for Actors.
+// This will be set by the Actor::onEvent call before running the python callback.
+static const Event* sLocalEvent = NULL;
+
 ///////////////////////////////////////////////////////////////////////////////
-const Event* getEvent() { return PythonInterpreter::getLastEvent(); }
+const Event* getEvent() 
+{ 
+	if(sLocalEvent != NULL) return sLocalEvent;
+	return PythonInterpreter::getLastEvent(); 
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 void printChildrenHelper(Node* n, int depth, const String& prefix, const String& indentString)
@@ -613,7 +626,8 @@ bool isSoundEnabled()
 ///////////////////////////////////////////////////////////////////////////////
 void toggleStats(const String& stats)
 {
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(SystemManager::instance()->getDisplaySystem());
+	SystemManager* sm = SystemManager::instance();
+	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
 	if(eqds != NULL)
 	{
 		eqds->toggleStats(stats);
@@ -623,7 +637,8 @@ void toggleStats(const String& stats)
 ///////////////////////////////////////////////////////////////////////////////
 void overridePanopticStereo(bool value)
 {
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(SystemManager::instance()->getDisplaySystem());
+	SystemManager* sm = SystemManager::instance();
+	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
 	if(eqds != NULL)
 	{
 		eqds->getDisplayConfig().panopticStereoEnabled = value;
@@ -633,7 +648,8 @@ void overridePanopticStereo(bool value)
 ///////////////////////////////////////////////////////////////////////////////
 void toggleStereo()
 {
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(SystemManager::instance()->getDisplaySystem());
+	SystemManager* sm = SystemManager::instance();
+	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
 	if(eqds != NULL)
 	{
 		eqds->getDisplayConfig().forceMono = !eqds->getDisplayConfig().forceMono;
@@ -776,11 +792,23 @@ void printModules()
 	Vector<EngineModule*> mods = ModuleServices::getModules();
 	
 	omsg("High   Priority:");
-	foreach(EngineModule* m, mods) if(m->getPriority() == EngineModule::PriorityHigh) ofmsg("    %1%", %m->getName());
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityHigh) 
+			ofmsg("    %1%", %m->getName());
+	}
 	omsg("Normal Priority:");
-	foreach(EngineModule* m, mods) if(m->getPriority() == EngineModule::PriorityNormal) ofmsg("    %1%", %m->getName());
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityNormal) 
+			ofmsg("    %1%", %m->getName());
+	}
 	omsg("Low    Priority:");
-	foreach(EngineModule* m, mods) if(m->getPriority() == EngineModule::PriorityLow) ofmsg("    %1%", %m->getName());
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityLow) 
+			ofmsg("    %1%", %m->getName());
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -801,8 +829,19 @@ public:
 
 	void onUpdate(const UpdateContext& context) 
 	{
-		if(override f = this->get_override("onUpdate")) f(context.frameNum, context.time, context.dt);
-		else Actor::onUpdate(context);
+		try
+		{
+			if(override f = this->get_override("onUpdate")) 
+			{
+				// Python callback accepts frame, time, dt: same as global callback.
+				f(context.frameNum, context.time, context.dt);
+			}
+			else Actor::onUpdate(context);
+		}
+		catch(const boost::python::error_already_set& e)
+		{
+			PyErr_Print();
+		}
 	}
 	void default_onUpdate(const UpdateContext& context) 
 	{ 
@@ -811,8 +850,20 @@ public:
 
 	void onEvent(const Event& evt)
 	{
-		if(override f = this->get_override("onEvent")) f(evt);
-		else Actor::onEvent(evt);
+		try
+		{
+			// Call funtion with no arguments. The python event handler will use
+			// getEvent() to retrieve the event data. This keeps actor callbacks
+			// consistent with global event callbacks.
+			sLocalEvent = &evt;
+			if(override f = this->get_override("onEvent")) f();
+			else Actor::onEvent(evt);
+			sLocalEvent = NULL;
+		}
+		catch(const boost::python::error_already_set& e)
+		{
+			PyErr_Print();
+		}
 	}
 	void default_onEvent(const Event& evt)
 	{
@@ -821,9 +872,17 @@ public:
 
 	bool onCommand(const String& cmd)
 	{
-		if(override f = this->get_override("onCommand"))
-			return f(cmd);
-		return Actor::onCommand(cmd);
+		try
+		{
+			if(override f = this->get_override("onCommand"))
+				return f(cmd);
+			return Actor::onCommand(cmd);
+		}
+		catch(const boost::python::error_already_set& e)
+		{
+			PyErr_Print();
+			return false;
+		}
 	}
 	bool default_onCommand(const String& cmd)
 	{
@@ -1097,7 +1156,8 @@ BOOST_PYTHON_MODULE(omega)
 	// SoundInstance
 	void (SoundInstance::*playSimple)() = &SoundInstance::play;
 	void (SoundInstance::*playSimpleStereo)() = &SoundInstance::playStereo;
-	class_<SoundInstance, boost::noncopyable, Ref<SoundInstance> >("SoundInstance", init<Sound*>())
+	class_<SoundInstance, boost::noncopyable, Ref<SoundInstance> >
+		("SoundInstance", init<Sound*>())
 		.def("play", playSimple)
 		.def("playStereo", playSimpleStereo)
 		PYAPI_METHOD(SoundInstance, pause)
