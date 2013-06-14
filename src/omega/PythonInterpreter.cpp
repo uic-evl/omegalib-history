@@ -399,6 +399,8 @@ void PythonInterpreter::runFile(const String& filename)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::clean()
 {
+	Engine::instance()->reset();
+
 	// destroy all global variables
 	if(myDebugShell)
 	{
@@ -416,8 +418,6 @@ void PythonInterpreter::clean()
 
 	// unregister callbacks
 	unregisterAllCallbacks();
-
-	Engine::instance()->reset();
 
 	// Clear all queued commands.
 	//myInteractiveCommandLock.lock();

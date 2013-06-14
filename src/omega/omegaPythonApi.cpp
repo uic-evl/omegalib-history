@@ -783,6 +783,54 @@ void printModules()
 	foreach(EngineModule* m, mods) if(m->getPriority() == EngineModule::PriorityLow) ofmsg("    %1%", %m->getName());
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//! The ActorWrapper adds support for python overloading to the Actor class
+class ActorPythonWrapper: public Actor, public wrapper<Actor>
+{
+public:
+	ActorPythonWrapper(): Actor() { ModuleServices::addModule(this); }
+	ActorPythonWrapper(const String& str): Actor(str) { ModuleServices::addModule(this); }
+
+	void dispose()
+	{
+		if(override f = this->get_override("dispose")) f();
+	}
+	virtual void default_dispose()
+	{
+	}
+
+	void onUpdate(const UpdateContext& context) 
+	{
+		if(override f = this->get_override("onUpdate")) f(context.frameNum, context.time, context.dt);
+		else Actor::onUpdate(context);
+	}
+	void default_onUpdate(const UpdateContext& context) 
+	{ 
+		this->Actor::onUpdate(context); 
+	}
+
+	void onEvent(const Event& evt)
+	{
+		if(override f = this->get_override("onEvent")) f(evt);
+		else Actor::onEvent(evt);
+	}
+	void default_onEvent(const Event& evt)
+	{
+		this->Actor::onEvent(evt);
+	}
+
+	bool onCommand(const String& cmd)
+	{
+		if(override f = this->get_override("onCommand"))
+			return f(cmd);
+		return Actor::onCommand(cmd);
+	}
+	bool default_onCommand(const String& cmd)
+	{
+		return this->Actor::onCommand(cmd);
+	}
+};
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeYawOverloads, yaw, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodePitchOverloads, pitch, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeRollOverloads, roll, 1, 2) 
@@ -981,9 +1029,24 @@ BOOST_PYTHON_MODULE(omega)
 		.add_property("alpha", &Color::getAlpha, &Color::setAlpha);
 
 	// Actor
-	PYAPI_REF_BASE_CLASS(Actor)
+	//PYAPI_REF_BASE_CLASS(Actor)
+	class_<ActorPythonWrapper, boost::noncopyable, Ref<ActorPythonWrapper> >
+		("Actor")
+		.def(init<const String&>())
 		PYAPI_METHOD(Actor, setSceneNode)
 		PYAPI_REF_GETTER(Actor, getSceneNode)
+		PYAPI_METHOD(Actor, isUpdateEnabled)
+		PYAPI_METHOD(Actor, setUpdateEnabled)
+		PYAPI_METHOD(Actor, setCommandsEnabled)
+		PYAPI_METHOD(Actor, areCommandsEnabled)
+		PYAPI_METHOD(Actor, setEventsEnabled)
+		PYAPI_METHOD(Actor, areEventsEnabled)
+		PYAPI_METHOD(Actor, kill)
+		// Overridable methods
+		.def("onUpdate", &Actor::onUpdate, &ActorPythonWrapper::default_onUpdate)
+		.def("onEvent", &Actor::onEvent, &ActorPythonWrapper::default_onEvent)
+		.def("onCommand", &Actor::onCommand, &ActorPythonWrapper::default_onCommand)
+		.def("dispose", &EngineModule::dispose, &ActorPythonWrapper::default_dispose)
 		;
 
 	// DrawInterface
