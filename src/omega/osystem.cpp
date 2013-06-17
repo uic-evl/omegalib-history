@@ -1,29 +1,38 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The omegalib entry point (main), initialization and shutdown code, plus a
+ *	set of system utility functions.
+ ******************************************************************************/
 #include "omega/osystem.h"
 #include "omega/ApplicationBase.h"
 #include "omega/SystemManager.h"
@@ -59,36 +68,36 @@
 
 namespace omega
 {
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	libconfig::ArgumentHelper sArgs;
 	GLEWContext* sGlewContext;
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	GLEWContext* glewGetContext()
 	{
 		return sGlewContext;
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	void glewSetContext(const GLEWContext* context)
 	{
 		sGlewContext = (GLEWContext*)context;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	OMEGA_API libconfig::ArgumentHelper& oargs()
 	{
 		return sArgs;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	extern "C" void abortHandler(int signal_number)
 	{
 		// Just exit.
 		exit(-1);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	extern "C" void sigproc(int signal_number)
 	{ 		 
 		DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
@@ -104,15 +113,13 @@ namespace omega
 		ds->killCluster();
 	}
 
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	void setupMultiInstance(SystemManager* sys, const String& multiAppString)
 	{
 		Vector<String> args = StringUtils::split(multiAppString, ",");
 		if(args.size() < 4)
 		{
-			ofwarn("Invalid number of arguments for -M option '%1%'. 4-5 expected: <tilex>,<tiley>,<tilewidth>,<tileHeight>[,portPool = 100]", %multiAppString);
+			ofwarn("Invalid number of arguments for -I option '%1%'. 4-5 expected: <tilex>,<tiley>,<tilewidth>,<tileHeight>[,portPool = 100]", %multiAppString);
 		}
 		else
 		{
@@ -129,7 +136,7 @@ namespace omega
 		}
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	void setupMissionControl(const String& mode, SystemManager* sys, const Setting& s, MissionControlClient*& missionControlClient)
 	{
 		int port = Config::getIntValue("port", s, MissionControlServer::DefaultPort);
@@ -158,7 +165,7 @@ namespace omega
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	int omain(omega::ApplicationBase& app, int argc, char** argv)
 	{
 		// register the abort handler.
@@ -166,8 +173,9 @@ namespace omega
 		signal(SIGINT, sigproc);
 
 #ifdef OMEGA_ENABLE_VLD
-		// Mark everything before this point as already reported to avoid reporting static global objects as leaks.
-		// This makes the report less precise but gets rid of a lot of noise.
+		// Mark everything before this point as already reported to avoid 
+		// reporting static global objects as leaks. This makes the report less
+		// precise but gets rid of a lot of noise.
 		VLDMarkAllLeaksAsReported();
 #endif
 		{
@@ -391,16 +399,7 @@ namespace omega
 		return 0;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-//	void osleep(uint msecs)
-//	{
-//#ifdef WIN32
-//		Sleep(msecs);
-//#else
-//		usleep((msecs)*1000);
-//#endif
-//	}
-
+	///////////////////////////////////////////////////////////////////////////
 	#ifndef OMEGA_OS_WIN
 	// the signal handler for SIGCHILD
 	static void sigChildHandler( int /*signal*/ )
@@ -418,7 +417,7 @@ namespace omega
 	}
 	#endif
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	bool olaunch(const String& command)
 	{
 		if( command.empty( )) return false;
@@ -496,7 +495,7 @@ namespace omega
 #endif
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	String ogetcwd()
 	{
 		char cCurrentPath[FILENAME_MAX];
@@ -506,13 +505,13 @@ namespace omega
 
 	String _dataPrefix;
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	void osetdataprefix(const String& data)
 	{
 		_dataPrefix = data;
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	String ogetdataprefix()
 	{
 		return _dataPrefix;
