@@ -42,3 +42,6 @@ if(OMEGA_BUILD_OSG_LIB)
 endif()
 
 target_link_libraries(orun ${LIBS})
+if(OMEGA_ENABLE_AUTO_UPDATE)
+	target_link_libraries(orun ${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.lib)
+endif()

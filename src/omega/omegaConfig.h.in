@@ -53,8 +53,11 @@
 #cmakedefine OMEGAOSG_USE_FBX
 #cmakedefine OMEGAOSG_USE_INVENTOR
 
-
+///////////////////////////////////////////////////////////////////////////////
+// Other settings
 // Visual leak detector support
 #cmakedefine OMEGA_ENABLE_VLD
+// orun windows auto-updater
+#cmakedefine OMEGA_ENABLE_AUTO_UPDATE
 
 #define OMEGA_DATA_PATH "${OMEGA_DATA_PATH}"
