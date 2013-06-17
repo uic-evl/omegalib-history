@@ -38,6 +38,12 @@
 #include <cyclops.h>
 #endif
 
+#ifdef OMEGA_OS_WIN
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+#include <winsparkle.h>
+#endif
+#endif
+
 using namespace omega;
 using namespace omegaToolkit;
 using namespace omegaToolkit::ui;
@@ -292,5 +298,20 @@ int main(int argc, char** argv)
 	Application<OmegaViewer> app(applicationName);
 	app.setExecutableName(argv[0]);
 
-	return omain(app, argc, argv);
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+// Convert the omegalib version to wide char (two macros needed for the substitution to work)
+#define OMEGA_WIDE_VERSION(ver) OMEGA_WIDE_VERSION2(ver)
+#define OMEGA_WIDE_VERSION2(ver) L##ver
+	win_sparkle_set_appcast_url("http://febretpository.googlecode.com/svn/site/omegalib-appcast.xml");
+	win_sparkle_set_app_details(L"EVL", L"omegalib", OMEGA_WIDE_VERSION(OMEGA_VERSION));
+	win_sparkle_init();
+#endif
+
+	int result = omain(app, argc, argv);
+
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+	win_sparkle_cleanup();
+#endif
+
+	return result;
 }
