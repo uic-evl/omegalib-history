@@ -199,6 +199,7 @@ bool OmegaViewer::handleCommand(const String& cmd)
 			omsg("\t w		     - toggle wand");
 			omsg("\t f		     - toggle draw fps");
 			omsg("\t porthole    - (experimental) enable porthole");
+			omsg("\t check_update - (windows only) checks for omegalib updates online");
 		}
 	}
 	else if(args[0] == "r" && args.size() > 1)
@@ -283,6 +284,12 @@ bool OmegaViewer::handleCommand(const String& cmd)
 			interp->queueCommand("getSceneManager().displayWand(0, 1)", true);
 		}
 	}
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+	else if(args[0] == "check_update")
+	{
+		win_sparkle_check_update_with_ui();
+	}
+#endif
 	return false;
 }
 
@@ -302,7 +309,7 @@ int main(int argc, char** argv)
 // Convert the omegalib version to wide char (two macros needed for the substitution to work)
 #define OMEGA_WIDE_VERSION(ver) OMEGA_WIDE_VERSION2(ver)
 #define OMEGA_WIDE_VERSION2(ver) L##ver
-	win_sparkle_set_appcast_url("http://febretpository.googlecode.com/svn/site/omegalib-appcast.xml");
+	win_sparkle_set_appcast_url("https://raw.github.com/febret/omegalib-windows/master/omegalib-appcast.xml");
 	win_sparkle_set_app_details(L"EVL", L"omegalib", OMEGA_WIDE_VERSION(OMEGA_VERSION));
 	win_sparkle_init();
 #endif
