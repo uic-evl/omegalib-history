@@ -221,7 +221,9 @@ void PythonInterpreter::initialize(const char* programName)
 	Py_DECREF(wrapperErr);
 
 	addPythonPath("./");
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 	addPythonPath(OMEGA_DATA_PATH);
+#endif
 
 #ifdef OMEGA_APPROOT_DIRECTORY
 	addPythonPath(OMEGA_APPROOT_DIRECTORY);
@@ -368,7 +370,9 @@ void PythonInterpreter::runFile(const String& filename, uint flags)
 	ofmsg("PythonInterpreter::runFile: running %1%", %filename);
 	// Substitute the OMEGA_DATA_ROOT and OMEGA_APP_ROOT macros in the path.
 	String path = filename;
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 	path = StringUtils::replaceAll(path, "OMEGA_DATA_ROOT", OMEGA_DATA_PATH);
+#endif
 #ifdef OMEGA_APPROOT_DIRECTORY
 	path = StringUtils::replaceAll(path, "OMEGA_APP_ROOT", OMEGA_APPROOT_DIRECTORY);
 #endif

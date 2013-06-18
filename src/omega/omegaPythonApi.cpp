@@ -342,6 +342,17 @@ const bool getBoolSetting(const String& section, const String& name, bool defaul
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+const String getStringSetting(const String& section, const String& name, String defaultValue)
+{
+	if(SystemManager::settingExists(section))
+	{
+		const Setting& s = SystemManager::settingLookup(section);
+		return Config::getStringValue(name, s, defaultValue);
+	}
+	return defaultValue;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void queueCommand(const String& command)
 {
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
@@ -1210,6 +1221,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("printChildren", &printChildren);
 	def("printObjCounts", &printObjCounts);
 	def("getBoolSetting", &getBoolSetting);
+	def("getStringSetting", &getStringSetting);
 	def("toggleStats", &toggleStats);
 	def("overridePanopticStereo", overridePanopticStereo);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);

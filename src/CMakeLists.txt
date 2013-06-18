@@ -31,6 +31,8 @@ include(UsePch)
 
 include(${OmegaLib_SOURCE_DIR}/external/UseOmicron.cmake)
 
+set(OMEGA_HARDCODE_DATA_PATHS true CACHE BOOL "When set to true, the data and application paths will be hardcoded in macros and will be used default for file lookups")
+
 ###################################################################################################
 # Visual Leak Detector Support
 if(OMEGA_OS_WIN)

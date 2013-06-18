@@ -305,11 +305,13 @@ namespace omega
 			// - the default omegalib data path
 			dm->addSource(new FilesystemDataSource("./"));
 			dm->addSource(new FilesystemDataSource(""));
+
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 			dm->addSource(new FilesystemDataSource(dataPath));
 			ofmsg("::: %1%", %dataPath);
 			dm->addSource(new FilesystemDataSource(OMEGA_DATA_PATH));
 			ofmsg("::: %1%", %OMEGA_DATA_PATH);
-
+#endif
 			omsg("omegalib application config lookup:");
 			String curCfgFilename = ostr("%1%/%2%", %app.getName() %configFilename);
 			ofmsg("::: trying %1%", %curCfgFilename);

@@ -60,4 +60,8 @@
 // orun windows auto-updater
 #cmakedefine OMEGA_ENABLE_AUTO_UPDATE
 
+#cmakedefine OMEGA_HARDCODE_DATA_PATHS
+
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 #define OMEGA_DATA_PATH "${OMEGA_DATA_PATH}"
+#endif
