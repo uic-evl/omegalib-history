@@ -1,29 +1,39 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The Equalizer channel implementation: this class is the entry point for
+ *	every rendering operation. It sets up the draw context and calls the
+ *  omegalib Renderer.draw method to perform the actual rendering.
+ ******************************************************************************/
 #include "eqinternal.h"
 #include "omega/DisplaySystem.h"
 #include "omega/SageManager.h"
@@ -40,17 +50,17 @@ using namespace std;
 
 using namespace eq;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ChannelImpl::ChannelImpl( eq::Window* parent ) 
     :eq::Channel( parent ), myWindow(parent), myDrawBuffer(NULL), myStencilInitialized(false)
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ChannelImpl::~ChannelImpl() 
 {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool ChannelImpl::configInit(const eq::uint128_t& initID)
 {
     eq::Channel::configInit(initID);
@@ -77,7 +87,7 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
     return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128_t& spin)
 {
     WindowImpl* window = static_cast<WindowImpl*>(getWindow());
@@ -123,6 +133,9 @@ void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128
 		}
 		else
 		{
+			// Do we want to invert stereo?
+			bool invertStereo = ds->getDisplayConfig().invertStereo || myDC.tile->invertStereo; 
+
 			if(context->eye == DrawContext::EyeLeft)
 			{
 				context->viewport = Rect(pvp.x, pvp.y, pvp.w / 2, pvp.h);
@@ -183,7 +196,7 @@ void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 {
     eq::Channel::frameDraw( frameID );
@@ -239,7 +252,7 @@ void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
 {
     eq::Channel::frameViewFinish( frameID );
@@ -308,14 +321,14 @@ void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
     EQ_GL_CALL( resetAssemblyState( ));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 omega::Renderer* ChannelImpl::getRenderer()
 {
     WindowImpl* window = static_cast<WindowImpl*>(getWindow());
     return window->getRenderer();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ChannelImpl::setupStencil(int gliWindowWidth, int gliWindowHeight)
 {
 	GLint gliStencilBits;
@@ -350,7 +363,11 @@ void ChannelImpl::setupStencil(int gliWindowWidth, int gliWindowHeight)
 	
 	if(stereoMode == DisplayTileConfig::LineInterleaved)
 	{
-		for(float gliY=-2; gliY<=gliWindowHeight; gliY+=2)
+		// Do we want to invert stereo?
+		bool invertStereo = ds->getDisplayConfig().invertStereo || myDC.tile->invertStereo; 
+		int startOffset = invertStereo ? -1 : -2;
+
+		for(float gliY = startOffset; gliY <= gliWindowHeight; gliY += 2)
 		{
 			glLineWidth(1);
 			glBegin(GL_LINES);
@@ -374,7 +391,7 @@ void ChannelImpl::setupStencil(int gliWindowWidth, int gliWindowHeight)
 	glFlush();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 #define HEIGHT 12
 #define SPACE  2
 struct EntityData

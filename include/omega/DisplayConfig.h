@@ -1,33 +1,38 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * What's in this file: 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
  *	Classes used to describe a display system configuration (network, screens, 
  *	system geometry etc.)
- *************************************************************************************************/
+ ******************************************************************************/
 #ifndef __DISPLAY_CONFIG__
 #define __DISPLAY_CONFIG__
 
@@ -36,7 +41,7 @@
 
 namespace omega
 {
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	// Forward declarations
 	class SystemManager;
 	class DisplaySystem;
@@ -47,7 +52,7 @@ namespace omega
 	class Renderer;
 	class Camera;
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	struct DisplayTileConfig
 	{
 	public:
@@ -61,17 +66,22 @@ namespace omega
 			enabled(false),
 			camera(NULL),
 			id(0),
+			invertStereo(false),
 			isInGrid(false)
 			 {}
 
 		StereoMode stereoMode;
+		//! When set to true, eyes are inverted in stereo mode.
+		bool invertStereo;
 
 		String name;
 		int id;
 
-		//! The X position of this tile in the tile grid. Set by display configurations that generate 2D tile grids.
+		//! The X position of this tile in the tile grid. Set by display 
+		//! configurations that generate 2D tile grids.
 		int gridX;
-		//! The Y position of this tile in the tile grid. Set by display configurations that generate 2D tile grids.
+		//! The Y position of this tile in the tile grid. Set by display 
+		//! configurations that generate 2D tile grids.
 		int gridY;
 		//! When set to true, this tile is part of a 2D tile grid.
 		bool isInGrid;
@@ -86,8 +96,8 @@ namespace omega
 		//! Window position (when autooffset is not used)
 		Vector2i position;
 
-		//! 2d position of this tile (normalized) with respect to the global canvas. Used for mapping 2d interaction and for mapping physical tiles to
-		//! logical views.
+		//! 2d position of this tile (normalized) with respect to the global canvas. 
+		//! Used for mapping 2d interaction and for mapping physical tiles to logical views.
 		//Vector4f viewport;
 
 		int device;
@@ -120,7 +130,7 @@ namespace omega
 		Vector3f bottomRight;
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	struct DisplayNodeConfig
 	{
 		static const int MaxNodeTiles = 64;
@@ -131,21 +141,23 @@ namespace omega
 		DisplayTileConfig* tiles[MaxNodeTiles];
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	//! Stores omegalib display configuration data.
 	struct DisplayConfig
 	{
 	public:
 		static void LoadConfig(Setting& s, DisplayConfig& cfg);
 
-		// Computes the corner positions for the specified tile using information stored in the tile and configuration
-		// like center, yaw and pitch, lcd size and so on.
+		//! Computes the corner positions for the specified tile using 
+		//! information stored in the tile and configuration like center, yaw 
+		//! and pitch, lcd size and so on.
 		void computeTileCorners(DisplayTileConfig* tile);
 
-		//! Modifies the display configuration to run on the tile subset specified in 
-		//! MultiInstanceConfig. This call modifies enabled tiles and port assignments in the display configuration and
-		//! Assings the application an instance id. The instance id is written in the id field of MultiInstanceConfig and
-		//! is returned by this call.
+		//! Modifies the display configuration to run on the tile subset 
+		//! specified in MultiInstanceConfig. This call modifies enabled tiles 
+		//! and port assignments in the display configuration and Assings the 
+		//! application an instance id. The instance id is written in the id 
+		//! field of MultiInstanceConfig and is returned by this call.
 		int setupMultiInstance(MultiInstanceConfig* mic);
 
 		//! Returns true if the specified host is running a tile in the specified section. 
@@ -155,12 +167,21 @@ namespace omega
 		// UGLY CONSTANTS.
 		static const int MaxNodes = 64;
 		
-		DisplayConfig(): disableConfigGenerator(false), latency(1), enableSwapSync(true), forceMono(false), verbose(false)
+		DisplayConfig(): 
+			disableConfigGenerator(false), latency(1), 
+			enableSwapSync(true), forceMono(false), verbose(false),
+			invertStereo(false)
 		{
 			memset(tileGrid, 0, sizeof(tileGrid));
 		}		
+
+		//! When set to true, eyes are inverted in stereo mode.
+		bool invertStereo;
+
 		bool disableConfigGenerator;
-		//! When set to true, the Display system will output additional diagnostic messages during startup and shutdown.
+
+		//! When set to true, the Display system will output additional 
+		//! diagnostic messages during startup and shutdown.
 		bool verbose;
 
 		Vector2i canvasPixelSize;
@@ -176,7 +197,8 @@ namespace omega
 		//Vector2i numTiles;
 		int latency;
 
-		//! (Used only for planar configurtions) Index of the tile whose center will be used as the origin of the display system geometry.
+		//! (Used only for planar configurtions) Index of the tile whose center
+		//! will be used as the origin of the display system geometry.
 		Vector2i referenceTile;
 		//! Offset of reference tile center wrt world origin.
 		Vector3f referenceOffset;
@@ -189,12 +211,14 @@ namespace omega
 		//! Tile resolution in pixels.
 		Vector2i tileResolution;
 
-		//! When set to true, window positions will be computed automatically in a multiwindow setting.
+		//! When set to true, window positions will be computed automatically 
+		//! in a multiwindow setting.
 		//bool autoOffsetWindows;
 		//! Offset of the first window in pixels (valid for multiwindow settings)
 		Vector2i windowOffset;
 
-		//! Global stereo mode. Will be used by tiles that specify 'Default" as their stereo mode.
+		//! Global stereo mode. Will be used by tiles that specify 'Default" 
+		//! as their stereo mode.
 		DisplayTileConfig::StereoMode stereoMode;
 
 		//! Enable vsync on all tiles
@@ -224,7 +248,8 @@ namespace omega
 		//! Tile configurations.
 		Dictionary<String, DisplayTileConfig*> tiles;
 
-		//! Total display resolution. Will be computed automatically during the setup process, users should leave this blank.
+		//! Total display resolution. Will be computed automatically during the 
+		//! setup process, users should leave this blank.
 		//Vector2i displayResolution;
 		int numTiles;
 
@@ -241,7 +266,8 @@ namespace omega
 		//! Default port used to connect to nodes
 		int basePort;
 
-		//! The tile grid is needed for 2d interaction with tiles. and for applications running on tile subsets.
+		//! The tile grid is needed for 2d interaction with tiles. and for 
+		//! applications running on tile subsets.
 		//! Configuration generators fill this up.
 		DisplayTileConfig* tileGrid[128][128];
 		//! The number of horizontal and vertical tiles in the tile grid.
@@ -249,7 +275,7 @@ namespace omega
 		Vector2i tileGridSize;
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	//! Interface for display configuration generators
 	class IDisplayConfigBuilder
 	{
