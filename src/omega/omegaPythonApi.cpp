@@ -850,7 +850,7 @@ public:
 			}
 			else Actor::onUpdate(context);
 		}
-		catch(const boost::python::error_already_set& e)
+		catch(const boost::python::error_already_set&)
 		{
 			PyErr_Print();
 		}
@@ -872,7 +872,7 @@ public:
 			else Actor::onEvent(evt);
 			sLocalEvent = NULL;
 		}
-		catch(const boost::python::error_already_set& e)
+		catch(const boost::python::error_already_set&)
 		{
 			PyErr_Print();
 		}
