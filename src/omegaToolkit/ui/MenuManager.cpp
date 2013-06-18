@@ -283,7 +283,7 @@ Menu* MenuManager::createMenu(const String& name)
 	if(myHideSoundMenu != NULL)
 	{
 		// Reenables menu sound
-		myHideSoundMenu->setVolumeScale(1);
+		myHideSoundMenu->setVolumeScale(0.5);
 	}
 	
 	return menu;
