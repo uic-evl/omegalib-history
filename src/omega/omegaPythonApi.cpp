@@ -1,32 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * What's in this file: 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
  *	The wrapper code for the omegalib python API. 
- *************************************************************************************************/
+ ******************************************************************************/
 #include "omega/PythonInterpreter.h"
 #include "omega/SystemManager.h"
 #include "omega/DisplaySystem.h"
@@ -59,7 +64,7 @@ void disableRefPtrForwarding() { sRefPtrForwardingEnabled = false; }
 bool isRefPtrForwardingEnabled() { return sRefPtrForwardingEnabled; }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PyObject* omegaExit(PyObject* self, PyObject* args)
 {
 	// Gracious exit code is broken. 
@@ -78,7 +83,7 @@ PyObject* omegaExit(PyObject* self, PyObject* args)
 	return Py_None;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static PyObject* omegaFindFile(PyObject* self, PyObject* args)
 {
 	const char* name;
@@ -95,7 +100,7 @@ static PyObject* omegaFindFile(PyObject* self, PyObject* args)
 	return Py_BuildValue("s", info.path.c_str());
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static PyObject* omegaUpdateCallback(PyObject *dummy, PyObject *args)
 {
     PyObject *result = NULL;
@@ -119,7 +124,7 @@ static PyObject* omegaUpdateCallback(PyObject *dummy, PyObject *args)
     return result;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static PyObject* omegaEventCallback(PyObject *dummy, PyObject *args)
 {
     PyObject *result = NULL;
@@ -143,7 +148,7 @@ static PyObject* omegaEventCallback(PyObject *dummy, PyObject *args)
     return result;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static PyObject* omegaDrawCallback(PyObject *dummy, PyObject *args)
 {
     PyObject *result = NULL;
@@ -167,7 +172,7 @@ static PyObject* omegaDrawCallback(PyObject *dummy, PyObject *args)
     return result;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 class ScriptNodeListener: public SceneNodeListener
 {
 public:
@@ -201,7 +206,7 @@ public:
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PyObject* addVisibilityListener(PyObject* self, PyObject* args)
 {
 	PyObject* pyNode = NULL;
@@ -223,7 +228,7 @@ PyObject* addVisibilityListener(PyObject* self, PyObject* args)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PyObject* addSelectionListener(PyObject* self, PyObject* args)
 {
 	PyObject* pyNode = NULL;
@@ -245,7 +250,7 @@ PyObject* addSelectionListener(PyObject* self, PyObject* args)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static PyMethodDef omegaMethods[] = 
 {
     {"addSelectionListener", addSelectionListener, METH_VARARGS, 
@@ -280,13 +285,21 @@ static PyMethodDef omegaMethods[] =
     {NULL, NULL, 0, NULL}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Engine* getEngine() { return Engine::instance(); }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-const Event* getEvent() { return PythonInterpreter::getLastEvent(); }
+// Used to make the getEvent call work for Actors.
+// This will be set by the Actor::onEvent call before running the python callback.
+static const Event* sLocalEvent = NULL;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+const Event* getEvent() 
+{ 
+	if(sLocalEvent != NULL) return sLocalEvent;
+	return PythonInterpreter::getLastEvent(); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void printChildrenHelper(Node* n, int depth, const String& prefix, const String& indentString)
 {
 	if(depth != 0)
@@ -302,7 +315,7 @@ void printChildrenHelper(Node* n, int depth, const String& prefix, const String&
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void printChildren(Node* node, int depth)
 {
 	if(node != NULL)
@@ -311,13 +324,13 @@ void printChildren(Node* node, int depth)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void printObjCounts()
 {
 	ReferenceType::printObjCounts();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const bool getBoolSetting(const String& section, const String& name, bool defaultValue)
 {
 	if(SystemManager::settingExists(section))
@@ -328,7 +341,18 @@ const bool getBoolSetting(const String& section, const String& name, bool defaul
 	return defaultValue;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+const String getStringSetting(const String& section, const String& name, String defaultValue)
+{
+	if(SystemManager::settingExists(section))
+	{
+		const Setting& s = SystemManager::settingLookup(section);
+		return Config::getStringValue(name, s, defaultValue);
+	}
+	return defaultValue;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void queueCommand(const String& command)
 {
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
@@ -337,7 +361,7 @@ void queueCommand(const String& command)
 	interp->queueCommand(command, true);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void broadcastCommand(const String& command)
 {
 	// This only runs on the master node and sends the command to all slaves. Use the queeuCommand
@@ -352,7 +376,7 @@ void broadcastCommand(const String& command)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // @internal
 struct Vector3f_to_python
 {
@@ -374,7 +398,7 @@ struct Vector3f_to_python
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // @internal
 struct Vector3f_from_python
 {
@@ -406,7 +430,7 @@ struct Vector3f_from_python
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // @internal
 struct Vector2f_to_python
 {
@@ -428,7 +452,7 @@ struct Vector2f_to_python
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // @internal
 struct Vector2f_from_python
 {
@@ -458,7 +482,7 @@ struct Vector2f_from_python
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // @internal
 struct Quaternion_to_python
 {
@@ -480,7 +504,7 @@ struct Quaternion_to_python
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // @internal
 struct Quaternion_from_python
 {
@@ -514,7 +538,7 @@ struct Quaternion_from_python
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void querySceneRay(const Vector3f& origin, const Vector3f& dir, boost::python::object callback)
 {
 	const SceneQueryResultList& sqrl = Engine::instance()->querySceneRay(Ray(origin, dir));
@@ -532,7 +556,19 @@ void querySceneRay(const Vector3f& origin, const Vector3f& dir, boost::python::o
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+boost::python::tuple hitNode(SceneNode* node, const Vector3f& origin, const Vector3f& dir)
+{
+	if(node != NULL)
+	{
+		Vector3f hitPoint;
+		bool hit = node->hit(Ray(origin, dir), &hitPoint, SceneNode::HitBest);
+		return boost::python::make_tuple(hit, hitPoint);
+	}
+	return boost::python::make_tuple(false, Vector3f::Zero());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 boost::python::tuple getRayFromEvent(const Event* evt)
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
@@ -541,7 +577,7 @@ boost::python::tuple getRayFromEvent(const Event* evt)
 	return boost::python::make_tuple(res, r.getOrigin(), r.getDirection());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 boost::python::tuple getRayFromPoint(int x, int y)
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
@@ -549,19 +585,19 @@ boost::python::tuple getRayFromPoint(int x, int y)
 	return boost::python::make_tuple(true, r.getOrigin(), r.getDirection());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Camera* getDefaultCamera()
 {
 	return Engine::instance()->getDefaultCamera();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Camera* getCamera(const String& name)
 {
 	return Engine::instance()->getCamera(name);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Camera* getOrCreateCamera(const String& name)
 {
 	Camera* cam = Engine::instance()->getCamera(name);
@@ -572,75 +608,78 @@ Camera* getOrCreateCamera(const String& name)
 	return cam;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool isMaster()
 {
 	return SystemManager::instance()->isMaster();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 String getHostname()
 {
 	return SystemManager::instance()->getHostname();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool isHostInTileSection(const String& hostname, int tilex, int tiley, int tilew, int tileh)
 {
 	DisplayConfig& dc = SystemManager::instance()->getDisplaySystem()->getDisplayConfig();
 	return dc.isHostInTileSection(hostname, tilex, tiley, tilew, tileh);
 }
 	
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneNode* getScene()
 {
 	return Engine::instance()->getScene();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SoundEnvironment* getSoundEnvironment()
 {
 	return Engine::instance()->getSoundEnvironment();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool isSoundEnabled()
 {
 	SoundManager* smng = Engine::instance()->getSoundManager();
 	return smng != NULL && smng->isSoundServerRunning();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void toggleStats(const String& stats)
 {
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(SystemManager::instance()->getDisplaySystem());
+	SystemManager* sm = SystemManager::instance();
+	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
 	if(eqds != NULL)
 	{
 		eqds->toggleStats(stats);
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void overridePanopticStereo(bool value)
 {
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(SystemManager::instance()->getDisplaySystem());
+	SystemManager* sm = SystemManager::instance();
+	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
 	if(eqds != NULL)
 	{
 		eqds->getDisplayConfig().panopticStereoEnabled = value;
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void toggleStereo()
 {
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(SystemManager::instance()->getDisplaySystem());
+	SystemManager* sm = SystemManager::instance();
+	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
 	if(eqds != NULL)
 	{
 		eqds->getDisplayConfig().forceMono = !eqds->getDisplayConfig().forceMono;
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 vector<String> getTiles()
 {
 	vector<String> res;
@@ -653,7 +692,7 @@ vector<String> getTiles()
 	return res;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void setTileCamera(const String& tilename, const String& cameraName)
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
@@ -668,49 +707,58 @@ void setTileCamera(const String& tilename, const String& cameraName)
 	ds->refreshSettings();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void setNearFarZ(float nearZ, float farZ)
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
 	ds->setNearFarZ(nearZ, farZ);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 float getNearZ(float near)
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
 	return ds->getNearZ();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 float getFarZ(float near)
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
 	return ds->getFarZ();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+boost::python::tuple getDisplayPixelSize()
+{
+	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
+	Vector2i size = ds->getCanvasSize();
+	return boost::python::make_tuple(size.x(), size.y());
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 void orun(const String& script)
 {
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
 	interp->runFile(script);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void oclean()
 {
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
 	interp->clean();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ocleanrun(const String& script)
 {
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
 	interp->cleanRun(script);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PixelData* loadImage(const String& filename)
 {
 	Ref<PixelData> data = ImageUtils::loadImage(filename);
@@ -724,7 +772,7 @@ PixelData* loadImage(const String& filename)
 	//return ImageFile(filename, data);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void resetDataPaths()
 {
 	DataManager* dm = DataManager::getInstance();
@@ -735,49 +783,140 @@ void resetDataPaths()
 	dm->addSource(new FilesystemDataSource(""));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void addDataPath(const String& path)
 {
 	DataManager* dm = DataManager::getInstance();
 	dm->addSource(new FilesystemDataSource(path));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void printDataPaths()
 {
 	DataManager* dm = DataManager::getInstance();
 	omsg(dm->getDataSourceNames());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void setImageLoaderThreads(int threads)
 {
 	ImageUtils::setImageLoaderThreads(threads);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int getImageLoaderThreads()
 {
 	return ImageUtils::getImageLoaderThreads();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void printModules()
 {
 	Vector<EngineModule*> mods = ModuleServices::getModules();
 	
 	omsg("High   Priority:");
-	foreach(EngineModule* m, mods) if(m->getPriority() == EngineModule::PriorityHigh) ofmsg("    %1%", %m->getName());
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityHigh) 
+			ofmsg("    %1%", %m->getName());
+	}
 	omsg("Normal Priority:");
-	foreach(EngineModule* m, mods) if(m->getPriority() == EngineModule::PriorityNormal) ofmsg("    %1%", %m->getName());
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityNormal) 
+			ofmsg("    %1%", %m->getName());
+	}
 	omsg("Low    Priority:");
-	foreach(EngineModule* m, mods) if(m->getPriority() == EngineModule::PriorityLow) ofmsg("    %1%", %m->getName());
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityLow) 
+			ofmsg("    %1%", %m->getName());
+	}
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//! The ActorWrapper adds support for python overloading to the Actor class
+class ActorPythonWrapper: public Actor, public wrapper<Actor>
+{
+public:
+	ActorPythonWrapper(): Actor() { ModuleServices::addModule(this); }
+	ActorPythonWrapper(const String& str): Actor(str) { ModuleServices::addModule(this); }
+
+	void dispose()
+	{
+		if(override f = this->get_override("dispose")) f();
+	}
+	virtual void default_dispose()
+	{
+	}
+
+	void onUpdate(const UpdateContext& context) 
+	{
+		try
+		{
+			if(override f = this->get_override("onUpdate")) 
+			{
+				// Python callback accepts frame, time, dt: same as global callback.
+				f(context.frameNum, context.time, context.dt);
+			}
+			else Actor::onUpdate(context);
+		}
+		catch(const boost::python::error_already_set&)
+		{
+			PyErr_Print();
+		}
+	}
+	void default_onUpdate(const UpdateContext& context) 
+	{ 
+		this->Actor::onUpdate(context); 
+	}
+
+	void onEvent(const Event& evt)
+	{
+		try
+		{
+			// Call funtion with no arguments. The python event handler will use
+			// getEvent() to retrieve the event data. This keeps actor callbacks
+			// consistent with global event callbacks.
+			sLocalEvent = &evt;
+			if(override f = this->get_override("onEvent")) f();
+			else Actor::onEvent(evt);
+			sLocalEvent = NULL;
+		}
+		catch(const boost::python::error_already_set&)
+		{
+			PyErr_Print();
+		}
+	}
+	void default_onEvent(const Event& evt)
+	{
+		this->Actor::onEvent(evt);
+	}
+
+	bool onCommand(const String& cmd)
+	{
+		try
+		{
+			if(override f = this->get_override("onCommand"))
+				return f(cmd);
+			return Actor::onCommand(cmd);
+		}
+		catch(const boost::python::error_already_set& e)
+		{
+			PyErr_Print();
+			return false;
+		}
+	}
+	bool default_onCommand(const String& cmd)
+	{
+		return this->Actor::onCommand(cmd);
+	}
+};
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeYawOverloads, yaw, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodePitchOverloads, pitch, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeRollOverloads, roll, 1, 2) 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 BOOST_PYTHON_MODULE(omega)
 {
 	// Font alignment
@@ -972,9 +1111,24 @@ BOOST_PYTHON_MODULE(omega)
 		.add_property("alpha", &Color::getAlpha, &Color::setAlpha);
 
 	// Actor
-	PYAPI_REF_BASE_CLASS(Actor)
+	//PYAPI_REF_BASE_CLASS(Actor)
+	class_<ActorPythonWrapper, boost::noncopyable, Ref<ActorPythonWrapper> >
+		("Actor")
+		.def(init<const String&>())
 		PYAPI_METHOD(Actor, setSceneNode)
 		PYAPI_REF_GETTER(Actor, getSceneNode)
+		PYAPI_METHOD(Actor, isUpdateEnabled)
+		PYAPI_METHOD(Actor, setUpdateEnabled)
+		PYAPI_METHOD(Actor, setCommandsEnabled)
+		PYAPI_METHOD(Actor, areCommandsEnabled)
+		PYAPI_METHOD(Actor, setEventsEnabled)
+		PYAPI_METHOD(Actor, areEventsEnabled)
+		PYAPI_METHOD(Actor, kill)
+		// Overridable methods
+		.def("onUpdate", &Actor::onUpdate, &ActorPythonWrapper::default_onUpdate)
+		.def("onEvent", &Actor::onEvent, &ActorPythonWrapper::default_onEvent)
+		.def("onCommand", &Actor::onCommand, &ActorPythonWrapper::default_onCommand)
+		.def("dispose", &EngineModule::dispose, &ActorPythonWrapper::default_dispose)
 		;
 
 	// DrawInterface
@@ -1025,7 +1179,8 @@ BOOST_PYTHON_MODULE(omega)
 	// SoundInstance
 	void (SoundInstance::*playSimple)() = &SoundInstance::play;
 	void (SoundInstance::*playSimpleStereo)() = &SoundInstance::playStereo;
-	class_<SoundInstance, boost::noncopyable, Ref<SoundInstance> >("SoundInstance", init<Sound*>())
+	class_<SoundInstance, boost::noncopyable, Ref<SoundInstance> >
+		("SoundInstance", init<Sound*>())
 		.def("play", playSimple)
 		.def("playStereo", playSimpleStereo)
 		PYAPI_METHOD(SoundInstance, pause)
@@ -1060,11 +1215,13 @@ BOOST_PYTHON_MODULE(omega)
 	def("getSoundEnvironment", getSoundEnvironment, PYAPI_RETURN_REF);
 	def("isSoundEnabled", isSoundEnabled);
 	def("querySceneRay", querySceneRay);
+	def("hitNode", hitNode);
 	def("getRayFromEvent", getRayFromEvent);
 	def("getRayFromPoint", getRayFromPoint);
 	def("printChildren", &printChildren);
 	def("printObjCounts", &printObjCounts);
 	def("getBoolSetting", &getBoolSetting);
+	def("getStringSetting", &getStringSetting);
 	def("toggleStats", &toggleStats);
 	def("overridePanopticStereo", overridePanopticStereo);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);
@@ -1094,6 +1251,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("setNearFarZ", setNearFarZ);
 	def("getNearZ", getNearZ);
 	def("getFarZ", getFarZ);
+	def("getDisplayPixelSize", getDisplayPixelSize);
 };
 
 // Black magic. Include the pyeuclid source code (saved as hex file using xdd -i)
@@ -1101,7 +1259,7 @@ char euclid_source[] = {
 	#include "euclid.xdd" 
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void omegaPythonApiInit()
 {
 	omsg("omegaPythonApiInit()");

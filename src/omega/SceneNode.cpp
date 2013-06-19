@@ -1,29 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The core class for the omegalib scene tree.
+ ******************************************************************************/
 #include "omega/DrawInterface.h"
 #include "omega/SceneNode.h"
 #include "omega/Renderable.h"
@@ -36,7 +44,7 @@
 using namespace omega;
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneNode* SceneNode::create(const String& name)
 {
 	SceneNode* sn = new SceneNode(Engine::instance(), name);
@@ -44,25 +52,25 @@ SceneNode* SceneNode::create(const String& name)
 	return sn;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::addListener(SceneNodeListener* listener)
 {
 	myListeners.push_back(listener);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::removeListener(SceneNodeListener* listener)
 {
 	myListeners.remove(listener);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool SceneNode::isVisible()
 { 
 	return myVisible; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::setVisible(bool value)
 { 
 	if(myListeners.size() != 0)
@@ -75,7 +83,7 @@ void SceneNode::setVisible(bool value)
 	myVisible = value; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::setParent(Node* parent)
 {
 	// If changed parent is a scene node, call listeners.
@@ -95,7 +103,7 @@ void SceneNode::setParent(Node* parent)
 	Node::setParent(parent);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::setSelected(bool value)
 {
 	mySelected = value;
@@ -108,30 +116,31 @@ void SceneNode::setSelected(bool value)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool SceneNode::isSelected()
 {
 	return mySelected;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::addComponent(NodeComponent* o) 
 { 
 	myObjects.push_back(o); 
 	o->attach(this);
 	//needUpdate();
-	updateBoundingBox();
+	// Force a bounding box update.
+	updateBoundingBox(true);
 	// If the object has not been initialized yet, do it now.
 	if(!o->isInitialized()) o->initialize(myServer);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int SceneNode::getNumComponents()
 { 
 	return myObjects.size(); 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::removeComponent(NodeComponent* o) 
 {
 	myObjects.remove(o);
@@ -140,7 +149,7 @@ void SceneNode::removeComponent(NodeComponent* o)
 	//needUpdate();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::draw(const DrawContext& context)
 {
 	if(myVisible)
@@ -164,7 +173,7 @@ void SceneNode::draw(const DrawContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::update(bool updateChildren, bool parentHasChanged)
 {
     // Short circuit the off case
@@ -178,7 +187,7 @@ void SceneNode::update(bool updateChildren, bool parentHasChanged)
 	updateBoundingBox();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::update(const UpdateContext& context)
 {
 	// Step 1: traverse the scene graph and invoke update on all attached node components.
@@ -189,7 +198,7 @@ void SceneNode::update(const UpdateContext& context)
     update(true, false);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::updateTraversal(const UpdateContext& context)
 {
 	// Reorient the node if a facing camera is set
@@ -211,36 +220,21 @@ void SceneNode::updateTraversal(const UpdateContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-bool SceneNode::needsBoundingBoxUpdate() 
-{ 
-	bool needbbupdate = false;
-	foreach(NodeComponent* d, myObjects) needbbupdate |= d->needsBoundingBoxUpdate();
-	if(needbbupdate) return true;
-
-	foreach(Node* n, getChildren())
-	{
-		SceneNode* child = dynamic_cast<SceneNode*>(n);
-		needbbupdate |= child->needsBoundingBoxUpdate();
-	}
-	return needbbupdate;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const AlignedBox3& SceneNode::getBoundingBox() 
 { 
 	updateBoundingBox();
 	return myBBox; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const Sphere& SceneNode::getBoundingSphere() 
 { 
 	updateBoundingBox();
 	return myBSphere; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const Vector3f& SceneNode::getBoundMinimum()
 {
 	updateBoundingBox();
@@ -252,7 +246,7 @@ const Vector3f& SceneNode::getBoundMinimum()
 	return myBBox.getMinimum();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const Vector3f& SceneNode::getBoundMaximum()
 {
 	updateBoundingBox();
@@ -264,7 +258,7 @@ const Vector3f& SceneNode::getBoundMaximum()
 	return myBBox.getMaximum();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const Vector3f SceneNode::getBoundCenter()
 {
 	updateBoundingBox();
@@ -276,7 +270,7 @@ const Vector3f SceneNode::getBoundCenter()
 	return myBBox.getCenter();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 float SceneNode::getBoundRadius()
 {
 	updateBoundingBox();
@@ -288,7 +282,7 @@ float SceneNode::getBoundRadius()
 	return myBSphere.getRadius();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::updateBoundingBox(bool force)
 {
 	// Exit now if bouning box does not need an update.
@@ -325,14 +319,16 @@ void SceneNode::updateBoundingBox(bool force)
 		myBSphere = Sphere(myBBox.getCenter(), myBBox.getHalfSize().maxCoeff());
 	}
 
-	SceneNode* parent = dynamic_cast<SceneNode*>(getParent());
-	if(parent != NULL)
-	{
-		parent->updateBoundingBox(true);
-	}
+	//SceneNode* parent = dynamic_cast<SceneNode*>(getParent());
+	//if(parent != NULL)
+	//{
+	//	parent->updateBoundingBox(true);
+	//}
+
+	myNeedsBoundingBoxUpdate = false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::drawBoundingBox()
 {
 	glPushAttrib(GL_ENABLE_BIT);
@@ -383,7 +379,7 @@ void SceneNode::drawBoundingBox()
 	glPopAttrib();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool SceneNode::hit(const Ray& ray, Vector3f* hitPoint, HitType hitType)
 {
 	if(hitType == HitBest)
@@ -405,7 +401,7 @@ bool SceneNode::hit(const Ray& ray, Vector3f* hitPoint, HitType hitType)
 	if(hitType == HitBoundingSphere)
 	{
 		const Sphere& s = getBoundingSphere();
-		std::pair<bool, float> h = ray.intersects(s);
+		std::pair<bool, omega::real> h = ray.intersects(s);
 		if(h.first)
 		{
 			(*hitPoint) = ray.getPoint(h.second);
@@ -415,7 +411,7 @@ bool SceneNode::hit(const Ray& ray, Vector3f* hitPoint, HitType hitType)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::followTrackable(int trackableId)
 {
 	if(myTracker == NULL)
@@ -427,14 +423,14 @@ void SceneNode::followTrackable(int trackableId)
 	myTracker->setTrackableSourceId(trackableId);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::setFollowOffset(const Vector3f& offset, const Quaternion& ooffset)
 {
 	myTracker->setOffset(offset);
 	myTracker->setOrientationOffset(ooffset);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::unfollow()
 {
 	if(myTracker != NULL)

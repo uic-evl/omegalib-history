@@ -588,22 +588,25 @@ void WidgetRenderable::popDrawAttributes()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::draw(const DrawContext& context)
 {
-	if(myOwner->isStereo())
+	if(myOwner->isVisible())
 	{
-		if(context.eye != DrawContext::EyeCyclop) 
+		if(myOwner->isStereo())
 		{
-			preDraw();
-			drawContent(context);
-			postDraw();
+			if(context.eye != DrawContext::EyeCyclop) 
+			{
+				preDraw();
+				drawContent(context);
+				postDraw();
+			}
 		}
-	}
-	else
-	{
-		if(context.eye == DrawContext::EyeCyclop) 
+		else
 		{
-			preDraw();
-			drawContent(context);
-			postDraw();
+			if(context.eye == DrawContext::EyeCyclop) 
+			{
+				preDraw();
+				drawContent(context);
+				postDraw();
+			}
 		}
 	}
 }

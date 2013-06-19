@@ -68,8 +68,8 @@ namespace omegaToolkit { namespace ui {
 
 		bool is3dMenuEnabled() { return my3dMenuEnabled; }
 		
-		Sound* getShowMenuSound() { return myShowMenuSound; }
-		Sound* getHideMenuSound() { return myHideSoundMenu; }
+		Sound* getShowMenuSound() { if( getEngine()->getSoundEnvironment() != NULL ) return getEngine()->getSoundEnvironment()->getSound("showMenuSound"); }
+		Sound* getHideMenuSound() { if( getEngine()->getSoundEnvironment() != NULL ) return getEngine()->getSoundEnvironment()->getSound("hideMenuSound"); }
 	private:
 		MenuManager();
 		virtual ~MenuManager();

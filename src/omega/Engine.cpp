@@ -173,27 +173,50 @@ void Engine::initialize()
 			float volumeScale = Config::getFloatValue("volumeScale", s, 0.5);
 
 			soundManager = new SoundManager(soundServerIP,soundServerPort);
+			soundEnv = soundManager->getSoundEnvironment();
+			soundManager->startSoundServer();
 
-			ofmsg("Engine: Connecting to sound server at %1% on port %2%...", %soundServerIP %soundServerPort);
+			ofmsg("Engine: Checking if sound server is ready at %1% on port %2%... (5 seconds max)", %soundServerIP %soundServerPort);
+
+			bool serverReady = true;
+			timeb tb;
+			ftime( &tb );
+			int curTime = tb.millitm + (tb.time & 0xfffff) * 1000;
+			lastSoundServerCheck = curTime;
+
 			while( !soundManager->isSoundServerRunning() )
 			{
+				timeb tb;
+				ftime( &tb );
+				curTime = tb.millitm + (tb.time & 0xfffff) * 1000;
+				int timeSinceLastCheck = curTime-lastSoundServerCheck;
+
 				soundManager->startSoundServer();
+				if( timeSinceLastCheck > 5000 )
+				{
+					omsg("Engine: Failed to start sound server. Sound disabled.");
+					serverReady = false;
+					break;
+				}
 			}
-			omsg("Engine: Connected to sound server.");
 
-			soundEnv = soundManager->getSoundEnvironment();
-			soundEnv->setVolumeScale( volumeScale );
-			soundEnv->setListenerPosition( getDefaultCamera()->getPosition() );
-			soundEnv->setListenerOrientation( getDefaultCamera()->getOrientation() );
+			if( serverReady )
+			{
+				omsg("Engine: Sound server reports ready.");
 
-			soundEnv->setUserPosition( Vector3f(0.0,1.8f,0.0) );
+				soundEnv->setVolumeScale( volumeScale );
+				soundEnv->setListenerPosition( getDefaultCamera()->getPosition() );
+				soundEnv->setListenerOrientation( getDefaultCamera()->getOrientation() );
 
-			bool assetCacheEnabled = Config::getBoolValue("assetCacheEnabled", s, true);
-			int assetCachePort = Config::getIntValue("assetCachePort", s, 22500);
+				soundEnv->setUserPosition( Vector3f(0.0,1.8f,0.0) );
 
-			soundManager->setAssetCacheEnabled(assetCacheEnabled);
-			soundManager->getAssetCacheManager()->addCacheHost(soundServerIP);
-			soundManager->getAssetCacheManager()->setCachePort(assetCachePort);
+				bool assetCacheEnabled = Config::getBoolValue("assetCacheEnabled", s, true);
+				int assetCachePort = Config::getIntValue("assetCachePort", s, 22500);
+
+				soundManager->setAssetCacheEnabled(assetCacheEnabled);
+				soundManager->getAssetCacheManager()->addCacheHost(soundServerIP);
+				soundManager->getAssetCacheManager()->setCachePort(assetCachePort);
+			}
 		}
 	}
 

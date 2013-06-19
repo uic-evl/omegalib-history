@@ -1,32 +1,38 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * What's in this file:
- *	The omegalib python interpreter core (excluding the wrapping code to the omegalib API)
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The omegalib python interpreter core (excluding the wrapping code to the 
+ *	omegalib API)
+ ******************************************************************************/
 #include "omega/PythonInterpreter.h"
 #include "omega/SystemManager.h"
 #include "omega/ModuleServices.h"
@@ -58,7 +64,7 @@ void omegaPythonApiInit();
 
 //PyThreadState* sMainThreadState;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 class PythonInteractiveThread: public Thread
 {
 public:
@@ -97,32 +103,32 @@ public:
 	}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::lockInterpreter()
 {
 	myLock.lock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::unlockInterpreter()
 {
 	myLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool PythonInterpreter::isEnabled()
 {
 	return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PythonInterpreter::PythonInterpreter()
 {
 	myShellEnabled = false;
 	myInteractiveThread = new PythonInteractiveThread();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PythonInterpreter::~PythonInterpreter()
 {
 	omsg("~PythonInterpreter");
@@ -133,7 +139,7 @@ PythonInterpreter::~PythonInterpreter()
 	Py_Finalize();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::addPythonPath(const char* dir)
 {
 	ofmsg("PythonInterpreter::addPythonPath: %1%", %dir);
@@ -157,14 +163,14 @@ void PythonInterpreter::addPythonPath(const char* dir)
 	//PyEval_ReleaseLock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::setup(const Setting& setting)
 {
 	myShellEnabled = Config::getBoolValue("pythonShellEnabled", setting, false);
 	myDebugShell = Config::getBoolValue("pythonShellDebug", setting, false);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::initialize(const char* programName)
 {
 	// Register self as shared object
@@ -215,7 +221,9 @@ void PythonInterpreter::initialize(const char* programName)
 	Py_DECREF(wrapperErr);
 
 	addPythonPath("./");
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 	addPythonPath(OMEGA_DATA_PATH);
+#endif
 
 #ifdef OMEGA_APPROOT_DIRECTORY
 	addPythonPath(OMEGA_APPROOT_DIRECTORY);
@@ -235,7 +243,7 @@ void PythonInterpreter::initialize(const char* programName)
 	omsg("Python Interpreter initialized.");
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::addModule(const char* name, PyMethodDef* methods)
 {
 	Dictionary<String, int> intConstants;
@@ -243,7 +251,7 @@ void PythonInterpreter::addModule(const char* name, PyMethodDef* methods)
 	addModule(name, methods, intConstants, stringConstants);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::addModule(const char* name, PyMethodDef* methods, const Dictionary<String, int> intConstants, const Dictionary<String, String> stringConstants)
 {
 	PyObject* module = Py_InitModule(name, methods);
@@ -282,7 +290,7 @@ void PythonInterpreter::addModule(const char* name, PyMethodDef* methods, const 
 #endif
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::eval(const String& cscript, const char* format, ...)
 {
 	String script = cscript;
@@ -343,7 +351,7 @@ void PythonInterpreter::eval(const String& cscript, const char* format, ...)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::evalEventCommand(const String& command, const Event& evt) 
 {
 	//! Save the last 'current' event to a local variable
@@ -356,13 +364,15 @@ void PythonInterpreter::evalEventCommand(const String& command, const Event& evt
 	mysLastEvent = tempEvt;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PythonInterpreter::runFile(const String& filename)
+///////////////////////////////////////////////////////////////////////////////
+void PythonInterpreter::runFile(const String& filename, uint flags)
 {
 	ofmsg("PythonInterpreter::runFile: running %1%", %filename);
 	// Substitute the OMEGA_DATA_ROOT and OMEGA_APP_ROOT macros in the path.
 	String path = filename;
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 	path = StringUtils::replaceAll(path, "OMEGA_DATA_ROOT", OMEGA_DATA_PATH);
+#endif
 #ifdef OMEGA_APPROOT_DIRECTORY
 	path = StringUtils::replaceAll(path, "OMEGA_APP_ROOT", OMEGA_APPROOT_DIRECTORY);
 #endif
@@ -377,14 +387,30 @@ void PythonInterpreter::runFile(const String& filename)
 		String baseScriptFilename;
 		StringUtils::splitFilename(fullPath, baseScriptFilename, scriptPath);
 
-		DataManager* dm = SystemManager::instance()->getDataManager();
-		dm->setCurrentPath(scriptPath);
-
-		// Add the path to the module lookup path for the interpreter, so we can open modules 
-		// in the same directory.
-		addPythonPath(scriptPath.c_str());
-
+		// NOTE: we need to read the file before (possibly) resetting the current
+		// working dir, otherwise we will not be able to find the file.
 		PyObject* PyFileObject = PyFile_FromString((char*)fullPath.c_str(), "r");
+		if(PyFileObject == NULL)
+		{
+			ofwarn("PythonInterpreter:runFile: failed to open script file %1%", %fullPath);
+		}
+
+		if(flags & SetCwdToScriptPath)
+		{
+			DataManager* dm = SystemManager::instance()->getDataManager();
+			dm->setCurrentPath(scriptPath);
+
+			// change the current working directory to be the script root, so we can load files using the open command.
+			eval("import os; os.chdir('" + scriptPath + "')");
+		}
+	
+		if(flags & AddScriptPathToModuleSearchPath)
+		{
+			// Add the path to the module lookup path for the interpreter, so we can open modules 
+			// in the same directory.
+			addPythonPath(scriptPath.c_str());
+		}
+
 		PyRun_SimpleFile(PyFile_AsFile(PyFileObject), filename.c_str());
 	}
 	else
@@ -393,9 +419,11 @@ void PythonInterpreter::runFile(const String& filename)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::clean()
 {
+	Engine::instance()->reset();
+
 	// destroy all global variables
 	if(myDebugShell)
 	{
@@ -414,15 +442,13 @@ void PythonInterpreter::clean()
 	// unregister callbacks
 	unregisterAllCallbacks();
 
-	Engine::instance()->reset();
-
 	// Clear all queued commands.
 	//myInteractiveCommandLock.lock();
 	//myCommandQueue.clear();
 	//myInteractiveCommandLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::cleanRun(const String& filename)
 {
 	clean();
@@ -432,7 +458,7 @@ void PythonInterpreter::cleanRun(const String& filename)
 	queueCommand(ostr("from omega import *; orun(\"%1%\")", %filename), true);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::registerCallback(void* callback, CallbackType type)
 {
 	// BLAGH cast
@@ -455,14 +481,14 @@ void PythonInterpreter::registerCallback(void* callback, CallbackType type)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::unregisterAllCallbacks()
 {
 	myUpdateCallbacks.clear();
 	myEventCallbacks.clear();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::update(const UpdateContext& context) 
 {
 	// Execute queued interactive commands first
@@ -508,7 +534,7 @@ void PythonInterpreter::update(const UpdateContext& context)
 	Py_DECREF(arglist);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::queueCommand(const String& command, bool local)
 {
 	//oassert(!myInteractiveCommandNeedsExecute && 
@@ -519,7 +545,7 @@ void PythonInterpreter::queueCommand(const String& command, bool local)
 	myInteractiveCommandLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::commitSharedData(SharedOStream& out)
 {
 	// Count number of commands that need sending
@@ -538,7 +564,7 @@ void PythonInterpreter::commitSharedData(SharedOStream& out)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::updateSharedData(SharedIStream& in)
 {
 	int cmdCount;
@@ -553,7 +579,7 @@ void PythonInterpreter::updateSharedData(SharedIStream& in)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::handleEvent(const Event& evt) 
 {
 	// Save the received event to the static variable mysLastEvent.
@@ -572,7 +598,7 @@ void PythonInterpreter::handleEvent(const Event& evt)
 	mysLastEvent = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::draw(const DrawContext& context, Camera* cam)
 {
 	if(myDrawCallbacks.size() > 0)
@@ -604,7 +630,7 @@ void PythonInterpreter::draw(const DrawContext& context, Camera* cam)
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //String PythonInterpreter::getHelpString(const String& filter)
 //{
 //	String result = "";
@@ -623,74 +649,74 @@ void PythonInterpreter::draw(const DrawContext& context, Camera* cam)
 
 #else
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool PythonInterpreter::isEnabled() { return false; }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PythonInterpreter::PythonInterpreter() 
 { 	
 	myShellEnabled = false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PythonInterpreter::~PythonInterpreter() { }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::setup(const Setting& setting) { }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::addPythonPath(const char* dir) { }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::initialize(const char* programName) { }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::addModule(const char* name, PyMethodDef* methods) { }
 
 void PythonInterpreter::addModule(const char* name, PyMethodDef* methods, const Dictionary<String, int> intConstants, const Dictionary<String, String> stringConstants) {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::eval(const String& script, const char* format, ...) 
 { 
 	ofwarn("PythonInterpreter::eval: Python interpreter not available on this system. (%1%)", %script);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PythonInterpreter::runFile(const String& filename) 
+///////////////////////////////////////////////////////////////////////////////
+void PythonInterpreter::runFile(const String& filename, uint flags) 
 { 
 	ofwarn("PythonInterpreter::runFile: Python interpreter not available on this system. (%1%)", %filename);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::registerCallback(void* callback, CallbackType type) { }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::update(const UpdateContext& context) { }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::handleEvent(const Event& evt) { }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::commitSharedData(SharedOStream& out) {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::updateSharedData(SharedIStream& in) {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::queueCommand(const String& command, bool local) {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::unregisterAllCallbacks() {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::draw(const DrawContext& context, Camera* cam) {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::evalEventCommand(const String& command, const Event& evt) {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::clean() {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::cleanRun(const String& filename) {}
 #endif

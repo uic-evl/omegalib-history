@@ -1,29 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The core class for the omegalib scene tree.
+ ******************************************************************************/
 #ifndef __SCENE_NODE_H__
 #define __SCENE_NODE_H__
 
@@ -38,9 +46,10 @@ namespace omega {
 	class SceneNode;
 	class Camera;
 	class TrackedObject;
+	class NodeComponent;
 	struct RenderState;
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	class OMEGA_API SceneNodeListener
 	{
 	public:
@@ -49,7 +58,7 @@ namespace omega {
 		virtual void onParentChanged(SceneNode* source, SceneNode* newParent) {}
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	//! Represents a node in the omegalib scene graph.
 	//! @remarks
 	//!		SceneNode instances add some functionality over the Node base class. Namely:
@@ -79,7 +88,8 @@ namespace omega {
 			myVisible(true),
 			mySelected(false),
 			myFacingCamera(NULL),
-			myTracker(NULL)
+			myTracker(NULL),
+			myNeedsBoundingBoxUpdate(false)
 			{}
 
 		SceneNode(Engine* server, const String& name):
@@ -92,7 +102,8 @@ namespace omega {
 			myVisible(true),
 			mySelected(false),
 			myFacingCamera(NULL),
-			myTracker(NULL)
+			myTracker(NULL),
+			myNeedsBoundingBoxUpdate(false)
 			{}
 
 		Engine* getEngine();
@@ -126,6 +137,9 @@ namespace omega {
 		const Vector3f& getBoundMaximum();
 		const Vector3f getBoundCenter();
 		float getBoundRadius();
+		//! Force an update of the bounding box for this node. Usually called by 
+		//! NodeComponent objects attached to this node.
+		void requestBoundingBoxUpdate();
 		//@}
 
 		// Listeners
@@ -189,6 +203,7 @@ namespace omega {
 
 		// Bounding box stuff.
 		bool myBoundingBoxVisible;
+		bool myNeedsBoundingBoxUpdate;
 		Color myBoundingBoxColor;
 
 		// Target camera for billboard mode. Can't use Ref due to circular dependency.
@@ -197,41 +212,69 @@ namespace omega {
 		TrackedObject* myTracker;
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
+	inline void SceneNode::requestBoundingBoxUpdate() 
+	{ 
+		// If we already requested a bounding box update, we are done.
+		if(!myNeedsBoundingBoxUpdate)
+		{
+			myNeedsBoundingBoxUpdate = true;
+			SceneNode* parent = dynamic_cast<SceneNode*>(getParent());
+			if(parent != NULL) parent->requestBoundingBoxUpdate();
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	inline bool SceneNode::needsBoundingBoxUpdate() 
+	{ return myNeedsBoundingBoxUpdate; }
+
+	///////////////////////////////////////////////////////////////////////////
 	inline bool SceneNode::isBoundingBoxVisible() 
 	{ return myBoundingBoxVisible; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline void SceneNode::setBoundingBoxVisible(bool value) 
 	{ myBoundingBoxVisible = value; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline const Color& SceneNode::getBoundingBoxColor() 
 	{ return myBoundingBoxColor; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline void SceneNode::setBoundingBoxColor(const Color& color) 
 	{ myBoundingBoxColor = color; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline Engine* SceneNode::getEngine()
 	{ return myServer; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline bool SceneNode::isSelectable() 
 	{ return mySelectable; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline void SceneNode::setSelectable(bool value) 
 	{ mySelectable = value; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline void SceneNode::setFacingCamera(Camera* cam)
 	{ myFacingCamera = cam; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline Camera* SceneNode::getFacingCamera()
 	{ return myFacingCamera; }
+
+	// This is a definition from NodeComponent. Doing it here because we need
+	// SceneNode.
+	///////////////////////////////////////////////////////////////////////////
+	inline void NodeComponent::requestBoundingBoxUpdate() 
+	{ 
+		myNeedBoundingBoxUpdate = true; 
+		if(myOwner) 
+		{
+			myOwner->requestBoundingBoxUpdate();
+		}
+	}
 }; // namespace omega
 
 #endif

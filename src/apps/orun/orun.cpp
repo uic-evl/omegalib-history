@@ -1,32 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * orun
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
  *	A python script launcher and interpreter for omegalib applications.
- *************************************************************************************************/
+ ******************************************************************************/
 #include <omega.h>
 #include <omegaToolkit.h>
 
@@ -36,6 +41,12 @@
 
 #ifdef OMEGA_BUILD_OSG_LIB
 #include <cyclops.h>
+#endif
+
+#ifdef OMEGA_OS_WIN
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+#include <winsparkle.h>
+#endif
 #endif
 
 using namespace omega;
@@ -56,7 +67,7 @@ String sDefaultScript = "";
 bool sAddScriptDirectoryToData = true;
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 class OmegaViewer: public EngineModule
 {
 public:
@@ -75,11 +86,11 @@ private:
 	String myAppStartFunctionCall;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 OmegaViewer* gViewerInstance = NULL;
 OmegaViewer* getViewer() { return gViewerInstance; }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Python wrapper code.
 #include "omega/PythonInterpreterWrapper.h"
 BOOST_PYTHON_MODULE(omegaViewer)
@@ -93,7 +104,7 @@ BOOST_PYTHON_MODULE(omegaViewer)
 	def("getViewer", getViewer, PYAPI_RETURN_REF);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 OmegaViewer::OmegaViewer():
 	EngineModule("OmegaViewer")
 {
@@ -105,8 +116,7 @@ OmegaViewer::OmegaViewer():
 	//ModuleServices::addModule(myUi);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void OmegaViewer::initialize()
 {
 #ifdef OMEGA_BUILD_VTK_LIB
@@ -136,7 +146,7 @@ void OmegaViewer::initialize()
 
 	// Run the init script.
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
-	interp->runFile(orunInitScriptName);
+	interp->runFile(orunInitScriptName, PythonInterpreter::NoRunFlags);
 	interp->eval(myAppStartFunctionCall);
 
 	// If a default script has been passed to orun, queue it's execution through the python
@@ -160,7 +170,7 @@ void OmegaViewer::initialize()
 	omsg("\n\n\n");
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool OmegaViewer::handleCommand(const String& cmd)
 {
 	Vector<String> args = StringUtils::split(cmd);
@@ -193,6 +203,7 @@ bool OmegaViewer::handleCommand(const String& cmd)
 			omsg("\t w		     - toggle wand");
 			omsg("\t f		     - toggle draw fps");
 			omsg("\t porthole    - (experimental) enable porthole");
+			omsg("\t check_update - (windows only) checks for omegalib updates online");
 		}
 	}
 	else if(args[0] == "r" && args.size() > 1)
@@ -277,10 +288,16 @@ bool OmegaViewer::handleCommand(const String& cmd)
 			interp->queueCommand("getSceneManager().displayWand(0, 1)", true);
 		}
 	}
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+	else if(args[0] == "check_update")
+	{
+		win_sparkle_check_update_with_ui();
+	}
+#endif
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Application entry point
 int main(int argc, char** argv)
 {
@@ -292,5 +309,20 @@ int main(int argc, char** argv)
 	Application<OmegaViewer> app(applicationName);
 	app.setExecutableName(argv[0]);
 
-	return omain(app, argc, argv);
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+// Convert the omegalib version to wide char (two macros needed for the substitution to work)
+#define OMEGA_WIDE_VERSION(ver) OMEGA_WIDE_VERSION2(ver)
+#define OMEGA_WIDE_VERSION2(ver) L##ver
+	win_sparkle_set_appcast_url("https://raw.github.com/febret/omegalib-windows/master/omegalib-appcast.xml");
+	win_sparkle_set_app_details(L"EVL", L"omegalib", OMEGA_WIDE_VERSION(OMEGA_VERSION));
+	win_sparkle_init();
+#endif
+
+	int result = omain(app, argc, argv);
+
+#ifdef OMEGA_ENABLE_AUTO_UPDATE
+	win_sparkle_cleanup();
+#endif
+
+	return result;
 }

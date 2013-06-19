@@ -31,6 +31,8 @@ include(UsePch)
 
 include(${OmegaLib_SOURCE_DIR}/external/UseOmicron.cmake)
 
+set(OMEGA_HARDCODE_DATA_PATHS true CACHE BOOL "When set to true, the data and application paths will be hardcoded in macros and will be used default for file lookups")
+
 ###################################################################################################
 # Visual Leak Detector Support
 if(OMEGA_OS_WIN)
@@ -73,6 +75,9 @@ set(OMEGA_USE_PORTHOLE true CACHE BOOL "Enable Porthole support")
 # Options
 set(OMEGA_BUILD_OSG_LIB true CACHE BOOL "Enable build of OpenSceneGraph integration library")
 set(OMEGA_BUILD_VTK_LIB false CACHE BOOL "Enable build of vtk integration library (Vtk has to be compiled with Python support)")
+if(WIN32)
+	set(OMEGA_ENABLE_AUTO_UPDATE true CACHE BOOL "Enables the omegalib binaries auto updater (WinSparkle) for a windows build. Supported by 32bit builds only.")
+endif()
 
 ###################################################################################################
 # Set include paths
@@ -186,6 +191,11 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/modules ${CMAKE_BINARY_DIR}/modules)
 configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/OmegalibConfig.cmake.in ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake)
 if(WIN32)
 	configure_file(${CMAKE_SOURCE_DIR}/MakeRelease.bat.in ${CMAKE_BINARY_DIR}/MakeRelease.bat)
+	# Copy WinSparkle dll to output folder
+	if(OMEGA_ENABLE_AUTO_UPDATE)
+		configure_file(${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG} COPYONLY)
+		configure_file(${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} COPYONLY)
+	endif()
 endif()
 
 

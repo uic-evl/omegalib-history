@@ -1,33 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * Original code adapted from Equalizer/osg
- * -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield 
- *                           2010 Stefan Eilemann <eile@eyescale.ch>
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	A customized wrapper around an openscenegraph scene
+ ******************************************************************************/
 #ifndef OOSG_SCENEVIEW
 #define OOSG_SCENEVIEW
 
@@ -43,7 +47,7 @@
 
 #include <osgUtil/CullVisitor>
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 class SceneView : public osg::Object, public osg::CullSettings
 {
     public:
@@ -72,7 +76,10 @@ class SceneView : public osg::Object, public osg::CullSettings
         /** Get the scene data to view. The data will typically be
          *  an osg::Scene but can be any osg::Node type.
          */
-        osg::Node* getSceneData(unsigned int childNo=0) { return (_camera->getNumChildren()>childNo) ? _camera->getChild(childNo) : 0; }
+        osg::Node* getSceneData(unsigned int childNo=0) 
+		{ 
+			return (_camera->getNumChildren()>childNo) ? _camera->getChild(childNo) : 0; 
+		}
 
         /** Get the const scene data which to view. The data will typically be
          *  an osg::Scene but can be any osg::Node type.
@@ -104,16 +111,16 @@ class SceneView : public osg::Object, public osg::CullSettings
         //inline osg::DisplaySettings* getDisplaySettings() { return _displaySettings.get(); }
 
 
-        void setGlobalStateSet(osg::StateSet* state) { _globalStateSet = state; }
-        osg::StateSet* getGlobalStateSet() { return _globalStateSet.get(); }
+        //void setGlobalStateSet(osg::StateSet* state) { _globalStateSet = state; }
+        //osg::StateSet* getGlobalStateSet() { return _globalStateSet.get(); }
         //const osg::StateSet* getGlobalStateSet() const { return _globalStateSet.get(); }
 
         //void setSecondaryStateSet(osg::StateSet* state) { _secondaryStateSet = state; }
         //osg::StateSet* getSecondaryStateSet() { return _secondaryStateSet.get(); }
         //const osg::StateSet* getSecondaryStateSet() const { return _secondaryStateSet.get(); }
 
-        void setLocalStateSet(osg::StateSet* state) { _localStateSet = state; }
-        osg::StateSet* getLocalStateSet() { return _localStateSet.get(); }
+        //void setLocalStateSet(osg::StateSet* state) { _localStateSet = state; }
+        //osg::StateSet* getLocalStateSet() { return _localStateSet.get(); }
         //const osg::StateSet* getLocalStateSet() const { return _localStateSet.get(); }
 
 		void setAutoNearFar(bool value);
@@ -157,8 +164,6 @@ class SceneView : public osg::Object, public osg::CullSettings
         osg::RenderInfo& getRenderInfo() { return _renderInfo; }
         const osg::RenderInfo& getRenderInfo() const { return _renderInfo; }
         
-
-
         /** Set the projection matrix. Can be thought of as setting the lens of a camera. */
         //inline void setProjectionMatrix(const osg::Matrixf& matrix) { _camera->setProjectionMatrix(matrix); }
 
@@ -270,7 +275,13 @@ class SceneView : public osg::Object, public osg::CullSettings
 		virtual ~SceneView();
 
         /** Do cull traversal of attached scene graph using Cull NodeVisitor. Return true if computeNearFar has been done during the cull traversal.*/
-        virtual bool cullStage(const osg::Matrixd& projection,const osg::Matrixd& modelview,osgUtil::CullVisitor* cullVisitor, osgUtil::StateGraph* rendergraph, osgUtil::RenderStage* renderStage, osg::Viewport *viewport);
+        virtual bool cullStage(
+			const osg::Matrixd& projection,
+			const osg::Matrixd& modelview,
+			osgUtil::CullVisitor* cullVisitor, 
+			osgUtil::StateGraph* rendergraph, 
+			osgUtil::RenderStage* renderStage, 
+			osg::Viewport *viewport);
         
         //void clearArea(int x,int y,int width,int height,const osg::Vec4& color);
 
@@ -291,10 +302,10 @@ class SceneView : public osg::Object, public osg::CullSettings
         osg::observer_ptr<osg::Camera>              _camera;
         //osg::ref_ptr<osg::Camera>                   _cameraWithOwnership;
         
-        osg::ref_ptr<osg::StateSet>                 _globalStateSet;
+        //osg::ref_ptr<osg::StateSet>                 _globalStateSet;
         //osg::ref_ptr<osg::DisplaySettings>          _displaySettings;
         
-        osg::ref_ptr<osg::StateSet>                 _secondaryStateSet;
+        //osg::ref_ptr<osg::StateSet>                 _secondaryStateSet;
 
 		osg::ref_ptr<osgDB::DatabasePager>			_databasePager;
 
