@@ -138,11 +138,25 @@ void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128
 
 			if(context->eye == DrawContext::EyeLeft)
 			{
-				context->viewport = Rect(pvp.x, pvp.y, pvp.w / 2, pvp.h);
+				if(invertStereo)
+				{
+					context->viewport = Rect(pvp.x + pvp.w / 2, pvp.y, pvp.w / 2, pvp.h);
+				}
+				else
+				{
+					context->viewport = Rect(pvp.x, pvp.y, pvp.w / 2, pvp.h);
+				}
 			}
 			else if(context->eye == DrawContext::EyeRight)
 			{
-				context->viewport = Rect(pvp.x + pvp.w / 2, pvp.y, pvp.w / 2, pvp.h);
+				if(invertStereo)
+				{
+					context->viewport = Rect(pvp.x, pvp.y, pvp.w / 2, pvp.h);
+				}
+				else
+				{
+					context->viewport = Rect(pvp.x + pvp.w / 2, pvp.y, pvp.w / 2, pvp.h);
+				}
 			}
 			else
 			{
