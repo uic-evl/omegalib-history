@@ -61,6 +61,9 @@ Text3D::Text3D(SceneManager* scene):
 	txtGeode->addDrawable(myTextDrawable);
 
 	initialize(txtGeode);
+
+	// Lighting disabled on text objects.
+	getMaterial()->setLit(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -166,6 +166,8 @@ BOOST_PYTHON_MODULE(cyclops)
 		PYAPI_METHOD(Material, setShininess)
 		PYAPI_METHOD(Material, getGloss)
 		PYAPI_METHOD(Material, setGloss)
+		PYAPI_METHOD(Material, isLit)
+		PYAPI_METHOD(Material, setLit)
 		PYAPI_METHOD(Material, setAlpha)
 		PYAPI_METHOD(Material, getAlpha);
 

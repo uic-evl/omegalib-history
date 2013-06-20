@@ -195,6 +195,14 @@ void Material::setDoubleFace(bool value)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void Material::setLit(bool value)
+{
+	myLit = value;
+	myStateSet->setMode(GL_LIGHTING, 
+		(myLit ? osg::StateAttribute::ON : osg::StateAttribute::OFF) | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void Material::setWireframe(bool value)
 {
 	myWireframe = value;
@@ -252,6 +260,7 @@ void Material::reset()
 	setDepthTestEnabled(true);
 	setAdditive(false);
 	setDoubleFace(false);
+	setLit(true);
 
 	myStateSet->setNestRenderBins(false);
 }

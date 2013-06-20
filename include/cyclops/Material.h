@@ -94,6 +94,8 @@ namespace cyclops {
 		bool isDoubleFace() { return myDoubleFace; }
 		void setWireframe(bool value);
 		bool isWireframe() { return myWireframe; }
+		void setLit(bool value);
+		bool isLit() { return myLit; }
 		//@}
 
 		//! Set the material polygon offset.
@@ -138,6 +140,7 @@ namespace cyclops {
 		bool myDepthTest;
 		bool myDoubleFace;
 		bool myWireframe;
+		bool myLit;
 
 		Ref<osg::StateSet> myStateSet;
 		Ref<osg::Material> myMaterial;
