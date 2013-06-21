@@ -1,31 +1,38 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * The scene manager contains all the main features used to handle a cyclops scene and its assets.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The scene manager contains all the main features used to handle a cyclops 
+ *  scene and its assets.
+ ******************************************************************************/
 #include <osgUtil/Optimizer>
 #include <osgDB/Archive>
 #include <osgDB/ReadFile>
@@ -56,7 +63,7 @@ Lock sModelQueueLock;
 Queue< Ref<SceneManager::LoadModelAsyncTask> > sModelQueue;
 bool sShutdownLoaderThread = false;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 class ModelLoaderThread: public Thread
 {
 public:
@@ -95,7 +102,7 @@ private:
 	SceneManager* mySceneManager;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneManager* SceneManager::instance() 
 { 
 	if(mysInstance == NULL)
@@ -105,7 +112,7 @@ SceneManager* SceneManager::instance()
 	return mysInstance; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneManager* SceneManager::createAndInitialize()
 {
 	if(mysInstance == NULL)
@@ -117,7 +124,7 @@ SceneManager* SceneManager::createAndInitialize()
 	return mysInstance;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneManager::SceneManager():
 	EngineModule("SceneManager"),
 	myOsg(NULL),
@@ -139,12 +146,12 @@ SceneManager::SceneManager():
 
 	myDefaultLoader = new DefaultModelLoader();
 
-	// Add the default loader to the list of loaders, so it can be called explicitly. The default loader
-	// Will always be used last.
+	// Add the default loader to the list of loaders, so it can be called explicitly. 
+	// The default loader will always be used last.
 	addLoader(myDefaultLoader);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneManager::~SceneManager()
 {
 	mysInstance = NULL;
@@ -158,7 +165,7 @@ SceneManager::~SceneManager()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::loadConfiguration()
 {
 	Config* cfg = SystemManager::instance()->getAppConfig();
@@ -190,7 +197,7 @@ void SceneManager::loadConfiguration()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::initialize()
 {
 	myMainLight = NULL;
@@ -223,6 +230,13 @@ void SceneManager::initialize()
 	setShaderMacroToString("customFragmentDefs", "");
 	setShaderMacroToFile("postLightingSection", "cyclops/common/postLighting/default.frag");
 
+	setShaderMacroToString("unlit", 
+		"$@fragmentLightSection\n"
+		"{\n" 
+		"litSurfData.luminance = surf.albedo;\n"
+		"}\n" 	
+		"$\n");
+
 	resetShadowSettings(myShadowSettings);
 
 	myModelLoaderThread = new ModelLoaderThread(this);
@@ -232,7 +246,7 @@ void SceneManager::initialize()
 	myMenuManager = omegaToolkit::ui::MenuManager::instance();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::dispose()
 {
 	unload();
@@ -242,7 +256,7 @@ void SceneManager::dispose()
 	myWandTracker = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::unload()
 {
 	sShutdownLoaderThread = true;
@@ -267,7 +281,7 @@ void SceneManager::unload()
 	myTextures.clear();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::update(const UpdateContext& context) 
 {
 	updateLights();
@@ -288,7 +302,7 @@ void SceneManager::update(const UpdateContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::onParentChanged(SceneNode* source, SceneNode* newParent)
 {
 	// Called by entities when their parent node changes. Update the osg parent node
@@ -307,7 +321,7 @@ void SceneManager::onParentChanged(SceneNode* source, SceneNode* newParent)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Uniforms* SceneManager::getGlobalUniforms() 
 { 
 	if(myGlobalUniforms == NULL)
@@ -317,19 +331,19 @@ Uniforms* SceneManager::getGlobalUniforms()
 	return myGlobalUniforms; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::addLight(Light* l)
 {
 	myLights.push_back(l);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::removeLight(Light* l)
 {
 	myLights.remove(l);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::updateLights()
 {
 	int i = 0;
@@ -375,7 +389,7 @@ void SceneManager::updateLights()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::handleEvent(const Event& evt) 
 {
 	if(evt.isButtonDown(getEngine()->getPrimaryButton()))
@@ -420,7 +434,7 @@ void SceneManager::handleEvent(const Event& evt)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::load(SceneLoader* loader)
 {
 	loader->startLoading(this);
@@ -436,7 +450,7 @@ void SceneManager::load(SceneLoader* loader)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::loadScene(const String& relativePath)
 {
 	String fullPath;
@@ -471,7 +485,7 @@ void SceneManager::loadScene(const String& relativePath)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 osg::Texture2D* SceneManager::getTexture(const String& name)
 {
 	// If texture has been loaded already return it.
@@ -519,7 +533,7 @@ osg::Texture2D* SceneManager::getTexture(const String& name)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 osg::Texture2D* SceneManager::createTexture(const String& name, PixelData* pixels)
 {
 	osg::Texture2D* texture = new osg::Texture2D();
@@ -533,13 +547,13 @@ osg::Texture2D* SceneManager::createTexture(const String& name, PixelData* pixel
 	return texture;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setShaderMacroToString(const String& macroName, const String& macroString)
 {
 	myShaderMacros[macroName] = macroString;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setShaderMacroToFile(const String& macroName, const String& name)
 {
 	String path;
@@ -556,7 +570,7 @@ void SceneManager::setShaderMacroToFile(const String& macroName, const String& n
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::loadShader(osg::Shader* shader, const String& name)
 {
 	// If shader source is not in the cache, load it now.
@@ -586,7 +600,7 @@ void SceneManager::loadShader(osg::Shader* shader, const String& name)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::compileShader(osg::Shader* shader, const String& source)
 {
 	String shaderPreSrc = source;
@@ -659,7 +673,7 @@ void SceneManager::compileShader(osg::Shader* shader, const String& source)
 	shader->setShaderSource(shaderSrc);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ProgramAsset* SceneManager::getOrCreateProgram(const String& name, const String& vertexShaderName, const String& fragmentShaderName)
 {
 	// If program has been loaded already return it.
@@ -682,7 +696,7 @@ ProgramAsset* SceneManager::getOrCreateProgram(const String& name, const String&
 	return asset;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ProgramAsset* SceneManager::createProgramFromString(const String& name, const String& vertexShaderCode, const String& fragmentShaderCode)
 {
 	ProgramAsset* asset = new ProgramAsset();
@@ -702,7 +716,7 @@ ProgramAsset* SceneManager::createProgramFromString(const String& name, const St
 	return asset;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::addProgram(ProgramAsset* program)
 {
 	myPrograms[program->name] = program;
@@ -711,7 +725,7 @@ void SceneManager::addProgram(ProgramAsset* program)
 	recompileShaders(program, myShaderVariationName);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::updateProgram(ProgramAsset* program)
 {
 	// Delete current shaders to force reload.
@@ -729,7 +743,7 @@ void SceneManager::updateProgram(ProgramAsset* program)
 	recompileShaders(program, myShaderVariationName);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::recompileShaders(ProgramAsset* program, const String& svariationName)
 {
 	String var = myShaderVariationName;
@@ -825,13 +839,13 @@ void SceneManager::recompileShaders(ProgramAsset* program, const String& svariat
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setBackgroundColor(const Color& color)
 {
 	getEngine()->getDisplaySystem()->setBackgroundColor(color);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneManager::LoadModelAsyncTask* SceneManager::loadModelAsync(ModelInfo* info)
 {
 	sModelQueueLock.lock();
@@ -842,14 +856,14 @@ SceneManager::LoadModelAsyncTask* SceneManager::loadModelAsync(ModelInfo* info)
 	return task;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::loadModelAsync(ModelInfo* info, const String& callback)
 {
 	LoadModelAsyncTask* task = loadModelAsync(info);
 	task->setCompletionCommand(callback);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::addLoader(ModelLoader* loader)
 {
 	if(loader != NULL)
@@ -862,7 +876,7 @@ void SceneManager::addLoader(ModelLoader* loader)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::removeLoader(ModelLoader* loader)
 {
 	if(loader != NULL)
@@ -875,10 +889,10 @@ void SceneManager::removeLoader(ModelLoader* loader)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool SceneManager::loadModel(ModelInfo* info)
 {
-	omsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SceneManager::loadModel");
+	omsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SceneManager::loadModel");
 	bool result = false;
 
 	ModelAsset* asset = new ModelAsset();
@@ -924,23 +938,23 @@ bool SceneManager::loadModel(ModelInfo* info)
 			result = myDefaultLoader->load(asset);
 		}
 	}
-	omsg("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SceneManager::loadModel\n");
+	omsg("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SceneManager::loadModel\n");
 	return result;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ModelAsset* SceneManager::getModel(const String& name)
 {
 	return myModelDictionary[name];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const List< Ref<ModelAsset> >& SceneManager::getModels()
 {
 	return myModelList;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setSkyBox(Skybox* skyBox)
 {
 	// If a skybox is currently active, remove it.
@@ -968,13 +982,13 @@ void SceneManager::setSkyBox(Skybox* skyBox)
 	recompileShaders();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const ShadowSettings& SceneManager::getCurrentShadowSettings()
 {
 	return myShadowSettings;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::resetShadowSettings(const ShadowSettings& settings)
 {
 	myShadowSettings = settings;
@@ -1021,7 +1035,7 @@ void SceneManager::resetShadowSettings(const ShadowSettings& settings)
 	recompileShaders();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::recompileShaders()
 {
 	// Add light functions to shader variation name
@@ -1040,7 +1054,6 @@ void SceneManager::recompileShaders()
 	// Update the shader variation name
 	myShaderVariationName = ostr(myShadowSettings.shadowsEnabled ? ".sm%1%-%2$x" : ".%1%-%2$x", %myNumActiveLights %lightFuncHash);
 
-	//omsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SceneManager::recompileShaders");
 	ofmsg("Recompiling shaders (variation: %1%)", %myShaderVariationName);
 
 	typedef Dictionary<String, Ref<ProgramAsset> >::Item ProgramAssetItem;
@@ -1048,10 +1061,9 @@ void SceneManager::recompileShaders()
 	{
 		recompileShaders(item.getValue(), myShaderVariationName);
 	}
-	//omsg("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SceneManager::recompileShaders\n");
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::reloadAndRecompileShaders()
 {
 	myShaderCache.clear();
@@ -1059,7 +1071,7 @@ void SceneManager::reloadAndRecompileShaders()
 	recompileShaders();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::displayWand(uint wandId, uint trackableId)
 {
 	// Simple single-wand implementation: we ignore wandId
@@ -1076,7 +1088,7 @@ void SceneManager::displayWand(uint wandId, uint trackableId)
 	getEngine()->getDefaultCamera()->addChild(myWandEntity);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::hideWand(uint wandId)
 {
 	if(myWandEntity != NULL)
@@ -1085,7 +1097,7 @@ void SceneManager::hideWand(uint wandId)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setWandEffect(uint wandId, const String& effect)
 {
 	// Simple single-wand implementation: we ignore wandId
@@ -1095,7 +1107,7 @@ void SceneManager::setWandEffect(uint wandId, const String& effect)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setWandSize(float width, float length)
 {
 	// Simple single-wand implementation: we ignore wandId
