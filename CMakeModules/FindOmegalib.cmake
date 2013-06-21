@@ -30,7 +30,7 @@ if(OMEGA_BINARY_DIR)
 	set(OMICRON_DEFAULT_BINARY_DIR ${OMEGA_BINARY_DIR}/omicron/omicron)
 	#set(OMICRON_BIN_DIR ${OMEGA_BINARY_DIR}/bin)
 	#set(OMICRON_LIB_DIR ${OMEGA_BINARY_DIR}/lib)
-	include(${OMEGA_SOURCE_DIR}/external/omicron/CMakeModules/FindOmicron.cmake)
+	include(${OMEGA_SOURCE_DIR}/omicron/CMakeModules/FindOmicron.cmake)
 
 	# the following are the include directories needed to build a 3rd party omegalib application.
 	# in the future, just ${OMEGA_ROOT_DIR}/include will be needed, but for now, multiple paths 
