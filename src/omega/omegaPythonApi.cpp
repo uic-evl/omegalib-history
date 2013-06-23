@@ -1078,7 +1078,9 @@ BOOST_PYTHON_MODULE(omega)
 	// CameraController
 	PYAPI_REF_BASE_CLASS(CameraController)
 		PYAPI_METHOD(CameraController, getSpeed)
-		PYAPI_METHOD(CameraController, setSpeed);
+		PYAPI_METHOD(CameraController, setSpeed)
+		PYAPI_METHOD(CameraController, reset)
+	;
 
 	// Camera
 	PYAPI_REF_CLASS(Camera, Node)

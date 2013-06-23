@@ -1,29 +1,41 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials 
+ * provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE  GOODS OR  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The Camera class: handles information about a view transformation, head 
+ *	tracking and optional target buffers for off screen rendering
+ *	A camera can have a controller that is used to implement a navigation 
+ *	technique.
+ ******************************************************************************/
 #include "omega/RenderTarget.h"
 #include "omega/Camera.h"
 #include "omega/CameraOutput.h"
@@ -36,7 +48,7 @@
 using namespace omega;
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Camera::Camera(Engine* e, uint flags):
 	SceneNode(e),
 	myAutoAspect(false),
@@ -61,7 +73,7 @@ Camera::Camera(Engine* e, uint flags):
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::setup(Setting& s)
 {
 	//set position of camera
@@ -115,7 +127,7 @@ void Camera::setup(Setting& s)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::handleEvent(const Event& evt)
 {
 	if(myTrackingEnabled)
@@ -128,7 +140,7 @@ void Camera::handleEvent(const Event& evt)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::updateTraversal(const UpdateContext& context)
 {
 	// Update the view transform
@@ -149,13 +161,13 @@ void Camera::updateTraversal(const UpdateContext& context)
 	SceneNode::updateTraversal(context);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::lookAt(const Vector3f& position, const Vector3f& upVector)
 {
 	Node::lookAt(myHeadOffset - position, upVector);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::focusOn(SceneNode* node)
 {
 	// Compute direction vector
@@ -171,14 +183,14 @@ void Camera::focusOn(SceneNode* node)
     //needUpdate();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 CameraOutput* Camera::getOutput(uint contextId)
 {
 	oassert(contextId < GpuContext::MaxContexts);
 	return myOutput[contextId].get();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Camera::isEnabled(const DrawContext& context)
 {
 	CameraOutput* output = getOutput(context.gpuContext->getId());
@@ -194,7 +206,7 @@ bool Camera::isEnabled(const DrawContext& context)
 	return false;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const DrawContext& Camera::beginDraw(const DrawContext& context)
 {
 	CameraOutput* output = getOutput(context.gpuContext->getId());
@@ -223,7 +235,7 @@ const DrawContext& Camera::beginDraw(const DrawContext& context)
 	return dc;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::endDraw(const DrawContext& context)
 {
 	CameraOutput* output = getOutput(context.gpuContext->getId());
@@ -231,21 +243,21 @@ void Camera::endDraw(const DrawContext& context)
 	output->endDraw(dc);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::startFrame(const FrameInfo& frame)
 {
 	CameraOutput* output = getOutput(frame.gpuContext->getId());
 	output->startFrame(frame);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::finishFrame(const FrameInfo& frame)
 {
 	CameraOutput* output = getOutput(frame.gpuContext->getId());
 	output->finishFrame(frame);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::setProjection(float fov, float aspect, float nearZ, float farZ)
 {
 	myProjection = Math::makePerspectiveMatrix(fov * Math::DegToRad, aspect, nearZ, farZ);
@@ -255,7 +267,7 @@ void Camera::setProjection(float fov, float aspect, float nearZ, float farZ)
 	myAspect = aspect;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Ray Camera::getViewRay(const Vector2f& normalizedPoint)
 {
 	Vector2f pt(
@@ -264,27 +276,27 @@ Ray Camera::getViewRay(const Vector2f& normalizedPoint)
 	return Math::unprojectNormalized(pt, myViewTransform, myProjection);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Vector3f Camera::localToWorldPosition(const Vector3f& position)
 {
 	Vector3f res = mPosition + mOrientation * position;
     return res;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Quaternion Camera::localToWorldOrientation(const Quaternion& orientation)
 {
 	return mOrientation * orientation;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Vector3f Camera::worldToLocalPosition(const Vector3f& position)
 {
 	Vector3f res = mOrientation.inverse() * (position - mPosition);
 	return res;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Camera::setController(CameraController* value) 
 { 
 	if(myController != NULL)
