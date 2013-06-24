@@ -410,7 +410,13 @@ void PythonInterpreter::runFile(const String& filename, uint flags)
 
 			// change the current working directory to be the script root, so 
 			// we can load files using the open command.
-			eval("import os; os.chdir('" + scriptPath + "')");
+			// NOTE: we use a straight PyRun_SimpleString instead of calling
+			// the eval method because we may be inside an eval call already
+			// (for instance, evaluating an orun command).
+			// Since the interpreter locks in eval, we would get into a 
+			// deadlock.
+			String cdcmd = "import os; os.chdir('" + scriptPath + "')";
+			PyRun_SimpleString(cdcmd.c_str());
 		}
 	
 		if(flags & AddScriptPathToModuleSearchPath)
