@@ -354,17 +354,23 @@ void SystemManager::run()
 ///////////////////////////////////////////////////////////////////////////////
 void SystemManager::cleanup()
 {
+	// Shutdown and dispose all services
 	if(myServiceManager != NULL)
 	{
 		myServiceManager->stop();
 		myServiceManager->dispose();
 	}
 
+	// Cleanup the interpreter state. All interpreter objects will be 
+	// deallocated. The engine state will be reset. We need to do this before
+	// Shutting down the display system to avoid deallocation conflicts.
 	if(myInterpreter != NULL) 
 	{
 		myInterpreter->clean();
 	}
 
+	// Shutdown the display system. This will also shutdown and dispose the
+	// omegalib engine.
 	if(myDisplaySystem) 
 	{
 		myDisplaySystem->cleanup();
@@ -372,12 +378,15 @@ void SystemManager::cleanup()
 		myDisplaySystem = NULL;
 	}
 
+	// Dispose the interpreter. Everything should have been cleaned up at this 
+	// point. So this just finalizes and releases the python interpreter.
 	if(myInterpreter != NULL) 
 	{
 		delete myInterpreter;
 		myInterpreter = NULL;
 	}
 
+	// Dispose myself.
 	delete mysInstance;
 	mysInstance = NULL;
 }
