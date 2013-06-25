@@ -168,6 +168,16 @@ void SystemManager::setup(Config* appcfg)
 				const Setting& sConfig = mySystemConfig->lookup("config");
 				myInterpreter->setup(sConfig);
 			}
+			// If we have an application configuration file, read interpreter 
+			// setup values from there as well. Setting
+			if(myAppConfig != mySystemConfig)
+			{
+				if(myAppConfig->exists("config"))
+				{
+					const Setting& sConfig = myAppConfig->lookup("config");
+					myInterpreter->setup(sConfig);
+				}
+			}
 		}
 	}
 	catch(libconfig::SettingTypeException ste)
