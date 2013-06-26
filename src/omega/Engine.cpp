@@ -1,32 +1,39 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * The omegalib Engine is the core runtime component of omegalib. It runs on each node of a cluster 
- * system and handles the abstract scene graph, cameras, distribution of events and frame updates. 
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ * The omegalib Engine is the core runtime component of omegalib. It runs on 
+ * each node of a cluster system and handles the abstract scene graph, cameras, 
+ * distribution of events and frame updates. 
+ ******************************************************************************/
 #include "omega/Engine.h"
 #include "omega/Application.h"
 #include "omega/Renderable.h"
@@ -42,7 +49,35 @@ using namespace omega;
 
 Engine* Engine::mysInstance = NULL;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+// Variables used by the death switch thread.
+Thread* sDeathSwitchThread = NULL;
+bool sUpdateReceived = true;
+int sDeathSwitchTimeout = 60; // Auto-kill after 60 seconds
+
+///////////////////////////////////////////////////////////////////////////////
+// Thsi thread runs on slave nodes and monitors the update loop. If no updates 
+// have been received within a specified interval, it kills the process. This
+// is useful for auto-killing stuck slave nodes.
+class DeathSwitchThread: public Thread
+{
+public:
+	virtual void threadProc()
+	{
+		while(!SystemManager::instance()->isExitRequested())	
+		{
+			// Check every second
+			osleep(sDeathSwitchTimeout * 1000);
+			if(!sUpdateReceived)
+			{
+				ofmsg("DeathSwitchThread: no update after %1% seconds. Killing process.", %sDeathSwitchTimeout);
+				exit(-1);
+			}
+			sUpdateReceived = false;
+		}
+	}
+};
+
+///////////////////////////////////////////////////////////////////////////////
 Engine::Engine(ApplicationBase* app):
     //myActivePointerTimeout(2.0f),
     myDefaultCamera(NULL),
@@ -56,13 +91,13 @@ Engine::Engine(ApplicationBase* app):
     mysInstance = this;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Engine::~Engine()
 {
 	omsg("~Engine");
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::initialize()
 {
     myLock.lock();
@@ -238,6 +273,8 @@ void Engine::initialize()
 
 	Setting& scfg = cfg->lookup("config");
 	myEventSharingEnabled = Config::getBoolValue("enableEventSharing", scfg, true);
+	
+	sDeathSwitchTimeout = Config::getIntValue("deathSwitchTimeout", scfg, 60);
 
 	// Initialize the default camera using the 
 	//Observer* obs = getDisplaySystem()->getObserver(0);
@@ -249,10 +286,16 @@ void Engine::initialize()
 	myLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::dispose()
 {
 	omsg("Engine::dispose");
+	
+	if(sDeathSwitchThread != NULL)
+	{
+		delete sDeathSwitchThread;
+		sDeathSwitchThread = NULL;
+	}
 
     ImageUtils::internalDispose();
 	ModuleServices::disposeAll();
@@ -268,7 +311,7 @@ void Engine::dispose()
 	myDefaultCamera = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::reset()
 {
 	// dispose non-core modules
@@ -301,14 +344,14 @@ void Engine::reset()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::addRenderer(Renderer* client)
 {
     oassert(client != NULL);
     myClients.push_back(client);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::removeRenderPass(const String& renderPassName)
 {
 	ofmsg("Engine: removing render pass %1%", %renderPassName);
@@ -326,7 +369,7 @@ void Engine::removeRenderPass(const String& renderPassName)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::refreshPointer(int pointerId, const Event& evt)
 {
 	Vector3f pos = evt.getPosition();
@@ -348,13 +391,13 @@ void Engine::refreshPointer(int pointerId, const Event& evt)
 	ptr->setPosition(pos[0], pos[1]);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SceneNode* Engine::getScene()
 {
     return myScene.get();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::handleEvent(const Event& evt)
 {
 	if(myDebugWand)
@@ -392,9 +435,21 @@ void Engine::handleEvent(const Event& evt)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::update(const UpdateContext& context)
 {
+	// Create the death switch thread if it does not exist yet
+	if(sDeathSwitchThread == NULL)
+	{
+		omsg("Creating death switch thread");
+		sDeathSwitchThread = new DeathSwitchThread();
+		sDeathSwitchThread->start();
+	}
+	
+	// Set the update received flag to true, so the death switch thread will
+	// not kill us.
+	sUpdateReceived = true;
+	
 	// First update the script
 	getSystemManager()->getScriptInterpreter()->update(context);
 
@@ -426,7 +481,7 @@ void Engine::update(const UpdateContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const SceneQueryResultList& Engine::querySceneRay(const Ray& ray, uint flags)
 {
     myRaySceneQuery.clearResults();
@@ -435,7 +490,7 @@ const SceneQueryResultList& Engine::querySceneRay(const Ray& ray, uint flags)
     return myRaySceneQuery.execute(flags);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::drawPointers(Renderer* client, const DrawContext& context)
 {
 	if(myDrawPointers)
@@ -453,7 +508,7 @@ void Engine::drawPointers(Renderer* client, const DrawContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Camera* Engine::createCamera(uint flags)
 {
     Camera* cam = new Camera(this, flags);
@@ -463,7 +518,7 @@ Camera* Engine::createCamera(uint flags)
     return cam;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Engine::destroyCamera(Camera* cam)
 {
     oassert(cam != NULL);
@@ -471,7 +526,7 @@ void Engine::destroyCamera(Camera* cam)
     //delete cam;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Camera* Engine::createCamera(const String& name, uint flags)
 {
 	Camera* cam = createCamera(flags);
@@ -479,7 +534,7 @@ Camera* Engine::createCamera(const String& name, uint flags)
 	return cam;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Camera* Engine::getCamera(const String& name)
 {
 	foreach(Camera* cam, myCameras)
@@ -489,31 +544,31 @@ Camera* Engine::getCamera(const String& name)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Engine::CameraCollection Engine::getCameras()
 {
     return myCameras;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Engine::CameraCollection Engine::getCameras() const
 {
     return myCameras;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int Engine::getCanvasWidth() 
 {
 	return getDisplaySystem()->getCanvasSize().x(); 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int Engine::getCanvasHeight()
 {
 	return getDisplaySystem()->getCanvasSize().y(); 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Renderer* Engine::getRendererByContextId(int id)
 {
 	foreach(Renderer* r, myClients)

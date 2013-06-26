@@ -304,11 +304,6 @@ void SceneView::cull(int eye)
     }
     
     osg::State* state = _renderInfo.getState();
-
-    if (!_localStateSet)
-    {
-        _localStateSet = new osg::StateSet;
-    }
     
     // we in theory should be able to be able to bypass reset, but we'll call it just incase.
     //_state->reset();
@@ -527,6 +522,10 @@ void SceneView::draw()
     _renderInfo.setView(_camera->getView());
 	_renderInfo.pushCamera(_camera.get());
 
+	// Make sure depth test is enabled (on a linux install, it somewhat 
+	// ignored the global default set in the osg::State)
+	glEnable(GL_DEPTH_TEST);
+	
     // bog standard draw.
     _renderStage->drawPreRenderStages(_renderInfo,previous);
     _renderStage->draw(_renderInfo,previous);

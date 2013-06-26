@@ -127,6 +127,7 @@ bool PythonInterpreter::isEnabled()
 PythonInterpreter::PythonInterpreter()
 {
 	myShellEnabled = false;
+	myDebugShell = false;
 	myInteractiveThread = new PythonInteractiveThread();
 }
 
@@ -168,8 +169,9 @@ void PythonInterpreter::addPythonPath(const char* dir)
 ///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::setup(const Setting& setting)
 {
-	myShellEnabled = Config::getBoolValue("pythonShellEnabled", setting, false);
-	myDebugShell = Config::getBoolValue("pythonShellDebug", setting, false);
+	myShellEnabled = Config::getBoolValue("pythonShellEnabled", setting, myShellEnabled);
+	myDebugShell = Config::getBoolValue("pythonShellDebug", setting, myDebugShell);
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////

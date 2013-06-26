@@ -226,7 +226,11 @@ Menu::Menu(const String& name, MenuManager* manager):
 Menu::~Menu()
 {
 	ofmsg("~Menu %1%", %myName);
-	myContainer->getContainer()->removeChild(myContainer);
+	Container* parent = myContainer->getContainer();
+	if(parent != NULL)
+	{
+		myContainer->getContainer()->removeChild(myContainer);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
