@@ -202,7 +202,7 @@ osg::Node* ModelLoader::processDefaultOptions(osg::Node* node, ModelAsset* asset
 		}
 
 		asset->nodes.push_back(node);
-		asset->description = asset->info->description;
+		//asset->description = asset->info->description;
 	}
 	return node;
 }
@@ -242,7 +242,6 @@ bool DefaultModelLoader::load(ModelAsset* asset)
 			{
 				node = processDefaultOptions(node, asset);
 				asset->nodes.push_back(node);
-				asset->description = asset->info->description;
 			}
 			else
 			{

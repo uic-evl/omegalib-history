@@ -293,7 +293,7 @@ BOOST_PYTHON_MODULE(cyclops)
 	// ModelInfo
 	class_<ModelInfo, boost::noncopyable, Ref<ModelInfo> >("ModelInfo")
 		.def_readwrite("name", &ModelInfo::name)
-		.def_readwrite("description", &ModelInfo::description)
+		.def_readwrite("options", &ModelInfo::options)
 		.def_readwrite("generateNormals", &ModelInfo::generateNormals)
 		.def_readwrite("generateTangents", &ModelInfo::generateNormals)
 		.def_readwrite("numFiles", &ModelInfo::numFiles)
