@@ -44,7 +44,8 @@ bool BinaryPointsLoader::load(ModelAsset* model)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool BinaryPointsLoader::loadFile(const String& filename, const String& options, osg::Group * grp)
+bool BinaryPointsLoader::loadFile(
+	const String& filename, const String& options, osg::Group * grp)
 {
 	if(!grp)
 	{
@@ -85,56 +86,85 @@ bool BinaryPointsLoader::loadFile(const String& filename, const String& options,
 
 ///////////////////////////////////////////////////////////////////////////////
 void BinaryPointsLoader::readXYZ(
-	const String& filename, const String& options, osg::Vec3Array* points, osg::Vec4Array* colors)
+	const String& filename, const String& options, 
+	osg::Vec3Array* points, osg::Vec4Array* colors)
 {
 	osg::Vec3f point;
 	osg::Vec4f color(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// Default record size = 6 doubles (X,Y,Z,R,G,B)
-	size_t recordSize = sizeof(double) * 6;
+	// Default record size = 7 doubles (X,Y,Z,R,G,B,A)
+	size_t recordSize = sizeof(double) * 7;
 
 	// Check the options to see if we should read a subsection of the file
 	// and / or use decimation.
 	int readStart = 0;
 	int readLength = 0;
+	int decimation = 0;
 
-	libconfig::ArgumentHelper ah;
-
-
-	// create a stream to read in file
-	ifstream ifs( filename.c_str() );
-
-	string value, values;
-	stringstream ss;
-	stringstream ssdouble;
-
-	while( getline( ifs, values ) )
+	if(options != "")
 	{
-		ss << values;
-
-		int index = 0;
-		while(ss >> value)
+		// Only format supported is XYZRGBA
+		if(StringUtils::startsWith(options, "xyzrgba"))
 		{
-     			ssdouble << value;
-
-     			if( index < 3 )
-			{
-     				ssdouble >> point[index];
-			}
-     			else
-			{
-				ssdouble >> color[index - 3];
-				//color[index - 3]/=255.0;
-			}
-
-     			ssdouble.clear();
-     			index++;
+			recordSize = sizeof(double) * 7;
+		}
+		else
+		{
+			ofwarn("BinaryPointsLoader::readXYZ: invalid file format specified in options. \n   "
+				"Options string should start with xyzrgba (is %1%)", %options);
+			return;
 		}
 
-		points->push_back(point);
-		colors->push_back(color);
-
-		ss.clear();
+		libconfig::ArgumentHelper ah;
+		ah.newNamedInt('s', "start", "start", "start record", readStart);
+		ah.newNamedInt('l', "length", "length", "number of records to read", readLength);
+		ah.newNamedInt('d', "decimation", "decimation", "read decimation", decimation);
+		ah.process(options.c_str());
 	}
-	ifs.close();
+
+	FILE* fin = fopen(filename.c_str(), "rb");
+
+	// How many records are in the file?
+	fseek(fin, 0, SEEK_END);
+	long endpos = ftell(fin);
+	fseek(fin, 0, SEEK_SET);
+	int numRecords = endpos / recordSize;
+
+	if(readStart != 0)
+	{
+		fseek(fin, readStart * recordSize, SEEK_SET);
+	}
+	// Adjust read length.
+	if(readLength == 0 || readStart + readLength > numRecords)
+	{
+		readLength = numRecords - readStart;
+	}
+
+	// Read in data
+	double* buffer = (double*)malloc(recordSize * readLength);
+	if(buffer == NULL)
+	{
+		oferror("BinaryPointsLoader::readXYZ: could not allocate %1% bytes", 
+			%(recordSize * readLength));
+		return;
+	}
+
+	fread(buffer, recordSize, readLength, fin);
+
+	if(decimation <= 0) decimation = 1;
+	for(int i = 0; i < readLength; i += decimation)
+	{
+		points->push_back(osg::Vec3f(
+			buffer[i * recordSize],
+			buffer[i * recordSize + 1],
+			buffer[i * recordSize + 2]));
+		colors->push_back(osg::Vec4f(
+			buffer[i * recordSize + 3],
+			buffer[i * recordSize + 4],
+			buffer[i * recordSize + 5],
+			buffer[i * recordSize + 6]));
+	}
+	
+	fclose(fin);
+	free(buffer);
 }
