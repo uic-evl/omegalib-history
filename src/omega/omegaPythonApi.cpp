@@ -353,6 +353,18 @@ const String getStringSetting(const String& section, const String& name, String 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+const Event::Flags getButtonSetting(
+	const String& section, const String& name, Event::Flags defaultValue)
+{
+	if(SystemManager::settingExists(section))
+	{
+		const Setting& s = SystemManager::settingLookup(section);
+		return Event::parseButtonName(Config::getStringValue(name, s, ""));
+	}
+	return defaultValue;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void queueCommand(const String& command)
 {
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
@@ -1242,6 +1254,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("printObjCounts", &printObjCounts);
 	def("getBoolSetting", &getBoolSetting);
 	def("getStringSetting", &getStringSetting);
+	def("getButtonSetting", &getButtonSetting);
 	def("toggleStats", &toggleStats);
 	def("overridePanopticStereo", overridePanopticStereo);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);
