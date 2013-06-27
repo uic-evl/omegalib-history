@@ -48,7 +48,7 @@ namespace omega {
 	class OMEGA_API EngineModule: public SharedObject
 	{
 	public:
-		enum Priority { PriorityLow = 0, PriorityNormal = 1, PriorityHigh = 2 };
+		enum Priority { PriorityLowest = 0, PriorityLow = 1, PriorityNormal = 2, PriorityHigh = 3, PriorityHighest = 4 };
 
 	public:
 		EngineModule(const String& name): 

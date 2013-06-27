@@ -814,6 +814,12 @@ void printModules()
 {
 	Vector<EngineModule*> mods = ModuleServices::getModules();
 	
+	omsg("Highest   Priority:");
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityHighest) 
+			ofmsg("    %1%", %m->getName());
+	}
 	omsg("High   Priority:");
 	foreach(EngineModule* m, mods) 
 	{
@@ -830,6 +836,12 @@ void printModules()
 	foreach(EngineModule* m, mods) 
 	{
 		if(m->getPriority() == EngineModule::PriorityLow) 
+			ofmsg("    %1%", %m->getName());
+	}
+	omsg("Lowest    Priority:");
+	foreach(EngineModule* m, mods) 
+	{
+		if(m->getPriority() == EngineModule::PriorityLowest) 
 			ofmsg("    %1%", %m->getName());
 	}
 }

@@ -126,7 +126,7 @@ void ModuleServices::update(Engine* srv, const UpdateContext& context)
 ///////////////////////////////////////////////////////////////////////////////
 void ModuleServices::handleEvent(const Event& evt)
 {
-	for(int i = EngineModule::PriorityHigh; i >= EngineModule::PriorityLow; i--)
+	for(int i = EngineModule::PriorityHighest; i >= EngineModule::PriorityLowest; i--)
 	{
 		foreach(EngineModule* module, mysModules)
 		{
@@ -145,7 +145,7 @@ void ModuleServices::handleEvent(const Event& evt)
 ///////////////////////////////////////////////////////////////////////////////
 bool ModuleServices::handleCommand(const String& cmd)
 {
-	for(int i = EngineModule::PriorityHigh; i >= EngineModule::PriorityLow; i--)
+	for(int i = EngineModule::PriorityHighest; i >= EngineModule::PriorityLowest; i--)
 	{
 		foreach(EngineModule* module, mysModules)
 		{
