@@ -81,8 +81,11 @@ void Material::setColor(const Color& diffuse, const Color& emissive)
 	if(myMaterial == NULL)
 	{
 		myMaterial = new osg::Material();
+		// Note the use of OVERRIDE here: we want to ignore all material 
+		// definitions possibly specified in a 3D object and use this one 
+		// instead. 
 		myStateSet->setAttributeAndModes(myMaterial, 
-			osg::StateAttribute::ON);
+			osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 	}
 	myMaterial->setDiffuse(osg::Material::FRONT_AND_BACK, COLOR_TO_OSG(diffuse));
 	myMaterial->setEmission(osg::Material::FRONT_AND_BACK, COLOR_TO_OSG(emissive));
@@ -195,6 +198,14 @@ void Material::setDoubleFace(bool value)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void Material::setLit(bool value)
+{
+	myLit = value;
+	myStateSet->setMode(GL_LIGHTING, 
+		(myLit ? osg::StateAttribute::ON : osg::StateAttribute::OFF) | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void Material::setWireframe(bool value)
 {
 	myWireframe = value;
@@ -252,6 +263,7 @@ void Material::reset()
 	setDepthTestEnabled(true);
 	setAdditive(false);
 	setDoubleFace(false);
+	setLit(true);
 
 	myStateSet->setNestRenderBins(false);
 }

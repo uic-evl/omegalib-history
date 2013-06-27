@@ -1,32 +1,38 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials 
+ * provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * What's in this file:
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE  GOODS OR  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
  *	The code for the system manager: the kernel of the omegalib runtime.
- *************************************************************************************************/
+ *****************************************************************************/
 #include "omega/SystemManager.h"
 
 // Display system
@@ -52,12 +58,12 @@
 
 using namespace omega;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SystemManager* SystemManager::mysInstance = NULL;
 
 Setting sNullSetting(NULL);
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool SystemManager::settingExists(const String& name)
 {
 	if(mysInstance != NULL)
@@ -72,7 +78,7 @@ bool SystemManager::settingExists(const String& name)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Setting& SystemManager::settingLookup(const String& name)
 {
 	if(mysInstance != NULL)
@@ -87,14 +93,14 @@ Setting& SystemManager::settingLookup(const String& name)
 	return sNullSetting;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SystemManager* SystemManager::instance()
 {
 	if(!mysInstance) mysInstance = new SystemManager();
 	return mysInstance;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SystemManager::SystemManager():
 	mySystemConfig(NULL),
 	myDisplaySystem(NULL),
@@ -109,7 +115,7 @@ SystemManager::SystemManager():
 	myInterpreter = new PythonInterpreter();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 SystemManager::~SystemManager()
 {
 	myAppConfig = NULL;
@@ -123,7 +129,7 @@ SystemManager::~SystemManager()
 	myInterpreter = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::setupRemote(Config* cfg, const String& hostname)
 {
 	myIsMaster = false;
@@ -131,7 +137,7 @@ void SystemManager::setupRemote(Config* cfg, const String& hostname)
 	setup(cfg);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::setup(Config* appcfg)
 {
 	omsg("SystemManager::setup");
@@ -162,6 +168,16 @@ void SystemManager::setup(Config* appcfg)
 				const Setting& sConfig = mySystemConfig->lookup("config");
 				myInterpreter->setup(sConfig);
 			}
+			// If we have an application configuration file, read interpreter 
+			// setup values from there as well. Setting
+			if(myAppConfig != mySystemConfig)
+			{
+				if(myAppConfig->exists("config"))
+				{
+					const Setting& sConfig = myAppConfig->lookup("config");
+					myInterpreter->setup(sConfig);
+				}
+			}
 		}
 	}
 	catch(libconfig::SettingTypeException ste)
@@ -170,7 +186,7 @@ void SystemManager::setup(Config* appcfg)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::setupConfig(Config* appcfg)
 {
 	if(!appcfg->isLoaded()) appcfg->load();
@@ -206,7 +222,7 @@ void SystemManager::setupConfig(Config* appcfg)
 	oassert(mySystemConfig->isLoaded());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::adjustNetServicePort(Setting& stnetsvc)
 {
 	for(int i = 0; i < stnetsvc.getLength(); i++)
@@ -223,7 +239,7 @@ void SystemManager::adjustNetServicePort(Setting& stnetsvc)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::setupServiceManager()
 {
 	myServiceManager = new ServiceManager();
@@ -263,7 +279,7 @@ void SystemManager::setupServiceManager()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::setupDisplaySystem()
 {
 	// Instantiate input services
@@ -316,7 +332,7 @@ void SystemManager::setupDisplaySystem()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::initialize()
 {
 	if(myDisplaySystem) myDisplaySystem->initialize(this);
@@ -328,7 +344,7 @@ void SystemManager::initialize()
 	myIsInitialized = true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::run()
 {
 	// If the system manager has not been initialized yet, do it now.
@@ -345,21 +361,26 @@ void SystemManager::run()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::cleanup()
 {
+	// Shutdown and dispose all services
 	if(myServiceManager != NULL)
 	{
 		myServiceManager->stop();
 		myServiceManager->dispose();
 	}
 
+	// Cleanup the interpreter state. All interpreter objects will be 
+	// deallocated. The engine state will be reset. We need to do this before
+	// Shutting down the display system to avoid deallocation conflicts.
 	if(myInterpreter != NULL) 
 	{
-		delete myInterpreter;
-		myInterpreter = NULL;
+		myInterpreter->clean();
 	}
-	
+
+	// Shutdown the display system. This will also shutdown and dispose the
+	// omegalib engine.
 	if(myDisplaySystem) 
 	{
 		myDisplaySystem->cleanup();
@@ -367,18 +388,27 @@ void SystemManager::cleanup()
 		myDisplaySystem = NULL;
 	}
 
+	// Dispose the interpreter. Everything should have been cleaned up at this 
+	// point. So this just finalizes and releases the python interpreter.
+	if(myInterpreter != NULL) 
+	{
+		delete myInterpreter;
+		myInterpreter = NULL;
+	}
+
+	// Dispose myself.
 	delete mysInstance;
 	mysInstance = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::postExitRequest(const String& reason)
 {
 	myExitRequested = true;
 	myExitReason = reason;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::loadAppConfig(const String& filename)
 {
 	String cfgPath;
@@ -391,14 +421,14 @@ void SystemManager::loadAppConfig(const String& filename)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 String SystemManager::getHostname() 
 { 
 	Vector<String> args = StringUtils::split(myHostname, ":");
 	return args[0];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const String& SystemManager::getHostnameAndPort() 
 { 
 	return myHostname;

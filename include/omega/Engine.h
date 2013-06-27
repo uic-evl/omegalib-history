@@ -1,32 +1,39 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * The omegalib Engine is the core runtime component of omegalib. It runs on each node of a cluster 
- * system and handles the abstract scene graph, cameras, distribution of events and frame updates. 
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ * The omegalib Engine is the core runtime component of omegalib. It runs on 
+ * each node of a cluster system and handles the abstract scene graph, cameras, 
+ * distribution of events and frame updates. 
+ ******************************************************************************/
 #ifndef __ENGINE_SERVER_H__
 #define __ENGINE_SERVER_H__
 
@@ -44,7 +51,7 @@
 namespace omega {
 	typedef List< Ref<Renderer> > RendererList;
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	template<typename T> class RendererObject
 	{
 	public:
@@ -62,7 +69,7 @@ namespace omega {
 		Dictionary<Renderer*, T> myObjs;
 	};
 		
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	class OMEGA_API Engine: public ReferenceType, public IEventListener
 	{
 	public:
@@ -80,9 +87,15 @@ namespace omega {
 
 		ServiceManager* getServiceManager();
 
-		SystemManager*  getSystemManager()  { return SystemManager::instance(); }
-		ApplicationBase* getApplication() { return myApplication; }
-		DisplaySystem*  getDisplaySystem() { return SystemManager::instance()->getDisplaySystem(); }
+		SystemManager*  getSystemManager()  
+		{ return SystemManager::instance(); }
+		
+		ApplicationBase* getApplication() 
+		{ return myApplication; }
+		
+		DisplaySystem*  getDisplaySystem() 
+		{ return SystemManager::instance()->getDisplaySystem(); }
+		
 		int getCanvasWidth(); 
 		int getCanvasHeight();
 
@@ -152,7 +165,8 @@ namespace omega {
 
 		virtual void initialize();
 		virtual void dispose();
-		//! Resets the omegalib engine to its initial state. Useful for runtime application switching.
+		//! Resets the omegalib engine to its initial state. Useful for runtime
+		//! application switching.
 		void reset();
 
 		virtual void handleEvent(const Event& evt);
@@ -214,43 +228,43 @@ namespace omega {
 		Event::Flags myPrimaryButton;
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline Camera* Engine::getDefaultCamera()
 	{ return myDefaultCamera.get(); }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline ServiceManager* Engine::getServiceManager()
 	{ return SystemManager::instance()->getServiceManager(); }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline RendererList& Engine::getRendererList()
 	{ return myClients; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline void Engine::setDefaultFont(const FontInfo& font)
 	{ myDefaultFont = font;	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline const FontInfo& Engine::getDefaultFont()
 	{ return myDefaultFont; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline Console* Engine::getConsole()
 	{ return myConsole.get();	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline bool Engine::isConsoleEnabled()
 	{ return myConsoleEnabled; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline void Engine::setConsoleEnabled(bool value)
 	{ myConsoleEnabled = value; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline SoundManager* Engine::getSoundManager()
 	{ return soundManager;	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline SoundEnvironment* Engine::getSoundEnvironment()
 	{ return soundEnv;	}
 }; // namespace omega

@@ -60,7 +60,7 @@ namespace cyclops {
 
 		String name;
 		String path;
-		String description;
+		String options;
 		uint numFiles;
 		float size;
 		bool generateNormals;
@@ -77,13 +77,11 @@ namespace cyclops {
 	class ModelAsset: public ReferenceType
 	{
 	public:
-		ModelAsset(): id(0), numNodes(0) {}
-		String description;
+		ModelAsset(): numNodes(0) {}
 		String name;
 		Vector< Ref<osg::Node> > nodes;
 		//! Number of nodes in this model (used for multimodel assets)
 		int numNodes;
-		int id;
 
 		Ref<ModelInfo> info;
 	};

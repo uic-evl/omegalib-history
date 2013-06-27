@@ -139,7 +139,7 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 				else if(sm == "interleaved") tc->stereoMode = DisplayTileConfig::LineInterleaved;
 				else if(sm == "sidebyside") tc->stereoMode = DisplayTileConfig::SideBySide;
 				
-				tc->invertStereo = Config::getBoolValue("invertStereo", scfg);
+				tc->invertStereo = Config::getBoolValue("invertStereo", sTile);
 				tc->enabled = Config::getBoolValue("enabled", sTile);
 				
 				//tc.index = index;

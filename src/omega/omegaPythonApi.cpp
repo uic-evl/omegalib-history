@@ -342,6 +342,17 @@ const bool getBoolSetting(const String& section, const String& name, bool defaul
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+const String getStringSetting(const String& section, const String& name, String defaultValue)
+{
+	if(SystemManager::settingExists(section))
+	{
+		const Setting& s = SystemManager::settingLookup(section);
+		return Config::getStringValue(name, s, defaultValue);
+	}
+	return defaultValue;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void queueCommand(const String& command)
 {
 	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
@@ -1004,7 +1015,11 @@ BOOST_PYTHON_MODULE(omega)
 
 	// Node
 	void (Node::*setPosition1)(const Vector3f&) = &Node::setPosition;
+	void (Node::*setPosition2)(float x, float y, float z) = &Node::setPosition;
+
 	void (Node::*setScale1)(const Vector3f&) = &Node::setScale;
+	void (Node::*setScale2)(float x, float y, float z) = &Node::setScale;
+
 	void (Node::*setOrientation1)(const Quaternion&) = &Node::setOrientation;
 	Node* (Node::*getChildByIndex)(unsigned short) const = &Node::getChild;
 	Node* (Node::*getChildByName)(const String&) const = &Node::getChild;
@@ -1016,8 +1031,10 @@ BOOST_PYTHON_MODULE(omega)
 	class_<Node, Ref<Node>, boost::noncopyable >("Node", no_init)
 		.def("getPosition", &Node::getPosition, PYAPI_RETURN_VALUE)
 		.def("setPosition", setPosition1)
+		.def("setPosition", setPosition2)
 		.def("getScale", &Node::getScale, PYAPI_RETURN_VALUE)
 		.def("setScale", setScale1)
+		.def("setScale", setScale2)
 		.def("setOrientation", setOrientation1)
 		.def("getOrientation", &Node::getOrientation, PYAPI_RETURN_VALUE)
 		.def("yaw", &Node::yaw, NodeYawOverloads())
@@ -1067,7 +1084,9 @@ BOOST_PYTHON_MODULE(omega)
 	// CameraController
 	PYAPI_REF_BASE_CLASS(CameraController)
 		PYAPI_METHOD(CameraController, getSpeed)
-		PYAPI_METHOD(CameraController, setSpeed);
+		PYAPI_METHOD(CameraController, setSpeed)
+		PYAPI_METHOD(CameraController, reset)
+	;
 
 	// Camera
 	PYAPI_REF_CLASS(Camera, Node)
@@ -1210,6 +1229,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("printChildren", &printChildren);
 	def("printObjCounts", &printObjCounts);
 	def("getBoolSetting", &getBoolSetting);
+	def("getStringSetting", &getStringSetting);
 	def("toggleStats", &toggleStats);
 	def("overridePanopticStereo", overridePanopticStereo);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);

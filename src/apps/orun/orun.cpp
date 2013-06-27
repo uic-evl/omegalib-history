@@ -131,7 +131,7 @@ void OmegaViewer::initialize()
 
 	//
 	String orunInitScriptName = "default_init.py";
-	myAppStartFunctionCall = "from omegaToolkit import *; _onAppStart()";
+	myAppStartFunctionCall = "from euclid import *; from omegaToolkit import *; _onAppStart()";
 
 	Config* cfg = SystemManager::instance()->getAppConfig();
     if(cfg->exists("config/orun"))

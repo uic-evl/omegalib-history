@@ -106,12 +106,14 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::lockInterpreter()
 {
+	if(myDebugShell) omsg("PythonInterpreter::lockInterpreter()");
 	myLock.lock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::unlockInterpreter()
 {
+	if(myDebugShell) omsg("PythonInterpreter::unlockInterpreter()");
 	myLock.unlock();
 }
 
@@ -125,6 +127,7 @@ bool PythonInterpreter::isEnabled()
 PythonInterpreter::PythonInterpreter()
 {
 	myShellEnabled = false;
+	myDebugShell = false;
 	myInteractiveThread = new PythonInteractiveThread();
 }
 
@@ -166,8 +169,9 @@ void PythonInterpreter::addPythonPath(const char* dir)
 ///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::setup(const Setting& setting)
 {
-	myShellEnabled = Config::getBoolValue("pythonShellEnabled", setting, false);
-	myDebugShell = Config::getBoolValue("pythonShellDebug", setting, false);
+	myShellEnabled = Config::getBoolValue("pythonShellEnabled", setting, myShellEnabled);
+	myDebugShell = Config::getBoolValue("pythonShellDebug", setting, myDebugShell);
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -221,7 +225,9 @@ void PythonInterpreter::initialize(const char* programName)
 	Py_DECREF(wrapperErr);
 
 	addPythonPath("./");
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 	addPythonPath(OMEGA_DATA_PATH);
+#endif
 
 #ifdef OMEGA_APPROOT_DIRECTORY
 	addPythonPath(OMEGA_APPROOT_DIRECTORY);
@@ -250,7 +256,10 @@ void PythonInterpreter::addModule(const char* name, PyMethodDef* methods)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void PythonInterpreter::addModule(const char* name, PyMethodDef* methods, const Dictionary<String, int> intConstants, const Dictionary<String, String> stringConstants)
+void PythonInterpreter::addModule(
+	const char* name, PyMethodDef* methods, 
+	const Dictionary<String, int> intConstants, 
+	const Dictionary<String, String> stringConstants)
 {
 	PyObject* module = Py_InitModule(name, methods);
 
@@ -297,8 +306,9 @@ void PythonInterpreter::eval(const String& cscript, const char* format, ...)
 	if(format == NULL)
 	{
 		bool handled = false;
-		// Handle special 'shortcut' commands. Commands starting with a ':' won't be interpreted
-		// using the python interpreter. Instead, we will dispatch them to EngineModule::handleCommand 
+		// Handle special 'shortcut' commands. Commands starting with a ':' 
+		// won't be interpreted using the python interpreter. Instead, we will 
+		// dispatch them to EngineModule::handleCommand 
 		// methods.
 		if(script.length() > 0 && script[0] == ':')
 		{
@@ -306,9 +316,10 @@ void PythonInterpreter::eval(const String& cscript, const char* format, ...)
 			String sscript = script.substr(1, script.length() - 1);
 			handled = ModuleServices::handleCommand(sscript);
 
-			// NOTE: the python interpreter is not an engine module, so it does not have 
-			// a handleCommand function per se... we still implement some quick commands here.
-			// if command is a ':post' we still execute it.
+			// NOTE: the python interpreter is not an engine module, so it does 
+			// not have a handleCommand function per se... we still implement 
+			// some quick commands here. if command is a ':post' we still 
+			// execute it.
 			if(StringUtils::startsWith(sscript, "post"))
 			{
 				String cmd = sscript.substr(5);
@@ -320,6 +331,7 @@ void PythonInterpreter::eval(const String& cscript, const char* format, ...)
 		}
 		else		
 		{
+			if(myDebugShell) ofmsg("PythonInterpreter::eval() >>>> %1%", %str);
 			lockInterpreter();
 			PyRun_SimpleString(str);
 			unlockInterpreter();
@@ -368,7 +380,9 @@ void PythonInterpreter::runFile(const String& filename, uint flags)
 	ofmsg("PythonInterpreter::runFile: running %1%", %filename);
 	// Substitute the OMEGA_DATA_ROOT and OMEGA_APP_ROOT macros in the path.
 	String path = filename;
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 	path = StringUtils::replaceAll(path, "OMEGA_DATA_ROOT", OMEGA_DATA_PATH);
+#endif
 #ifdef OMEGA_APPROOT_DIRECTORY
 	path = StringUtils::replaceAll(path, "OMEGA_APP_ROOT", OMEGA_APPROOT_DIRECTORY);
 #endif
@@ -396,14 +410,21 @@ void PythonInterpreter::runFile(const String& filename, uint flags)
 			DataManager* dm = SystemManager::instance()->getDataManager();
 			dm->setCurrentPath(scriptPath);
 
-			// change the current working directory to be the script root, so we can load files using the open command.
-			eval("import os; os.chdir('" + scriptPath + "')");
+			// change the current working directory to be the script root, so 
+			// we can load files using the open command.
+			// NOTE: we use a straight PyRun_SimpleString instead of calling
+			// the eval method because we may be inside an eval call already
+			// (for instance, evaluating an orun command).
+			// Since the interpreter locks in eval, we would get into a 
+			// deadlock.
+			String cdcmd = "import os; os.chdir('" + scriptPath + "')";
+			PyRun_SimpleString(cdcmd.c_str());
 		}
 	
 		if(flags & AddScriptPathToModuleSearchPath)
 		{
-			// Add the path to the module lookup path for the interpreter, so we can open modules 
-			// in the same directory.
+			// Add the path to the module lookup path for the interpreter, so 
+			// we can open modules in the same directory.
 			addPythonPath(scriptPath.c_str());
 		}
 
@@ -423,8 +444,9 @@ void PythonInterpreter::clean()
 	// destroy all global variables
 	if(myDebugShell)
 	{
-		// Use this line instead of the previous to get debugging info on variable deletion. Useful in 
-		// case of crashes to know which variable is currently being deleted.
+		// Use this line instead of the previous to get debugging info on 
+		// variable deletion. Useful in  case of crashes to know which variable
+		// is currently being deleted.
 		eval("for uniquevar in [var for var in globals().copy() if var[0] != \"_\" and var != 'clearall']: print(\"deleting \" + uniquevar); del globals()[uniquevar]");
 	}
 	else
@@ -448,9 +470,12 @@ void PythonInterpreter::clean()
 void PythonInterpreter::cleanRun(const String& filename)
 {
 	clean();
-	// NOTE: Instead of running the script immediately through PythonInterpreter::runFile, we queue a local orun command.
-	// We do this to give the system a chance to finish reset, if this script is loading through a :r! command.
-	// Also note how we explicitly import module omega, since all global symbols have been unloaded by the previously mentioned reset command.
+	// NOTE: Instead of running the script immediately through 
+	// PythonInterpreter::runFile, we queue a local orun command. We do this to 
+	// give the system a chance to finish reset, if this script is loading 
+	// through a :r! command. Also note how we explicitly import module omega, 
+	// since all global symbols have been unloaded by the previously mentioned 
+	// reset command.
 	queueCommand(ostr("from omega import *; orun(\"%1%\")", %filename), true);
 }
 
@@ -589,8 +614,9 @@ void PythonInterpreter::handleEvent(const Event& evt)
 		PyObject_CallObject(pyCallback, NULL);
 	}
 
-	// We can't guarantee the event will live outside of this call tree, so clean up the static
-	// variable. getEvent() will return None when called outside the event callback.
+	// We can't guarantee the event will live outside of this call tree, so 
+	// clean up the static variable. getEvent() will return None when called 
+	// outside the event callback.
 	mysLastEvent = NULL;
 }
 
@@ -626,7 +652,7 @@ void PythonInterpreter::draw(const DrawContext& context, Camera* cam)
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //String PythonInterpreter::getHelpString(const String& filter)
 //{
 //	String result = "";

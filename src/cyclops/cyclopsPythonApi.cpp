@@ -166,6 +166,8 @@ BOOST_PYTHON_MODULE(cyclops)
 		PYAPI_METHOD(Material, setShininess)
 		PYAPI_METHOD(Material, getGloss)
 		PYAPI_METHOD(Material, setGloss)
+		PYAPI_METHOD(Material, isLit)
+		PYAPI_METHOD(Material, setLit)
 		PYAPI_METHOD(Material, setAlpha)
 		PYAPI_METHOD(Material, getAlpha);
 
@@ -291,7 +293,7 @@ BOOST_PYTHON_MODULE(cyclops)
 	// ModelInfo
 	class_<ModelInfo, boost::noncopyable, Ref<ModelInfo> >("ModelInfo")
 		.def_readwrite("name", &ModelInfo::name)
-		.def_readwrite("description", &ModelInfo::description)
+		.def_readwrite("options", &ModelInfo::options)
 		.def_readwrite("generateNormals", &ModelInfo::generateNormals)
 		.def_readwrite("generateTangents", &ModelInfo::generateNormals)
 		.def_readwrite("numFiles", &ModelInfo::numFiles)

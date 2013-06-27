@@ -30,7 +30,7 @@ if(OMEGA_BINARY_DIR)
 	set(OMICRON_DEFAULT_BINARY_DIR ${OMEGA_BINARY_DIR}/omicron/omicron)
 	#set(OMICRON_BIN_DIR ${OMEGA_BINARY_DIR}/bin)
 	#set(OMICRON_LIB_DIR ${OMEGA_BINARY_DIR}/lib)
-	include(${OMEGA_SOURCE_DIR}/external/omicron/CMakeModules/FindOmicron.cmake)
+	include(${OMEGA_SOURCE_DIR}/omicron/CMakeModules/FindOmicron.cmake)
 
 	# the following are the include directories needed to build a 3rd party omegalib application.
 	# in the future, just ${OMEGA_ROOT_DIR}/include will be needed, but for now, multiple paths 
@@ -109,6 +109,12 @@ if(OMEGA_BINARY_DIR)
 
 	#set(OMEGA_LIB debug ${OMEGA_LIB_DEBUG} debug ${OPENGL_LIBRARY} debug ${GLEW_LIB_DEBUG} debug ${LIBCONFIG_LIB_DEBUG} optimized ${OMEGA_LIB_RELEASE} optimized ${GLEW_LIB_RELEASE} optimized ${OPENGL_LIBRARY} optimized ${LIBCONFIG_LIB_RELEASE})
 	set(OMEGA_LIB debug ${OMICRON_LIB_DEBUG} optimized ${OMICRON_LIB_RELEASE} debug ${OMEGA_LIB_DEBUG} debug ${OPENGL_LIBRARY} optimized ${OMEGA_LIB_RELEASE} optimized ${OPENGL_LIBRARY})
+	
+	# add pthreads dependency for linux build
+	if(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
+		set(OMEGA_LIB ${OMEGA_LIB} pthread)
+	endif()
+	
 	set(OMEGA_TOOLKIT_LIB debug ${OTK_LIB_DEBUG} optimized ${OTK_LIB_RELEASE})
 	set(OMEGA_OSG_LIB debug ${OOSG_LIB_DEBUG} optimized ${OOSG_LIB_RELEASE} ${OSG_LIBS})
 	set(OMEGA_VTK_LIB debug ${OVTK_LIB_DEBUG} optimized ${OVTK_LIB_RELEASE})
