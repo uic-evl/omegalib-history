@@ -36,7 +36,7 @@ CameraController::CameraController(const String& name):
 	//myOriginalOrientation( Quaternion::Identity() ), 
 	mySpeed(2.0f) 
 { 
-	setPriority(PriorityLow); 
+	setPriority(PriorityLowest); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
