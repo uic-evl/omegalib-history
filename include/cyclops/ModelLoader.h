@@ -77,12 +77,11 @@ namespace cyclops {
 	class ModelAsset: public ReferenceType
 	{
 	public:
-		ModelAsset(): id(0), numNodes(0) {}
+		ModelAsset(): numNodes(0) {}
 		String name;
 		Vector< Ref<osg::Node> > nodes;
 		//! Number of nodes in this model (used for multimodel assets)
 		int numNodes;
-		int id;
 
 		Ref<ModelInfo> info;
 	};
