@@ -161,16 +161,21 @@ void Engine::initialize()
 
 	// Load sound config from system config file
 	// On distributed systems, this is executed only on the master node
+	soundEnabled = false;
 	if(SystemManager::instance()->isMaster())
 	{
 		if(syscfg->exists("config/sound"))
 		{
+			soundEnabled = true;
 			Setting& s = syscfg->lookup("config/sound");
 
 			String soundServerIP = Config::getStringValue("soundServerIP", s, "localhost");
 			int soundServerPort = Config::getIntValue("soundServerPort", s, 57120);
 
 			float volumeScale = Config::getFloatValue("volumeScale", s, 0.5);
+
+			// Config in seconds, function below in milliseconds
+			soundServerCheckDelay = Config::getFloatValue("soundServerReconnectDelay", s, 5) * 1000;
 
 			soundManager = new SoundManager(soundServerIP,soundServerPort);
 			soundEnv = soundManager->getSoundEnvironment();
@@ -192,7 +197,7 @@ void Engine::initialize()
 				int timeSinceLastCheck = curTime-lastSoundServerCheck;
 
 				soundManager->startSoundServer();
-				if( timeSinceLastCheck > 5000 )
+				if( timeSinceLastCheck > soundServerCheckDelay )
 				{
 					omsg("Engine: Failed to start sound server. Sound disabled.");
 					serverReady = false;
@@ -202,20 +207,7 @@ void Engine::initialize()
 
 			if( serverReady )
 			{
-				omsg("Engine: Sound server reports ready.");
-
-				soundEnv->setVolumeScale( volumeScale );
-				soundEnv->setListenerPosition( getDefaultCamera()->getPosition() );
-				soundEnv->setListenerOrientation( getDefaultCamera()->getOrientation() );
-
-				soundEnv->setUserPosition( Vector3f(0.0,1.8f,0.0) );
-
-				bool assetCacheEnabled = Config::getBoolValue("assetCacheEnabled", s, true);
-				int assetCachePort = Config::getIntValue("assetCachePort", s, 22500);
-
-				soundManager->setAssetCacheEnabled(assetCacheEnabled);
-				soundManager->getAssetCacheManager()->addCacheHost(soundServerIP);
-				soundManager->getAssetCacheManager()->setCachePort(assetCachePort);
+				initializeSound();
 			}
 		}
 	}
@@ -412,7 +404,8 @@ void Engine::update(const UpdateContext& context)
 	// Run update on the scene graph.
 	myScene->update(context);
 
-	if( soundEnv != NULL )
+	// Process sound / reconnect to sound server (if sound is enabled in config and failed on init)
+	if( soundEnv != NULL && soundManager->isSoundServerRunning() )
 	{
 		// Processing messages from sound server
 		soundManager->poll();
@@ -423,6 +416,36 @@ void Engine::update(const UpdateContext& context)
 
 		// Update the user position with the head tracker's position
 		soundEnv->setUserPosition( getDefaultCamera()->getHeadOffset() );
+	}
+}
+
+void Engine::initializeSound()
+{
+	if( soundManager->isSoundServerRunning() )
+	{
+		Config* syscfg = getSystemManager()->getSystemConfig();
+		Setting& s = syscfg->lookup("config/sound");
+
+		String soundServerIP = Config::getStringValue("soundServerIP", s, "localhost");
+		int soundServerPort = Config::getIntValue("soundServerPort", s, 57120);
+
+		float volumeScale = Config::getFloatValue("volumeScale", s, 0.5);
+
+		omsg("Engine: Sound server reports ready.");
+
+		soundEnv->setVolumeScale( volumeScale );
+		soundEnv->setListenerPosition( getDefaultCamera()->getPosition() );
+		soundEnv->setListenerOrientation( getDefaultCamera()->getOrientation() );
+		
+		soundEnv->setUserPosition( Vector3f(0.0,1.8f,0.0) );
+		bool assetCacheEnabled = Config::getBoolValue("assetCacheEnabled", s, true);
+		int assetCachePort = Config::getIntValue("assetCachePort", s, 22500);
+
+		soundManager->setAssetCacheEnabled(assetCacheEnabled);
+		soundManager->getAssetCacheManager()->addCacheHost(soundServerIP);
+		soundManager->getAssetCacheManager()->setCachePort(assetCachePort);
+
+		soundReady = true;
 	}
 }
 

@@ -137,6 +137,7 @@ namespace omega {
 
 		//! Sound management
 		//@{
+		void initializeSound();
 		SoundManager* getSoundManager();
 		SoundEnvironment* getSoundEnvironment();
 		//@}
@@ -205,6 +206,9 @@ namespace omega {
 		Ref<SoundManager> soundManager;
 		Ref<SoundEnvironment> soundEnv;
 		int lastSoundServerCheck;
+		int soundServerCheckDelay;
+		bool soundEnabled;
+		bool soundReady;
 
 		// Input mapping
 		Event::Flags myPrimaryButton;
