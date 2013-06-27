@@ -1,4 +1,4 @@
-#include "PointsLoader.h"
+#include "TextPointsLoader.h"
 
 #include <osg/Geode>
 #include <osg/Point>
@@ -6,29 +6,29 @@
 using namespace omega;
 using namespace cyclops;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-PointsLoader::PointsLoader(): ModelLoader("points")
+///////////////////////////////////////////////////////////////////////////////
+TextPointsLoader::TextPointsLoader(): ModelLoader("points-text")
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-PointsLoader::~PointsLoader()
+///////////////////////////////////////////////////////////////////////////////
+TextPointsLoader::~TextPointsLoader()
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-bool PointsLoader::supportsExtension(const String& ext) 
+///////////////////////////////////////////////////////////////////////////////
+bool TextPointsLoader::supportsExtension(const String& ext) 
 { 
 	if(ext == "xyz") return true;
 	return false; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-bool PointsLoader::load(ModelAsset* model)
+///////////////////////////////////////////////////////////////////////////////
+bool TextPointsLoader::load(ModelAsset* model)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
-    bool result = loadFile(model->info->path, group);
+	bool result = loadFile(model->info->path, model->info->options, group);
 
     // if successful get last child and add to sceneobject
     if(result)
@@ -43,8 +43,8 @@ bool PointsLoader::load(ModelAsset* model)
     return result;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-bool PointsLoader::loadFile(std::string filename, osg::Group * grp)
+///////////////////////////////////////////////////////////////////////////////
+bool TextPointsLoader::loadFile(const String& filename, const String& options, osg::Group * grp)
 {
 	if(!grp)
 	{
@@ -57,7 +57,7 @@ bool PointsLoader::loadFile(std::string filename, osg::Group * grp)
 	String path;
 	if(DataManager::findFile(filename, path))
 	{ 
-		readXYZ(path, verticesP, verticesC);
+		readXYZ(path, options, verticesP, verticesC);
 
   		// create geometry and geodes to hold the data
   		osg::Geode* geode = new osg::Geode();
@@ -83,8 +83,9 @@ bool PointsLoader::loadFile(std::string filename, osg::Group * grp)
 	return false; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PointsLoader::readXYZ(const String& filename, osg::Vec3Array* points, osg::Vec4Array* colors)
+///////////////////////////////////////////////////////////////////////////////
+void TextPointsLoader::readXYZ(
+	const String& filename, const String& options, osg::Vec3Array* points, osg::Vec4Array* colors)
 {
 	osg::Vec3f point;
 	osg::Vec4f color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -126,5 +127,4 @@ void PointsLoader::readXYZ(const String& filename, osg::Vec3Array* points, osg::
 	}
 	ifs.close();
 }
-
 

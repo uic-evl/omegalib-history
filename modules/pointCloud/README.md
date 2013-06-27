@@ -1,12 +1,12 @@
 # pointCloud
 This module contains classes used to load and handle point cloud data.
 
-Right now the only exported class is a point cloud loader for cyclops
+Right now the only exported classes are point cloud loaders for cyclops
 
-## PointsLoader
-This class can be used to load models containing point cloud data in ASCII or binary xyz + RGB format.
+## TextPointsLoader and BinaryPointsLoader
+These classes can be used to load models containing point cloud data in ASCII or binary xyz + RGB format.
 
-To use `PointsLoader`:
+To use `TextPointsLoader`:
 ```python
 from omega import *
 from cyclops import *
@@ -14,7 +14,7 @@ from pointCloud import *
 
 # Register the points loader
 scene = getSceneManager()
-scene.addLoader(PointsLoader())
+scene.addLoader(TextPointsLoader())
 
 # Load a points cloud using the standard loading command
 pointCloudData = ModelInfo()
