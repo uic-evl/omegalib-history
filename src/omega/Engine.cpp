@@ -491,14 +491,16 @@ void Engine::initializeSound()
 		soundEnv->setVolumeScale( volumeScale );
 		soundEnv->setListenerPosition( getDefaultCamera()->getPosition() );
 		soundEnv->setListenerOrientation( getDefaultCamera()->getOrientation() );
-		
 		soundEnv->setUserPosition( Vector3f(0.0,1.8f,0.0) );
+
 		bool assetCacheEnabled = Config::getBoolValue("assetCacheEnabled", s, true);
 		int assetCachePort = Config::getIntValue("assetCachePort", s, 22500);
 
 		soundManager->setAssetCacheEnabled(assetCacheEnabled);
 		soundManager->getAssetCacheManager()->addCacheHost(soundServerIP);
 		soundManager->getAssetCacheManager()->setCachePort(assetCachePort);
+
+		soundManager->setServerVolume( Config::getIntValue("soundServerVolume", s, -16) );
 
 		soundReady = true;
 	}
