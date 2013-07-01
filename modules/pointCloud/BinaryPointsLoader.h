@@ -23,7 +23,11 @@ public:
     void initialize();
 
 private:
-    bool loadFile(const String& file, const String& options, osg::Group * grp);
-    void readXYZ(const String& filename, const String& options, osg::Vec3Array* points, osg::Vec4Array* colors);
+    bool loadFile(cyclops::ModelAsset* model, osg::Group * grp);
+    void readXYZ(const String& filename, 
+		const String& options, osg::Vec3Array* points, osg::Vec4Array* colors,
+		int* numPoints,
+		Vector4f* rgbamin,
+		Vector4f* rgbamax);
 };
 #endif

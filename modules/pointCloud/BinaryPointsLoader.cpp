@@ -3,6 +3,8 @@
 #include <osg/Geode>
 #include <osg/Point>
 
+#include <limits>
+
 using namespace omega;
 using namespace cyclops;
 
@@ -28,7 +30,7 @@ bool BinaryPointsLoader::load(ModelAsset* model)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
-	bool result = loadFile(model->info->path, model->info->options, group);
+	bool result = loadFile(model, group);
 
     // if successful get last child and add to sceneobject
     if(result)
@@ -44,8 +46,7 @@ bool BinaryPointsLoader::load(ModelAsset* model)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool BinaryPointsLoader::loadFile(
-	const String& filename, const String& options, osg::Group * grp)
+bool BinaryPointsLoader::loadFile(ModelAsset* model, osg::Group * grp)
 {
 	if(!grp)
 	{
@@ -56,9 +57,18 @@ bool BinaryPointsLoader::loadFile(
   	osg::Vec4Array* verticesC = new osg::Vec4Array();
 
 	String path;
-	if(DataManager::findFile(filename, path))
+	if(DataManager::findFile(model->info->path, path))
 	{ 
-		readXYZ(path, options, verticesP, verticesC);
+		int numPoints = 0;
+		float maxf = numeric_limits<float>::max();
+		float minf = -numeric_limits<float>::max();
+		Vector4f rgbamin = Vector4f(maxf, maxf, maxf, maxf);
+		Vector4f rgbamax = Vector4f(minf, minf, minf, minf);
+
+		readXYZ(path, model->info->options, verticesP, verticesC,
+			&numPoints,
+			&rgbamin,
+			&rgbamax);
 
   		// create geometry and geodes to hold the data
   		osg::Geode* geode = new osg::Geode();
@@ -79,6 +89,20 @@ bool BinaryPointsLoader::loadFile(
   		geode->dirtyBound();
  
 		grp->addChild(geode);
+
+		// Save loade results in the model info
+		model->info->loaderOutput = ostr("{ 'numPoints': %d, "
+			"'minR': %d, 'maxR': %d, "
+			"'minG': %d, 'maxG': %d, "
+			"'minB': %d, 'maxB': %d, "
+			"'minA': %d, 'maxA': %d }", 
+			%numPoints
+			%rgbamin[0] %rgbamax[0]
+			%rgbamin[1] %rgbamax[1]
+			%rgbamin[2] %rgbamax[2]
+			%rgbamin[3] %rgbamax[3]
+			);
+
 		return true;
 	}
 	return false; 
@@ -87,7 +111,10 @@ bool BinaryPointsLoader::loadFile(
 ///////////////////////////////////////////////////////////////////////////////
 void BinaryPointsLoader::readXYZ(
 	const String& filename, const String& options, 
-	osg::Vec3Array* points, osg::Vec4Array* colors)
+	osg::Vec3Array* points, osg::Vec4Array* colors,
+	int* numPoints,
+	Vector4f* rgbamin,
+	Vector4f* rgbamax)
 {
 	osg::Vec3f point;
 	osg::Vec4f color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -168,6 +195,14 @@ void BinaryPointsLoader::readXYZ(
 
 		points->push_back(point);
 		colors->push_back(color);
+
+		// Update data bounds and number of points
+		*numPoints = *numPoints + 1;
+		for(int j = 0; j < 4; j++)
+		{
+			if(color[j] < (*rgbamin)[j]) (*rgbamin)[j] = color[j];
+			if(color[j] > (*rgbamax)[j]) (*rgbamax)[j] = color[j];
+		}
 	}
 	
 	fclose(fin);
