@@ -1,36 +1,55 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials 
+ * provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE  GOODS OR  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	Classes to handle GLSL uniforms
+ *****************************************************************************/
 #include "cyclops/Uniforms.h"
 
 #include <osg/StateSet>
 
 using namespace cyclops;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+Uniform* Uniform::create(const String& name, Type type, uint elements)
+{
+	osg::Uniform* u = new osg::Uniform();
+	u->setName(name);
+	u->setType(Uniforms::toOsgUniformType(type));
+	u->setNumElements(elements);
+	return new Uniform(u, type, elements);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 Uniform::Uniform(osg::Uniform* uniform, Type type, uint elements):
 	myOsgUniform(uniform),
 	myType(type),
@@ -38,18 +57,18 @@ Uniform::Uniform(osg::Uniform* uniform, Type type, uint elements):
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Uniform::~Uniform()
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Uniform::setFloat(float value)
 {
 	myOsgUniform->set(value);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 float Uniform::getFloat()
 {
 	float value;
@@ -57,13 +76,13 @@ float Uniform::getFloat()
 	return value;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Uniform::setInt(int value)
 {
 	myOsgUniform->set(value);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int Uniform::getInt()
 {
 	int value;
@@ -71,14 +90,14 @@ int Uniform::getInt()
 	return value;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Uniform::setVector2f(const omega::Vector2f& value)
 { 
 	osg::Vec2 ov(value[0], value[1]);
 	myOsgUniform->set(ov);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 omega::Vector2f Uniform::getVector2f()
 {
 	osg::Vec2 value;
@@ -86,14 +105,14 @@ omega::Vector2f Uniform::getVector2f()
 	return omega::Vector2f(value[0], value[1]);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Uniform::setVector3f(const omega::Vector3f& value)
 {
 	osg::Vec3 ov(value[0], value[1], value[2]);
 	myOsgUniform->set(ov);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 omega::Vector3f Uniform::getVector3f()
 {
 	osg::Vec3 value;
@@ -101,14 +120,14 @@ omega::Vector3f Uniform::getVector3f()
 	return omega::Vector3f(value[0], value[1], value[2]);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Uniform::setColor(const omega::Color& value)
 {
 	osg::Vec4 ov(value[0], value[1], value[2], value[3]);
 	myOsgUniform->set(ov);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 omega::Color Uniform::getColor()
 {
 	osg::Vec4 value;
@@ -116,18 +135,28 @@ omega::Color Uniform::getColor()
 	return omega::Color(value[0], value[1], value[2], value.w());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Uniforms::Uniforms(osg::StateSet* stateset):
 	myStateSet(stateset)
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Uniforms::~Uniforms()
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void Uniforms::attachUniform(Uniform* uniform)
+{
+	if(uniform != NULL)
+	{
+		myStateSet->addUniform(uniform->getOsgUniform());
+		myUniformDictionary[uniform->getOsgUniform()->getName()] = uniform;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 Uniform* Uniforms::addUniform(const String& name, Uniform::Type type)
 {
 	if(myUniformDictionary.find(name) == myUniformDictionary.end())
@@ -139,7 +168,7 @@ Uniform* Uniforms::addUniform(const String& name, Uniform::Type type)
 	return myUniformDictionary[name];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Uniform* Uniforms::addUniformArray(const String& name, Uniform::Type type, uint elements)
 {
 	if(myUniformDictionary.find(name) == myUniformDictionary.end())
@@ -151,14 +180,14 @@ Uniform* Uniforms::addUniformArray(const String& name, Uniform::Type type, uint 
 	return myUniformDictionary[name];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Uniform* Uniforms::getUniform(const String& name)
 {
 	if(myUniformDictionary.find(name) == myUniformDictionary.end()) return NULL;
 	return myUniformDictionary[name];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Uniforms::removeAllUniforms()
 {
 	foreach(UniformDictionary::Item i, myUniformDictionary)
@@ -168,7 +197,7 @@ void Uniforms::removeAllUniforms()
 	myUniformDictionary.clear();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 osg::Uniform::Type Uniforms::toOsgUniformType(Uniform::Type type)
 {
 	switch(type)

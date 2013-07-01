@@ -93,31 +93,23 @@ void BinaryPointsLoader::readXYZ(
 	osg::Vec4f color(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Default record size = 7 doubles (X,Y,Z,R,G,B,A)
-	size_t recordSize = sizeof(double) * 7;
+	int numFields = 7;
+	size_t recordSize = sizeof(double) * numFields;
 
 	// Check the options to see if we should read a subsection of the file
 	// and / or use decimation.
-	int readStart = 0;
-	int readLength = 0;
+	int readStartP = 0;
+	int readLengthP = 0;
 	int decimation = 0;
 
 	if(options != "")
 	{
-		// Only format supported is XYZRGBA
-		if(StringUtils::startsWith(options, "xyzrgba"))
-		{
-			recordSize = sizeof(double) * 7;
-		}
-		else
-		{
-			ofwarn("BinaryPointsLoader::readXYZ: invalid file format specified in options. \n   "
-				"Options string should start with xyzrgba (is %1%)", %options);
-			return;
-		}
+		String format;
 
 		libconfig::ArgumentHelper ah;
-		ah.newNamedInt('s', "start", "start", "start record", readStart);
-		ah.newNamedInt('l', "length", "length", "number of records to read", readLength);
+		ah.newString("format", "only suported format is xyzrgba", format);
+		ah.newNamedInt('s', "start", "start", "start record %", readStartP);
+		ah.newNamedInt('l', "length", "length", "number of records to read %", readLengthP);
 		ah.newNamedInt('d', "decimation", "decimation", "read decimation", decimation);
 		ah.process(options.c_str());
 	}
@@ -129,11 +121,18 @@ void BinaryPointsLoader::readXYZ(
 	long endpos = ftell(fin);
 	fseek(fin, 0, SEEK_SET);
 	int numRecords = endpos / recordSize;
+	int readStart = numRecords * readStartP / 100;
+	int readLength = numRecords * readLengthP / 100;
 
+	ofmsg("BinaryPointsLoader: reading records %1% - %2% of %3% (decimation %4%) of %5%",
+		%readStart %(readStart + readLength) %numRecords %decimation %filename);
+
+	if(decimation <= 0) decimation = 1;
 	if(readStart != 0)
 	{
 		fseek(fin, readStart * recordSize, SEEK_SET);
 	}
+
 	// Adjust read length.
 	if(readLength == 0 || readStart + readLength > numRecords)
 	{
@@ -149,20 +148,26 @@ void BinaryPointsLoader::readXYZ(
 		return;
 	}
 
-	fread(buffer, recordSize, readLength, fin);
+	size_t size = fread(buffer, recordSize, readLength, fin);
 
-	if(decimation <= 0) decimation = 1;
+	int ne = readLength / decimation;
+	points->reserve(ne);
+	colors->reserve(ne);
+
+	int j = 0;
 	for(int i = 0; i < readLength; i += decimation)
 	{
-		points->push_back(osg::Vec3f(
-			buffer[i * recordSize],
-			buffer[i * recordSize + 1],
-			buffer[i * recordSize + 2]));
-		colors->push_back(osg::Vec4f(
-			buffer[i * recordSize + 3],
-			buffer[i * recordSize + 4],
-			buffer[i * recordSize + 5],
-			buffer[i * recordSize + 6]));
+		point[0] = buffer[i * numFields];
+		point[1] = buffer[i * numFields + 1];
+		point[2] = buffer[i * numFields + 2];
+
+		color[0] = buffer[i * numFields + 3];
+		color[1] = buffer[i * numFields + 4];
+		color[2] = buffer[i * numFields + 5];
+		color[3] = buffer[i * numFields + 6];
+
+		points->push_back(point);
+		colors->push_back(color);
 	}
 	
 	fclose(fin);

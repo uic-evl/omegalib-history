@@ -121,6 +121,7 @@ BOOST_PYTHON_MODULE(cyclops)
 
 	// Uniform
 	PYAPI_REF_BASE_CLASS(Uniform)
+		PYAPI_STATIC_REF_GETTER(Uniform, create)
 		PYAPI_GETTER(Uniform, getType)
 		PYAPI_METHOD(Uniform, setInt)
 		PYAPI_METHOD(Uniform, getInt)
@@ -135,6 +136,7 @@ BOOST_PYTHON_MODULE(cyclops)
 
 	// Uniforms
 	PYAPI_REF_BASE_CLASS(Uniforms)
+		PYAPI_REF_GETTER(Uniforms, attachUniform)
 		PYAPI_REF_GETTER(Uniforms, addUniform)
 		PYAPI_REF_GETTER(Uniforms, addUniformArray)
 		PYAPI_REF_GETTER(Uniforms, getUniform)
@@ -301,6 +303,7 @@ BOOST_PYTHON_MODULE(cyclops)
 		.def_readwrite("size", &ModelInfo::size)
 		.def_readwrite("optimize", &ModelInfo::optimize)
 		.def_readwrite("usePowerOfTwoTextures", &ModelInfo::usePowerOfTwoTextures)
+		.def_readwrite("loaderOutput", &ModelInfo::loaderOutput)
 		;
 
 	// ShadowSetings
