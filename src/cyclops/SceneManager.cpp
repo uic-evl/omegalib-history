@@ -303,21 +303,26 @@ void SceneManager::update(const UpdateContext& context)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void SceneManager::onParentChanged(SceneNode* source, SceneNode* newParent)
+void SceneManager::onAttachedToScene(SceneNode* source)
 {
 	// Called by entities when their parent node changes. Update the osg parent node
 	// accordingly.
 	Entity* e = dynamic_cast<Entity*>(source);
 	if(e != NULL)
 	{
-		if(newParent == NULL)
-		{
-			myScene->removeChild(e->getOsgNode());
-		}
-		else
-		{
-			myScene->addChild(e->getOsgNode());
-		}
+		myScene->addChild(e->getOsgNode());
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void SceneManager::onDetachedFromScene(SceneNode* source)
+{
+	// Called by entities when their parent node changes. Update the osg parent node
+	// accordingly.
+	Entity* e = dynamic_cast<Entity*>(source);
+	if(e != NULL)
+	{
+		myScene->removeChild(e->getOsgNode());
 	}
 }
 

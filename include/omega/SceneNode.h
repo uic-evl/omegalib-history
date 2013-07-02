@@ -56,17 +56,22 @@ namespace omega {
 		virtual void onVisibleChanged(SceneNode* source, bool value) {}
 		virtual void onSelectedChanged(SceneNode* source, bool value) {}
 		virtual void onParentChanged(SceneNode* source, SceneNode* newParent) {}
+		//! Called when this node becomes part of the scene tree.
+		virtual void onAttachedToScene(SceneNode* source) {}
+		//! Called when this node is removed from the scene tree either directly 
+		//! or due to a parent node beging removed.
+		virtual void onDetachedFromScene(SceneNode* source) {}
 	};
 
 	///////////////////////////////////////////////////////////////////////////
 	//! Represents a node in the omegalib scene graph.
 	//! @remarks
-	//!		SceneNode instances add some functionality over the Node base class. Namely:
+	//!		SceneNode instances add some functionality over the Node base class:
 	//!			- renderable objects can be attached to a scene node;
 	//!			- a scene node has a bounding box;
 	//!			- scene nodes have selection and visibility flags
-	//!			- it is possible to attach listeners to scene nodes, to handle visibility change,
-	//!				selection change and other events.
+	//!			- it is possible to attach listeners to scene nodes, to handle 
+	//!				visibility change, selection change and other events.
 	class OMEGA_API SceneNode: public Node
 	{
 	public:
@@ -123,6 +128,9 @@ namespace omega {
 		void setVisible(bool value);
 		void setSelected(bool value);
 		bool isSelected();
+		// Returns true if this node is attached to the scene (that is, if 
+		// there is a path from the scene root to this node)
+		bool isAttachedToScene();
 		//@}
 
 		// Bounding box handling
@@ -178,6 +186,8 @@ namespace omega {
 		virtual void updateTraversal(const UpdateContext& context);
         /// Only available internally - notification of parent.
         virtual void setParent(Node* parent);
+		void onAttachedToScene();
+		void onDetachedFromScene();
 	
 	private:
 		void drawBoundingBox();

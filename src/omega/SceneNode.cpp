@@ -86,6 +86,9 @@ void SceneNode::setVisible(bool value)
 ///////////////////////////////////////////////////////////////////////////////
 void SceneNode::setParent(Node* parent)
 {
+	// Save the current scene attachment state
+	bool wasAttached = isAttachedToScene();
+
 	// If changed parent is a scene node, call listeners.
 	// NOTE: We call listeners only for SceneNode parents since in the future Node & ScneNode classes
 	// should be unified, and this simplifies the API.
@@ -101,6 +104,44 @@ void SceneNode::setParent(Node* parent)
 		}
 	}
 	Node::setParent(parent);
+
+	// If the attachment state changed, notify listeners.
+	bool isAttached = isAttachedToScene();
+	if(wasAttached != isAttached)
+	{
+		if(isAttached) onAttachedToScene();
+		else onDetachedFromScene();
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void SceneNode::onAttachedToScene()
+{
+	foreach(SceneNodeListener* l, myListeners)
+	{
+		l->onAttachedToScene(this);
+	}
+	// Broadcast to children
+	foreach(Node* c, mChildrenList)
+	{
+		SceneNode* snc = dynamic_cast<SceneNode*>(c);
+		if(snc != NULL) snc->onAttachedToScene();
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void SceneNode::onDetachedFromScene()
+{
+	foreach(SceneNodeListener* l, myListeners)
+	{
+		l->onDetachedFromScene(this);
+	}
+	// Broadcast to children
+	foreach(Node* c, mChildrenList)
+	{
+		SceneNode* snc = dynamic_cast<SceneNode*>(c);
+		if(snc != NULL) snc->onDetachedFromScene();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,6 +161,18 @@ void SceneNode::setSelected(bool value)
 bool SceneNode::isSelected()
 {
 	return mySelected;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool SceneNode::isAttachedToScene()
+{
+	Node* cur = this;
+	while(cur != NULL)
+	{
+		if(cur == getEngine()->getScene()) return true; 
+		cur = cur->getParent();
+	}
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

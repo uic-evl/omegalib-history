@@ -206,10 +206,10 @@ namespace cyclops {
 		void recompileShaders(ProgramAsset* program, const String& variationName = "");
 		//@}
 
-		//! SceneNodeListener override
-		virtual void onParentChanged(SceneNode* source, SceneNode* newParent);
+		//! SceneNodeListener overrides
+		virtual void onAttachedToScene(SceneNode* source);
+		virtual void onDetachedFromScene(SceneNode* source);
 		
-
 		omegaToolkit::ui::Menu* createContextMenu(Entity* entity);
 		void deleteContextMenu(Entity* entity);
 
