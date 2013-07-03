@@ -32,15 +32,14 @@ bool BinaryPointsLoader::load(ModelAsset* model)
 
 	bool result = loadFile(model, group);
 
-    // if successful get last child and add to sceneobject
     if(result)
     {
-		osg::Geode* points;
-	    points = group->getChild(0)->asGeode();
+		//osg::Geode* points;
+	    //points = group->getChild(0)->asGeode();
 	    
-		model->nodes.push_back(points);
+		model->nodes.push_back(group->asGroup());
 
-	    group->removeChild(0, 1);
+	    //group->removeChild(0, 1);
     }
     return result;
 }
@@ -70,25 +69,40 @@ bool BinaryPointsLoader::loadFile(ModelAsset* model, osg::Group * grp)
 			&rgbamin,
 			&rgbamax);
 
-  		// create geometry and geodes to hold the data
-  		osg::Geode* geode = new osg::Geode();
-  		geode->setCullingActive(false);
-  		osg::Geometry* nodeGeom = new osg::Geometry();
-  		osg::StateSet *state = nodeGeom->getOrCreateStateSet();
-		nodeGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS,0, verticesP->size()));
-  		osg::VertexBufferObject* vboP = nodeGeom->getOrCreateVertexBufferObject();
-  		vboP->setUsage (GL_STREAM_DRAW);
+		int batchSize = 10000;
+		int numBatches = verticesP->size() / batchSize;
+		ofmsg("%1%: creating %2% batches of %3% points", %model->info->name %numBatches %batchSize);
+		int batchStart = 0;
+		for(int batchId = 0; batchId < numBatches; batchId++)
+		{
+  			// create geometry and geodes to hold the data
+  			osg::Geode* geode = new osg::Geode();
+  			geode->setCullingActive(false);
 
-  		nodeGeom->setUseDisplayList (false);
-  		nodeGeom->setUseVertexBufferObjects(true);
-  		nodeGeom->setVertexArray(verticesP);
-  		nodeGeom->setColorArray(verticesC);
-  		nodeGeom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+			int prims = batchSize;
+			if(batchStart + prims > verticesP->size())
+			{
+				prims = verticesP->size() - batchStart;
+			}
+  			osg::Geometry* nodeGeom = new osg::Geometry();
+  			osg::StateSet *state = nodeGeom->getOrCreateStateSet();
+			nodeGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS,batchStart, prims));
+  			osg::VertexBufferObject* vboP = nodeGeom->getOrCreateVertexBufferObject();
+  			vboP->setUsage (GL_STREAM_DRAW);
 
-  		geode->addDrawable(nodeGeom);
-  		geode->dirtyBound();
- 
-		grp->addChild(geode);
+  			nodeGeom->setUseDisplayList (false);
+  			nodeGeom->setUseVertexBufferObjects(true);
+  			nodeGeom->setVertexArray(verticesP);
+  			nodeGeom->setColorArray(verticesC);
+  			nodeGeom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+
+  			geode->addDrawable(nodeGeom);
+			batchStart += prims;
+
+  			geode->dirtyBound();
+			grp->addChild(geode);
+		}
+
 
 		// Save loade results in the model info
 		model->info->loaderOutput = ostr("{ 'numPoints': %d, "
