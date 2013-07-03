@@ -50,6 +50,7 @@ void DefaultButtonRenderable::drawContent(const DrawContext& context)
 	Vector2f size = myOwner->getSize();
 
 	// If button is checkable, draw check box.
+	float checkSize = 0;
 	if(myOwner->isCheckable())
 	{
 		if(myOwner->isRadio())
@@ -78,17 +79,19 @@ void DefaultButtonRenderable::drawContent(const DrawContext& context)
 				painter->drawRect(checkBoxPosition, checkBoxSize, Color::Lime);
 			}
 		}
-		myOwner->getLabel()->setPosition(Vector2f(size[1] + 4, 0));
+		checkSize = size[1] + 4;
+		myOwner->getLabel()->setPosition(Vector2f(checkSize, 0));
 	}
 
-	if(myOwner->getIcon() != NULL)
+	if(myOwner->isImageEnabled())
 	{
+		myOwner->getImage()->setPosition(checkSize + 4, 0);
 		ImageRenderable* ir = (ImageRenderable*)myOwner->getImage()->getRenderable(getClient());
 		if(ir)
 		{
 			ir->draw(context);
 		}
-		myOwner->getLabel()->setPosition(Vector2f(myOwner->getImage()->getSize()[0], 0));
+		myOwner->getLabel()->setPosition(Vector2f(checkSize + 4 + myOwner->getImage()->getSize()[0], 0));
 	}
 	myOwner->getLabel()->setColor(col);
 	LabelRenderable* lr = (LabelRenderable*)myOwner->getLabel()->getRenderable(getClient());

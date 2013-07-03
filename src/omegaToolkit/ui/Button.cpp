@@ -62,6 +62,7 @@ Button::Button(Engine* srv):
 	//myLabel.setText(name);
 	setMaximumHeight(22);
 	myColor = Color(0.2f, 0.2f, 0.2f);
+	myImageEnabled = false;
 	setAutosize(true);
 	//setDebugModeEnabled(true);
 }
@@ -82,7 +83,8 @@ void Button::autosize(Renderer* r)
 	size[0] += myImage.getSize()[0];
 	size[1] = max(size[1], myImage.getSize()[1]);
 	myLabel.setHeight(size[1]);
-	myImage.setHeight(size[1]);
+	// Commented: avoid stretching the image.
+	//myImage.setHeight(size[1]);
 	if(myCheckable)
 	{
 		size += Vector2f(20, 4);

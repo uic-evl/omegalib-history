@@ -162,6 +162,8 @@ namespace omegaToolkit {
 		float getAlpha() { return myAlpha; }
 		void setBlendMode(BlendMode value) { myBlendMode = value; }
 		BlendMode getBlendMode() { return myBlendMode; }
+		void setFillColor(const Color& c) { myFillColor = c; }
+		void setFillEnabled(bool value) { myFillEnabled = value; }
 		//@}
 
 		Layer getLayer() { return myLayer; }
