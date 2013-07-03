@@ -441,12 +441,12 @@ void Engine::handleEvent(const Event& evt)
 void Engine::update(const UpdateContext& context)
 {
 	// Create the death switch thread if it does not exist yet
-	if(sDeathSwitchThread == NULL)
+	/*if(sDeathSwitchThread == NULL)
 	{
 		omsg("Creating death switch thread");
 		sDeathSwitchThread = new DeathSwitchThread();
 		sDeathSwitchThread->start();
-	}
+	}*/
 	
 	// Set the update received flag to true, so the death switch thread will
 	// not kill us.
