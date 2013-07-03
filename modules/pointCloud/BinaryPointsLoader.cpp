@@ -102,7 +102,9 @@ bool BinaryPointsLoader::loadFile(ModelAsset* model, osg::Group * grp)
 			%rgbamin[2] %rgbamax[2]
 			%rgbamin[3] %rgbamax[3]
 			);
-
+		
+		omsg(model->info->loaderOutput);
+		
 		return true;
 	}
 	return false; 
@@ -151,9 +153,6 @@ void BinaryPointsLoader::readXYZ(
 	int readStart = numRecords * readStartP / 100;
 	int readLength = numRecords * readLengthP / 100;
 
-	ofmsg("BinaryPointsLoader: reading records %1% - %2% of %3% (decimation %4%) of %5%",
-		%readStart %(readStart + readLength) %numRecords %decimation %filename);
-
 	if(decimation <= 0) decimation = 1;
 	if(readStart != 0)
 	{
@@ -166,6 +165,9 @@ void BinaryPointsLoader::readXYZ(
 		readLength = numRecords - readStart;
 	}
 
+	ofmsg("BinaryPointsLoader: reading records %1% - %2% of %3% (decimation %4%) of %5%",
+		%readStart %(readStart + readLength) %numRecords %decimation %filename);
+		
 	// Read in data
 	double* buffer = (double*)malloc(recordSize * readLength);
 	if(buffer == NULL)
