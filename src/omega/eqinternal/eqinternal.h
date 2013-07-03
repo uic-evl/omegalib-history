@@ -1,29 +1,38 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	Definitions of all the classes used implement the low-level interface 
+ *	between omegalib and Equalizer.
+ ******************************************************************************/
 #ifndef EQ_INTERNAL
 #define EQ_INTERNAL
 
@@ -39,8 +48,9 @@
 #include "co/co.h"
 
 #ifdef OMEGA_OS_WIN
-// This include is needed to use Layout::findView since equalizer code doesn't use this method, and its 
-// template definition isn't compiled in the original equalizer static library.
+// This include is needed to use Layout::findView since equalizer code doesn't 
+// use this method, and its  template definition isn't compiled in the original 
+// equalizer static library.
 #include "eq/../../../equalizer/libs/fabric/layout.ipp"
 #endif
 
@@ -58,6 +68,9 @@ using namespace co::base;
 using namespace std;
 
 namespace omicron {
+	///////////////////////////////////////////////////////////////////////////
+	//! This class provides utility methods for converting omegalib events into
+	//! the stream format used by Equalizer to share data between nodes.
     class EventUtils
     {
     public:
@@ -72,7 +85,7 @@ namespace omega {
     class RenderTarget;
 	class Camera;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 class SharedData: public co::Object
 {
 public:
@@ -93,7 +106,7 @@ private:
 	UpdateContext myUpdateContext;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! @internal Keeps observer per-tile data
 struct ObserverTileData
 {
@@ -112,7 +125,7 @@ struct ObserverTileData
 	omega::Camera* camera;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! @internal
 class ConfigImpl: public eq::Config
 {
@@ -149,7 +162,7 @@ private:
     omicron::Ref<Engine> myServer;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! @internal
 class NodeImpl: public eq::Node
 {
@@ -169,7 +182,7 @@ private:
     //FrameData myFrameData;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! @internal
 class PipeImpl: public eq::Pipe
 {
@@ -187,7 +200,7 @@ private:
     omicron::Ref<GpuContext> myGpuContext;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! @internal
 //! A Window represents an on-screen or off-screen drawable. A drawable is a 2D rendering surface, 
 //! typically attached to an OpenGL context. A Window is a child of a Pipe. The task methods for all windows 
@@ -199,7 +212,8 @@ public:
     WindowImpl(eq::Pipe* parent);
     virtual ~WindowImpl();
 
-	EqualizerDisplaySystem* getDisplaySystem() { return (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem(); }
+	EqualizerDisplaySystem* getDisplaySystem() 
+	{ return (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem(); }
 
 	DisplayTileConfig* getTileConfig() { return myTile; }
     Renderer* getRenderer();
@@ -214,9 +228,10 @@ private:
 	PipeImpl* myPipe;
     omicron::Ref<Renderer> myRenderer;
     DisplayTileConfig* myTile;
+	bool myVisible;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! @internal
 class ChannelImpl: public eq::Channel
 {
@@ -256,7 +271,7 @@ private:
     omicron::Ref<RenderTarget> myStatsBuffer;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! @internal
 class EqualizerNodeFactory: public eq::NodeFactory
 {

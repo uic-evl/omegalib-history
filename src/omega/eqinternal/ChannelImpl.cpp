@@ -50,6 +50,10 @@ using namespace std;
 
 using namespace eq;
 
+// This static variable is used to signal local tiles visibility
+// This external variable is declared in EqualizerDisplaySystem.cpp
+extern bool sLocalTilesVisible;
+
 ///////////////////////////////////////////////////////////////////////////////
 ChannelImpl::ChannelImpl( eq::Window* parent ) 
     :eq::Channel( parent ), myWindow(parent), myDrawBuffer(NULL), myStencilInitialized(false)
@@ -215,6 +219,9 @@ void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 {
     eq::Channel::frameDraw( frameID );
 
+	// If local tiles are hidden, we are done.
+	if(!sLocalTilesVisible) return;
+
 	EqualizerDisplaySystem* ds = dynamic_cast<EqualizerDisplaySystem*>(SystemManager::instance()->getDisplaySystem());
 	if(getEye() == eq::fabric::EYE_LEFT || getEye() == eq::fabric::EYE_CYCLOP) 
 	{
@@ -270,7 +277,13 @@ void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
 {
     eq::Channel::frameViewFinish( frameID );
-    if(getEye() != eq::fabric::EYE_LAST && getEye() != eq::fabric::EYE_CYCLOP) return;
+
+	// If local tiles are hidden, we are done.
+	if(!sLocalTilesVisible) return;
+
+	// Overlay always renders in a single pass eve when stereo is enabled.
+	// So, if we are in stereo mode skip one eye.
+	if(getEye() != eq::fabric::EYE_LAST && getEye() != eq::fabric::EYE_CYCLOP) return;
 
     setupDrawContext(&myDC, frameID);
     myDC.task = DrawContext::OverlayDrawTask;
