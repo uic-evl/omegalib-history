@@ -282,6 +282,15 @@ void ConfigImpl::updateSharedData( )
 {
 	if(!mySharedData.isMaster())
 	{
+		// This call will update the shared data on all slave nodes.
+		// All registered modules will receive updated data from the master.
+		// In particular, the event sharing module will receive input events
+		// from the master and will dispatch them to the local Engine instance.
+		// For the event dispatch the call stack will be something like this:
+		//   Engine.handleEvent
+		//   EventSharingModule.updateSharedData
+		//   SharedData.applyInstanceData
+		//   SharedData.sync
 		mySharedData.sync(co::VERSION_NEXT);
 	}
 }

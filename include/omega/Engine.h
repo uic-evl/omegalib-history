@@ -52,7 +52,7 @@ namespace omega {
 	typedef List< Ref<Renderer> > RendererList;
 
 	///////////////////////////////////////////////////////////////////////////
-	template<typename T> class RendererObject
+	/*template<typename T> class RendererObject
 	{
 	public:
 		//typedef typename Dictionary<Renderer*, T>::Item Item;
@@ -67,9 +67,12 @@ namespace omega {
 
 	private:
 		Dictionary<Renderer*, T> myObjs;
-	};
+	};*/
 		
 	///////////////////////////////////////////////////////////////////////////
+	//! The omegalib Engine is the core runtime component of omegalib. It runs on 
+	//! each node of a cluster system and handles the abstract scene graph, 
+	//! cameras, distribution of events and frame updates. 
 	class OMEGA_API Engine: public ReferenceType, public IEventListener
 	{
 	public:
@@ -130,7 +133,6 @@ namespace omega {
 		const SceneQueryResultList& querySceneRay(const Ray& ray, uint flags = 0);
 		//@}
 
-		//! PYAPI
 		SceneNode* getScene();
 
  		//! Pointer mode management
@@ -168,6 +170,12 @@ namespace omega {
 		//! Resets the omegalib engine to its initial state. Useful for runtime
 		//! application switching.
 		void reset();
+
+		//! Set to true by default.
+		//! When set to false, the engine will ignore all input events.
+		void setEventDispatchEnabled(bool value);
+		bool isEventDispatchEnabled() 
+			{ return myEventDispatchEnabled; }
 
 		virtual void handleEvent(const Event& evt);
 		virtual void update(const UpdateContext& context);
@@ -208,7 +216,17 @@ namespace omega {
 		Ref<Console> myConsole;
 		bool myConsoleEnabled;
 
+		//! Configuration value, set to true by default.
+		//! When set to true, events will be broadcast from the master node 
+		//! to all slave instances (unless they are marked as local).
+		//! Disable event sharing if your application wants to handle events
+		//! on the master node only. You will be in charge of implementing your
+		//! own synchronization scheme.
 		bool myEventSharingEnabled;
+
+		//! Set to true by default.
+		//! When set to false, the engine will ignore all input events.
+		bool myEventDispatchEnabled;
 
 		// Cameras.
 		Ref<Camera> myDefaultCamera;

@@ -86,6 +86,12 @@ public:
 	void drawFps(bool value) { myDrawFps = value; }
 	bool isDrawFpsEnabled() { return myDrawFps; }
 
+	//! Hides all the tiles running on the machine where this method is executed.
+	virtual void hideLocalTiles() {}
+
+	//! Shows all the tiles running on the machine where this method is executed.
+	virtual void showLocalTiles() {}
+
 protected:
 	DisplaySystem(): myBackgroundColor(0.2f, 0.2f, 0.2f), myNearZ(0), myFarZ(0), myDrawFps(false) {}
 

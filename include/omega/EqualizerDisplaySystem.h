@@ -97,6 +97,12 @@ namespace omega
 		void toggleStats(const String& statList);
 		bool isStatEnabled(const String& stat);
 
+		//! Hides all the tiles running on the machine where this method is executed.
+		virtual void hideLocalTiles();
+
+		//! Shows all the tiles running on the machine where this method is executed.
+		virtual void showLocalTiles();
+
 	private:
 		void generateEqConfig();
 		void setupEqInitArgs(int& numArgs, const char** argv);

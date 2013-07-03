@@ -86,6 +86,7 @@ Engine::Engine(ApplicationBase* app):
 	myDrawPointers(false),
 	myDebugWand(false),
 	myPrimaryButton(Event::Button3),
+	myEventDispatchEnabled(true),
 	soundEnv(NULL)
 {
     mysInstance = this;
@@ -390,8 +391,17 @@ SceneNode* Engine::getScene()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void Engine::setEventDispatchEnabled(bool value)
+{
+	myEventDispatchEnabled = value;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void Engine::handleEvent(const Event& evt)
 {
+	// If event dispatch is disabled, ignore all events.
+	if(!myEventDispatchEnabled) return;
+
 	if(myDebugWand)
 	{
 		if(evt.getServiceType() == Event::ServiceTypeWand)

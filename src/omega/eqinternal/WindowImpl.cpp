@@ -106,7 +106,7 @@ void WindowImpl::frameStart( const uint128_t& frameID, const uint32_t frameNumbe
 	ofmsg("WindowImpl::frameStart %1%", %frameNumber);
 #endif
 
-	// Activate the glew context for this pipe, so initialize and update client
+	// Activate the glew context for this pipe, so initialize and update client11111
 	// methods can handle openGL buffers associated with this Pipe.
 	// NOTE: getting the glew context from the first window is correct since all
 	// windows attached to the same pape share the same Glew (and OpenGL) contexts.

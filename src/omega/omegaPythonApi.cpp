@@ -638,7 +638,33 @@ bool isHostInTileSection(const String& hostname, int tilex, int tiley, int tilew
 	DisplayConfig& dc = SystemManager::instance()->getDisplaySystem()->getDisplayConfig();
 	return dc.isHostInTileSection(hostname, tilex, tiley, tilew, tileh);
 }
-	
+
+///////////////////////////////////////////////////////////////////////////////
+void hideLocalTiles()
+{
+	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
+	ds->hideLocalTiles();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void showLocalTiles()
+{
+	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
+	ds->showLocalTiles();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool isEventDispatchEnabled()
+{
+	return Engine::instance()->isEventDispatchEnabled();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void setEventDispatchEnabled(bool value)
+{
+	Engine::instance()->setEventDispatchEnabled(value);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 SceneNode* getScene()
 {
@@ -1275,7 +1301,12 @@ BOOST_PYTHON_MODULE(omega)
 	def("getImageLoaderThreads", getImageLoaderThreads);
 	def("getHostname", getHostname, PYAPI_RETURN_VALUE);
 	def("isHostInTileSection", isHostInTileSection);
+	def("hideLocalTiles", hideLocalTiles);
+	def("showLocalTiles", showLocalTiles);
 	def("printModules", printModules);
+
+	def("isEventDispatchEnabled", isEventDispatchEnabled);
+	def("setEventDispatchEnabled", setEventDispatchEnabled);
 
 	def("orun", orun);
 	def("oclean", oclean);
