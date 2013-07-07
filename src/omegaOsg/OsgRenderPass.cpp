@@ -141,7 +141,7 @@ void OsgRenderPass::drawView(SceneView* view, const DrawContext& context, bool g
 
 	view->cull(context.eye);
 
-	if(getstats) collectStat(myCullTimeStat, "osgCullP%1%", myTimer.getElapsedTime() * 1000);
+	if(getstats) collectStat(myCullTimeStat, "osgCullP%1%", myTimer.getElapsedTimeInMilliSec());
 
 	// Draw
 	if(getstats) myTimer.start();
@@ -150,7 +150,7 @@ void OsgRenderPass::drawView(SceneView* view, const DrawContext& context, bool g
 	view->draw();
 	glPopAttrib();
 
-	if(getstats) collectStat(myDrawTimeStat, "osgDrawP%1%", myTimer.getElapsedTime() * 1000);
+	if(getstats) collectStat(myDrawTimeStat, "osgDrawP%1%", myTimer.getElapsedTimeInMilliSec());
 
 	// Collect triangle count statistics (every 10 frames)
 	if(getstats) collectStat(myTriangleCountStat, "osgTrisP%1%", (float)view->getTriangleCount());
