@@ -84,14 +84,28 @@ void SceneNode::setVisible(bool value)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void SceneNode::setChildrenVisible(bool value)
+{
+	foreach(Node* c, mChildrenList)
+	{
+		SceneNode* snc = dynamic_cast<SceneNode*>(c);
+		if(snc != NULL) 
+		{
+			snc->setVisible(value);
+			snc->setChildrenVisible(value);
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void SceneNode::setParent(Node* parent)
 {
 	// Save the current scene attachment state
 	bool wasAttached = isAttachedToScene();
 
 	// If changed parent is a scene node, call listeners.
-	// NOTE: We call listeners only for SceneNode parents since in the future Node & ScneNode classes
-	// should be unified, and this simplifies the API.
+	// NOTE: We call listeners only for SceneNode parents since in the future 
+	// Node & ScneNode classes should be unified, and this simplifies the API.
 	SceneNode* snparent = dynamic_cast<SceneNode*>(parent);
 	if(snparent != NULL || parent == NULL)
 	{

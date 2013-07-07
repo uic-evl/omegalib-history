@@ -124,8 +124,12 @@ namespace omega {
 		//@{
 		bool isSelectable();
 		void setSelectable(bool value);
-		bool isVisible();
+		//! Sets this node visibility. A node visibility does not influence 
+		//! children of the node, but only scene objects attached to the node
+		//! itself. To change children visibility use setChildrenVisible instead.
 		void setVisible(bool value);
+		bool isVisible();
+		void setChildrenVisible(bool value);
 		void setSelected(bool value);
 		bool isSelected();
 		// Returns true if this node is attached to the scene (that is, if 
