@@ -69,7 +69,7 @@ bool BinaryPointsLoader::loadFile(ModelAsset* model, osg::Group * grp)
 			&rgbamin,
 			&rgbamax);
 
-		int batchSize = 10000;
+		int batchSize = 1000;
 		int numBatches = verticesP->size() / batchSize;
 		ofmsg("%1%: creating %2% batches of %3% points", %model->info->name %numBatches %batchSize);
 		int batchStart = 0;
@@ -77,7 +77,7 @@ bool BinaryPointsLoader::loadFile(ModelAsset* model, osg::Group * grp)
 		{
   			// create geometry and geodes to hold the data
   			osg::Geode* geode = new osg::Geode();
-  			geode->setCullingActive(false);
+  			geode->setCullingActive(true);
 
 			int prims = batchSize;
 			if(batchStart + prims > verticesP->size())

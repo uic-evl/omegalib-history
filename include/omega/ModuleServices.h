@@ -47,17 +47,24 @@ namespace omega {
 	///////////////////////////////////////////////////////////////////////////
 	class OMEGA_API EngineModule: public SharedObject
 	{
+	friend class ModuleServices;
 	public:
 		enum Priority { PriorityLowest = 0, PriorityLow = 1, PriorityNormal = 2, PriorityHigh = 3, PriorityHighest = 4 };
 
 	public:
 		EngineModule(const String& name): 
 		  myInitialized(false), myEngine(NULL), myName(name), 
-			  myPriority(PriorityNormal), mySharedDataEnabled(false) {}
+			  myPriority(PriorityNormal), mySharedDataEnabled(false),
+			  myEventTimeStat(NULL),  myUpdateTimeStat(NULL) 
+		  {
+		  }
 
 		EngineModule(): 
 		  myInitialized(false), myEngine(NULL), myName(mysNameGenerator.generate()), 
-			  myPriority(PriorityNormal), mySharedDataEnabled(false) {}
+			  myPriority(PriorityNormal), mySharedDataEnabled(false),
+			  myEventTimeStat(NULL),  myUpdateTimeStat(NULL) 
+	      {
+		  }
 
 		virtual ~EngineModule();
 
@@ -96,6 +103,10 @@ namespace omega {
 		bool mySharedDataEnabled;
 
 		static NameGenerator mysNameGenerator;
+
+		// Statistics
+		Stat* myEventTimeStat;
+		Stat* myUpdateTimeStat;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -121,6 +132,7 @@ namespace omega {
 		static List< Ref<EngineModule> > mysModulesToRemove;
 		static List< EngineModule* > mysNonCoreModules;
 		static bool mysCoreMode;
+		static Timer mysTimer;
 	};
 }; // namespace omega
 
