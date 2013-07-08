@@ -224,6 +224,11 @@ void PythonInterpreter::initialize(const char* programName)
 	Py_DECREF(wrapperOut);
 	Py_DECREF(wrapperErr);
 	
+	// Add a generic 'current working dir' to the module search paths, so modules
+	// in the current working directory will always load, regardless of where the
+	// current working dir is.
+	addPythonPath("./");
+
 	// Add the current working directory to the python module search paths. This should
 	// be the directory containing the current executable (and all binary modules that
 	// get built with omegalib should be in the same dir)
