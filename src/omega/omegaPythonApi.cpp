@@ -1270,6 +1270,8 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(MissionControlClient, postCommand)
 		PYAPI_METHOD(MissionControlClient, setName)
 		PYAPI_METHOD(MissionControlClient, getName)
+		PYAPI_METHOD(MissionControlClient, isConnected)
+		PYAPI_METHOD(MissionControlClient, closeConnection)
 		;
 
 

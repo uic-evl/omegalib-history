@@ -1,32 +1,40 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *-------------------------------------------------------------------------------------------------
- * Contains Mission Control - a communication API to manage omegalib applications and support
- * message passing between application instances.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ * Classes that implement the mission control client and server.
+ * Mission control is a protocol used to communicate to running omegalib 
+ * instances, or let different instances to connect with each other and exchange
+ * data or python commands.
+ ******************************************************************************/
 #include "omega/MissionControl.h"
 #include "omega/PythonInterpreter.h"
 
@@ -47,7 +55,7 @@ const char* MissionControlMessageIds::LogMessage = "smsg";
 const char* MissionControlMessageIds::SendTo = "sdto";
 const char* MissionControlMessageIds::SendAll = "sall";
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool MissionControlMessageHandler::handleMessage(MissionControlConnection* sender, const char* header, char* data, int size)
 {
 	bool handled = true;
@@ -124,7 +132,7 @@ bool MissionControlMessageHandler::handleMessage(MissionControlConnection* sende
 	return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MissionControlConnection::MissionControlConnection(ConnectionInfo ci, IMissionControlMessageHandler* msgHandler, MissionControlServer* server): 
 	TcpConnection(ci),
 	myServer(server),
@@ -134,13 +142,13 @@ MissionControlConnection::MissionControlConnection(ConnectionInfo ci, IMissionCo
 }
         
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlConnection::setName(const String& name)
 {
 	myName = name;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlConnection::handleData()
 {
     // Read message header.
@@ -167,21 +175,21 @@ void MissionControlConnection::handleData()
 	if(!strncmp(header, MissionControlMessageIds::Bye, 4)) close();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlConnection::handleClosed()
 {
     ofmsg("Mission control connection closed (id=%1%)", %getConnectionInfo().id);
 	if(myServer != NULL) myServer->closeConnection(this);
 }
         
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlConnection::handleConnected()
 {
 	TcpConnection::handleConnected();
     ofmsg("Mission control connection open (id=%1%)", %getConnectionInfo().id);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlConnection::sendMessage(const char* header, void* data, int size)
 {
 	write((void*)header, 4);
@@ -229,7 +237,7 @@ void MissionControlServer::closeConnection(MissionControlConnection* conn)
 	myConnections.remove(conn);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MissionControlConnection* MissionControlServer::findConnection(const String& name)
 {
 	foreach(MissionControlConnection* conn, myConnections)
@@ -239,7 +247,7 @@ MissionControlConnection* MissionControlServer::findConnection(const String& nam
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlServer::broadcastMessage(const char* header, void* data, int size, MissionControlConnection* sender)
 {
 	foreach(MissionControlConnection* conn, myConnections)
@@ -251,13 +259,13 @@ void MissionControlServer::broadcastMessage(const char* header, void* data, int 
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlServer::addLine(const String& line)
 {
 	broadcastMessage(MissionControlMessageIds::LogMessage, (void*)line.c_str(), line.size());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MissionControlClient* MissionControlClient::create()
 {
 	MissionControlClient* missionControlClient = new MissionControlClient();
@@ -265,7 +273,7 @@ MissionControlClient* MissionControlClient::create()
 	return missionControlClient;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlClient::initialize()
 {
 	if(myConnection == NULL)
@@ -275,7 +283,7 @@ void MissionControlClient::initialize()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlClient::dispose()
 {
 	if(myConnection != NULL)
@@ -288,18 +296,18 @@ void MissionControlClient::dispose()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlClient::update(const UpdateContext& context)
 {
 	myConnection->poll();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlClient::handleEvent(const UpdateContext& context)
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlClient::connect(const String& host, int port)
 {
 	if(myConnection == NULL)
@@ -309,7 +317,7 @@ void MissionControlClient::connect(const String& host, int port)
 	myConnection->open(host, port);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool MissionControlClient::handleCommand(const String& command)
 {
 	if(StringUtils::startsWith(command, "post"))
@@ -321,7 +329,7 @@ bool MissionControlClient::handleCommand(const String& command)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MissionControlClient::postCommand(const String& cmd)
 {
 	if(myConnection->getState() == TcpConnection::ConnectionOpen)
@@ -329,5 +337,22 @@ void MissionControlClient::postCommand(const String& cmd)
 		myConnection->sendMessage(
 			MissionControlMessageIds::ScriptCommand, 
 			(void*)cmd.c_str(), cmd.size());
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool MissionControlClient::isConnected()
+{
+	return myConnection != NULL && 
+		myConnection->getState() == TcpConnection::ConnectionOpen;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::closeConnection()
+{
+	if(isConnected())
+	{
+		myConnection->goodbyeServer();
+		myConnection = NULL;
 	}
 }
