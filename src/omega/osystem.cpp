@@ -137,7 +137,7 @@ namespace omega
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-	void setupMissionControl(const String& mode, SystemManager* sys, const Setting& s, MissionControlClient*& missionControlClient)
+	void setupMissionControl(const String& mode, SystemManager* sys, const Setting& s)
 	{
 		int port = Config::getIntValue("port", s, MissionControlServer::DefaultPort);
 		String serverHost = Config::getStringValue("host", s, "127.0.0.1");
@@ -152,16 +152,6 @@ namespace omega
 			// periodically to check for new connections.
 			SystemManager::instance()->getServiceManager()->addService(srv);
 			srv->start();
-		}
-		else if(mode == "client")
-		{
-			missionControlClient = new MissionControlClient();
-			// Increase the reference count to avoid deallocation during module cleanup. We want to delete this object
-			// manually due to some issues deallocating it automatically on Visual Studio.
-			missionControlClient->ref();
-			ModuleServices::addModule(missionControlClient);
-			//sMissionControlClient->doInitialize(Engine::instance());
-			missionControlClient->connect(serverHost, port);
 		}
 	}
 
@@ -241,7 +231,7 @@ namespace omega
 			sArgs.newNamedString(
 				'm',
 				"mc",
-				"Sets mission control mode. (default, client, server, disable) ", "In default mode, the application opens a mission control server if enabled in the configuration file. ",
+				"Sets mission control mode. (default, server, disable) ", "In default mode, the application opens a mission control server if enabled in the configuration file. ",
 				mcmode);
 
 			sArgs.setName("omegalib");
@@ -337,9 +327,6 @@ namespace omega
 
 			Config* cfg = new Config(curCfgFilename);
 			
-			// This is used when the application runs a mission control client.
-			MissionControlClient* missionControlClient = NULL;
-
 			// If multiApp string is set, setup multi-application mode.
 			// In multi-app mode, this instance will output to a subset of the available tiles, and will choose a
 			// communication port using a port interval starting at the configuration base port plus and dependent on a port pool.
@@ -367,7 +354,7 @@ namespace omega
 					Config* syscfg = sys->getSystemConfig();
 					if(syscfg->exists("config/missionControl"))
 					{
-						setupMissionControl(mcmode, sys, syscfg->lookup("config/missionControl"), missionControlClient);
+						setupMissionControl(mcmode, sys, syscfg->lookup("config/missionControl"));
 					}
 				}
 
@@ -379,12 +366,6 @@ namespace omega
 				omsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> OMEGALIB SHUTDOWN");
 				sys->cleanup();
 				omsg("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< OMEGALIB SHUTDOWN\n\n");
-
-				if(missionControlClient != NULL) 
-				{
-					missionControlClient->unref();
-					missionControlClient = NULL;
-				}
 
 				omsg("===================== ReferenceType object leaks follow:");
 				ReferenceType::printObjCounts();
