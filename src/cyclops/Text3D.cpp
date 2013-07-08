@@ -93,6 +93,7 @@ void Text3D::setFontResolution(int resolution)
 void Text3D::setText(const String& text)
 {
 	myTextDrawable->setText(text);
+	requestBoundingBoxUpdate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
