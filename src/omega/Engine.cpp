@@ -410,9 +410,18 @@ void Engine::handleEvent(const Event& evt)
 		}
 	}
 
-    ModuleServices::handleEvent(evt);
+	// Python events are processed with normal priority. First pass them to modules
+	// With higher priority...
+	ModuleServices::handleEvent(evt, EngineModule::PriorityHighest);
+	ModuleServices::handleEvent(evt, EngineModule::PriorityHigh);
 
+	// Now to python callbacks...
 	getSystemManager()->getScriptInterpreter()->handleEvent(evt);
+
+	// Now to modules with lower priority.
+	ModuleServices::handleEvent(evt, EngineModule::PriorityNormal);
+	ModuleServices::handleEvent(evt, EngineModule::PriorityLow);
+	ModuleServices::handleEvent(evt, EngineModule::PriorityLowest);
 
 	if( evt.getServiceType() == Service::Keyboard )
 	{

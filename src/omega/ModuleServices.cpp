@@ -124,19 +124,16 @@ void ModuleServices::update(Engine* srv, const UpdateContext& context)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void ModuleServices::handleEvent(const Event& evt)
+void ModuleServices::handleEvent(const Event& evt, EngineModule::Priority p)
 {
-	for(int i = EngineModule::PriorityHighest; i >= EngineModule::PriorityLowest; i--)
+	foreach(EngineModule* module, mysModules)
 	{
-		foreach(EngineModule* module, mysModules)
+		// Only send events to initialized modules.
+		if(module->isInitialized())
 		{
-			// Only send events to initialized modules.
-			if(module->isInitialized())
+			if(module->getPriority() == p)
 			{
-				if(module->getPriority() == i)
-				{
-					module->handleEvent(evt);
-				}
+				module->handleEvent(evt);
 			}
 		}
 	}

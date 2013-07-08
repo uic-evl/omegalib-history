@@ -116,7 +116,8 @@ namespace omega {
 		static void addModule(EngineModule* module);
 		static void removeModule(EngineModule* module);
 		static void update(Engine* srv, const UpdateContext& context);
-		static void handleEvent(const Event& evt);
+		//! Dispatches an event to all modules with the specified priority.
+		static void handleEvent(const Event& evt, EngineModule::Priority p);
 		static bool handleCommand(const String& cmd);
 		//static void initializeRenderer(Engine* srv, Renderer* r);
 		static void disposeAll();
