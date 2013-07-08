@@ -1,29 +1,40 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials 
+ * provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE  GOODS OR  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	OsgSceneObject: the connection point between an osg node and an omegalib
+ *	scene node. OsgSceneObject is can be attached to an omegalib scene node and
+ *	contains an osg node and transformation.
+ *****************************************************************************/
 #include "omegaOsg/OsgSceneObject.h"
 #include "omega/SceneNode.h"
 
@@ -31,10 +42,11 @@
 #include <osg/MatrixTransform>
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IntersectionVisitor>
+#include <osg/ComputeBoundsVisitor>
 
 using namespace omegaOsg;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 OsgSceneObject::OsgSceneObject(osg::Node* node): myNode(node), myInitialized(false), myUseLocalTransform(false)
 {
 	// if node is already a matrix transform, do not parent it to another matrix transform and use
@@ -47,28 +59,16 @@ OsgSceneObject::OsgSceneObject(osg::Node* node): myNode(node), myInitialized(fal
 		myTransform->addChild( node );
 	}
 	myTransform->setDataVariance( osg::Object::DYNAMIC );
-
-	const osg::BoundingSphere& bs = node->getBound();
-	Vector3f center(bs.center()[0], bs.center()[1], bs.center()[2]);
-
-	float fradius = bs.radius();
-	if(fradius == -1) fradius = 0;
-
-	Vector3f radius(fradius, fradius, fradius);
-
-	//ofmsg("&OsgRenderable center: %1%, size: %2%", %center %bs.radius());
-
-	myBBox.setExtents(center - radius, center + radius);
 	requestBoundingBoxUpdate();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 OsgSceneObject::~OsgSceneObject()
 {
 	myTransform = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void OsgSceneObject::onAttached(SceneNode* node)
 {
 	node->addListener(this);
@@ -77,13 +77,13 @@ void OsgSceneObject::onAttached(SceneNode* node)
 	onSelectedChanged(node, node->isSelected());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void OsgSceneObject::onDetached(SceneNode* node)
 {
 	node->removeListener(this);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void OsgSceneObject::update(const UpdateContext& context)
 {
 	SceneNode* node = getOwner();
@@ -104,7 +104,7 @@ void OsgSceneObject::update(const UpdateContext& context)
 		oxform.set(m.data());
 	}
 	myTransform->setMatrix( oxform );
-	requestBoundingBoxUpdate();
+	//requestBoundingBoxUpdate();
 
 	//const osg::BoundingSphere& bs = myNode->getBound();
 	//Vector3f center(bs.center()[0], bs.center()[1], bs.center()[2]);
@@ -119,23 +119,42 @@ void OsgSceneObject::update(const UpdateContext& context)
 	//myBBox.setExtents(center - radius, center + radius);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const AlignedBox3* OsgSceneObject::getBoundingBox()
 {
+	osg::ComputeBoundsVisitor cbv;
+	myNode->accept(cbv);
+
+	osg::BoundingBox& bb = cbv.getBoundingBox();
+
+	const osg::BoundingSphere& bs = myTransform->getBound();
+	Vector3f center(bs.center()[0], bs.center()[1], bs.center()[2]);
+
+	float fradius = bs.radius();
+	if(fradius == -1) fradius = 0;
+
+	Vector3f radius(fradius, fradius, fradius);
+
+	if(bb.valid())
+	{
+		Vector3f min(bb._min.x(), bb._min.y(), bb._min.z());
+		Vector3f max(bb._max.x(), bb._max.y(), bb._max.z());
+		myBBox.setExtents(min, max);
+	}
 	return &myBBox;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void OsgSceneObject::onVisibleChanged(SceneNode* source, bool value) 
 {
 	myTransform->setNodeMask(value ? ~0 : 0);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void OsgSceneObject::onSelectedChanged(SceneNode* source, bool value) 
 {}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool OsgSceneObject::intersectRay(const Ray& ray, Vector3f* hitPoint)
 {
 	Vector3f rstart = ray.getOrigin();

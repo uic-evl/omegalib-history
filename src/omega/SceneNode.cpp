@@ -250,8 +250,6 @@ void SceneNode::update(bool updateChildren, bool parentHasChanged)
     }
 
 	Node::update(updateChildren, parentHasChanged);
-
-	updateBoundingBox();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -285,6 +283,13 @@ void SceneNode::updateTraversal(const UpdateContext& context)
 		SceneNode* n = dynamic_cast<SceneNode*>(child);
 		if(n) n->updateTraversal(context);
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void SceneNode::needUpdate(bool forceParentUpdate)
+{
+	Node::needUpdate();
+	myNeedsBoundingBoxUpdate = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -352,8 +357,8 @@ float SceneNode::getBoundRadius()
 ///////////////////////////////////////////////////////////////////////////////
 void SceneNode::updateBoundingBox(bool force)
 {
-	// Exit now if bouning box does not need an update.
-	if(!force && !needsBoundingBoxUpdate()) return;
+	// Exit now if bounding box does not need an update.
+	if(!force && !needsBoundingBoxUpdate() && !mCachedTransformOutOfDate) return;
 
 	// Reset bounding box.
 	myBBox.setNull();
@@ -398,6 +403,7 @@ void SceneNode::updateBoundingBox(bool force)
 ///////////////////////////////////////////////////////////////////////////////
 void SceneNode::drawBoundingBox()
 {
+	updateBoundingBox();
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
