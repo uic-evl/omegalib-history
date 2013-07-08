@@ -35,8 +35,8 @@
  * instances, or let different instances to connect with each other and exchange
  * data or python commands.
  ******************************************************************************/
-#ifndef __TABLET_SERVICE_H__
-#define __TABLET_SERVICE_H__
+#ifndef __MISSION_CONTROL_H__
+#define __MISSION_CONTROL_H__
 
 #include "omega/osystem.h"
 #include "omega/StatsManager.h"
