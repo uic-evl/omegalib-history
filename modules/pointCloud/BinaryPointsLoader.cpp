@@ -64,20 +64,40 @@ bool BinaryPointsLoader::loadFile(ModelAsset* model, osg::Group * grp)
 		Vector4f rgbamin = Vector4f(maxf, maxf, maxf, maxf);
 		Vector4f rgbamax = Vector4f(minf, minf, minf, minf);
 
+		// Check the options to see if we should read a subsection of the file
+		// and / or use decimation.
+		readStartP = 0;
+		readLengthP = 0;
+		decimation = 0;
+		int batchSize = 1000;
+
+		if(model->info->options != "")
+		{
+			String format;
+
+			libconfig::ArgumentHelper ah;
+			ah.newString("format", "only suported format is xyzrgba", format);
+			ah.newNamedInt('s', "start", "start", "start record %", readStartP);
+			ah.newNamedInt('l', "length", "length", "number of records to read %", readLengthP);
+			ah.newNamedInt('d', "decimation", "decimation", "read decimation", decimation);
+			ah.newNamedInt('b', "batch-size", "batch size", "batch size", batchSize);
+			ah.process(model->info->options.c_str());
+		}
+
 		readXYZ(path, model->info->options, verticesP, verticesC,
 			&numPoints,
 			&rgbamin,
 			&rgbamax);
 
-		int batchSize = 1000;
+  		// create geometry and geodes to hold the data
+  		osg::Geode* geode = new osg::Geode();
+  		geode->setCullingActive(true);
+
 		int numBatches = verticesP->size() / batchSize;
 		ofmsg("%1%: creating %2% batches of %3% points", %model->info->name %numBatches %batchSize);
 		int batchStart = 0;
 		for(int batchId = 0; batchId < numBatches; batchId++)
 		{
-  			// create geometry and geodes to hold the data
-  			osg::Geode* geode = new osg::Geode();
-  			geode->setCullingActive(true);
 
 			int prims = batchSize;
 			if(batchStart + prims > verticesP->size())
@@ -99,10 +119,10 @@ bool BinaryPointsLoader::loadFile(ModelAsset* model, osg::Group * grp)
   			geode->addDrawable(nodeGeom);
 			batchStart += prims;
 
-  			geode->dirtyBound();
-			grp->addChild(geode);
 		}
 
+  		geode->dirtyBound();
+		grp->addChild(geode);
 
 		// Save loade results in the model info
 		model->info->loaderOutput = ostr("{ 'numPoints': %d, "
@@ -138,24 +158,6 @@ void BinaryPointsLoader::readXYZ(
 	// Default record size = 7 doubles (X,Y,Z,R,G,B,A)
 	int numFields = 7;
 	size_t recordSize = sizeof(double) * numFields;
-
-	// Check the options to see if we should read a subsection of the file
-	// and / or use decimation.
-	int readStartP = 0;
-	int readLengthP = 0;
-	int decimation = 0;
-
-	if(options != "")
-	{
-		String format;
-
-		libconfig::ArgumentHelper ah;
-		ah.newString("format", "only suported format is xyzrgba", format);
-		ah.newNamedInt('s', "start", "start", "start record %", readStartP);
-		ah.newNamedInt('l', "length", "length", "number of records to read %", readLengthP);
-		ah.newNamedInt('d', "decimation", "decimation", "read decimation", decimation);
-		ah.process(options.c_str());
-	}
 
 	FILE* fin = fopen(filename.c_str(), "rb");
 

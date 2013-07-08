@@ -29,5 +29,11 @@ private:
 		int* numPoints,
 		Vector4f* rgbamin,
 		Vector4f* rgbamax);
+
+private:
+	String format;
+	int readStartP;
+	int readLengthP;
+	int decimation;
 };
 #endif
