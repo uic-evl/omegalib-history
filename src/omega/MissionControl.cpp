@@ -258,6 +258,14 @@ void MissionControlServer::addLine(const String& line)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+MissionControlClient* MissionControlClient::create()
+{
+	MissionControlClient* missionControlClient = new MissionControlClient();
+	ModuleServices::addModule(missionControlClient);
+	return missionControlClient;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void MissionControlClient::initialize()
 {
 	if(myConnection == NULL)
@@ -311,4 +319,15 @@ bool MissionControlClient::handleCommand(const String& command)
 	}
 	// Let other modules process commands.
 	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::postCommand(const String& cmd)
+{
+	if(myConnection->getState() == TcpConnection::ConnectionOpen)
+	{
+		myConnection->sendMessage(
+			MissionControlMessageIds::ScriptCommand, 
+			(void*)cmd.c_str(), cmd.size());
+	}
 }

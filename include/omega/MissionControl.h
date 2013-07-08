@@ -145,6 +145,10 @@ namespace omega {
 	class OMEGA_API MissionControlClient: public EngineModule
 	{
 	public:
+		//! Utility method: creates a new client and registers it as a module.
+		static MissionControlClient* create();
+
+	public:
 		MissionControlClient(): EngineModule("MissionControlClient") {}
 		virtual ~MissionControlClient() 
 		{ 
@@ -162,6 +166,7 @@ namespace omega {
 		virtual void handleEvent(const UpdateContext& context);
 		virtual bool handleCommand(const String& command);
 		void connect(const String& host, int port);
+		void postCommand(const String& command);
 
 		String getName() { return myConnection->getName(); }
 		virtual void setName(const String& name) { myConnection->setName(name); }

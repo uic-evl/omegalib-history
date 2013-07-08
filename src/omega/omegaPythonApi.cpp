@@ -1262,6 +1262,17 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(SoundInstance, fade)
 		;
 
+	// MissionControlClient
+	PYAPI_REF_BASE_CLASS(MissionControlClient)
+		PYAPI_STATIC_REF_GETTER(MissionControlClient, create)
+		PYAPI_METHOD(MissionControlClient, connect)
+		PYAPI_METHOD(MissionControlClient, dispose)
+		PYAPI_METHOD(MissionControlClient, postCommand)
+		PYAPI_METHOD(MissionControlClient, setName)
+		PYAPI_METHOD(MissionControlClient, getName)
+		;
+
+
 	class_< vector<String> >("StringVector").def(vector_indexing_suite< vector<String> >());
 
 	// Free Functions
