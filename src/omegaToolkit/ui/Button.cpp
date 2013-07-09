@@ -93,6 +93,10 @@ void Button::autosize(Renderer* r)
 	{
 		size += Vector2f(10, 4);
 	}
+	if(isImageEnabled())
+	{
+		size.x() += myImage.getSize().x();
+	}
 
 	setSize(size);
 }
