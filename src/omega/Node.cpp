@@ -344,19 +344,21 @@ void Node::resetOrientation(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Node::lookAt(const Vector3f& position, const Vector3f& upVector)
 {
-	Vector3f zaxis = position - mPosition;
+	Vector3f zaxis = position - mDerivedPosition;
 	zaxis.normalize();
 
-	Vector3f xaxis = upVector.cross(zaxis);
+	Vector3f yaxis = upVector.cross(zaxis);
+	yaxis.normalize();
+
+	Vector3f xaxis = zaxis.cross(yaxis);
 	xaxis.normalize();
 
-	Vector3f yaxis = zaxis.cross(xaxis);
-
 	Matrix3f m;
-	m.col(0) = xaxis;
-	m.col(1) = yaxis;
+	m.col(0) = yaxis;
+	m.col(1) = xaxis;
 	m.col(2) = zaxis;
 	mOrientation = m;
+	setInheritOrientation(false);
 	needUpdate();
 }
 
