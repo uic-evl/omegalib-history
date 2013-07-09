@@ -185,22 +185,40 @@ void BinaryPointsLoader::readXYZ(
 		%readStart %(readStart + readLength) %numRecords %decimation %filename);
 		
 	// Read in data
-	double* buffer = (double*)malloc(recordSize * readLength);
+	double* buffer = (double*)malloc(recordSize * readLength / decimation);
 	if(buffer == NULL)
 	{
 		oferror("BinaryPointsLoader::readXYZ: could not allocate %1% bytes", 
-			%(recordSize * readLength));
+			%(recordSize * readLength / decimation));
 		return;
 	}
 
-	size_t size = fread(buffer, recordSize, readLength, fin);
-
 	int ne = readLength / decimation;
+
+	// Read data
+	// If data is not decimated, read it in one go.
+	if(decimation == 1)
+	{
+		size_t size = fread(buffer, recordSize, readLength, fin);
+	}
+	else
+	{
+		int j = 0;
+		for(int i = 0; i < ne; i ++)
+		{
+			// Read one record
+			size_t size = fread(&buffer[j], recordSize, 1, fin);
+			// Skip ahead decimation - 1 records.
+			fseek(fin, recordSize * (decimation - 1), SEEK_CUR);
+			j += numFields;
+		}
+	}
+
 	points->reserve(ne);
 	colors->reserve(ne);
 
 	int j = 0;
-	for(int i = 0; i < readLength; i += decimation)
+	for(int i = 0; i < ne; i ++)
 	{
 		point[0] = buffer[i * numFields];
 		point[1] = buffer[i * numFields + 1];
