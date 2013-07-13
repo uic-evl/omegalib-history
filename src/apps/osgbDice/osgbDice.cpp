@@ -81,80 +81,6 @@ osg::MatrixTransform* makeDie( btDynamicsWorld* bw )
     return( root );
 }
 
-/* \cond */
-class ShakeManipulator : public osgGA::GUIEventHandler
-{
-public:
-    ShakeManipulator( osgbDynamics::MotionState* motion )
-      : _motion( motion )
-    {}
-
-    bool handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& )
-    {
-        switch( ea.getEventType() )
-        {
-            case osgGA::GUIEventAdapter::KEYUP:
-            {
-                if (ea.getKey()==osgGA::GUIEventAdapter::KEY_Space)
-                {
-                    btTransform trans; trans.setIdentity();
-                    _motion->setWorldTransform( trans );
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            case osgGA::GUIEventAdapter::PUSH:
-            {
-                _lastX = ea.getXnormalized();
-                _lastY = ea.getYnormalized();
-
-                btTransform world;
-                _motion->getWorldTransform( world );
-                btVector3 o = world.getOrigin();
-                o[ 2 ] = 0.25;
-                world.setOrigin( o );
-                _motion->setWorldTransform( world );
-
-                return true;
-            }
-            case osgGA::GUIEventAdapter::DRAG:
-            {
-                btVector3 move;
-                move[ 0 ] = _lastX - ea.getXnormalized();
-                move[ 1 ] = ea.getYnormalized() - _lastY;
-                move[ 2 ] = 0.;
-                move *= 10.;
-                btTransform moveTrans; moveTrans.setIdentity();
-                moveTrans.setOrigin( move );
-                btTransform world;
-                _motion->getWorldTransform( world );
-                btTransform netTrans = moveTrans * world;
-                btVector3 o = netTrans.getOrigin();
-                o[ 2 ] = 0.;
-                netTrans.setOrigin( o );
-
-                _motion->setWorldTransform( netTrans );
-
-                _lastX = ea.getXnormalized();
-                _lastY = ea.getYnormalized();
-
-                return true;
-            }
-            default:
-            break;
-        }
-        return false;
-    }
-
-protected:
-    osgbDynamics::MotionState* _motion;
-    float _lastX, _lastY;
-};
-/* \endcond */
-
 // create a box
 // 100% osg stuff
 osg::Geode* osgBox( const osg::Vec3& center, const osg::Vec3& halfLengths )
@@ -216,7 +142,7 @@ btDynamicsWorld* OsgbDice::initBtPhysicsWorld()
 
     btDynamicsWorld * dynamicsWorld = new btDiscreteDynamicsWorld( dispatcher, inter, solver, collisionConfiguration );
 
-    dynamicsWorld->setGravity( btVector3(0, 0, 9.8) );
+    dynamicsWorld->setGravity( btVector3(0, 0, -9.8) );
 
     return( dynamicsWorld );
 }
@@ -239,7 +165,6 @@ void OsgbDice::initialize()
 		root->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().y(),
 		root->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().z());
 	}
-	//root->addChild( createAxes().get() );
 
     /* BEGIN: Create environment boxes */
     float xDim( 10. );
@@ -294,7 +219,7 @@ void OsgbDice::initialize()
         trans.setOrigin( osgbCollision::asBtVector3( center ) );
         compoundShape->addChildShape( trans, box );
     }
-    { // bottom of window -Y
+    { // top of window Y
         osg::Vec3 halfLengths( xDim*.5, thick*.5, zDim*.5 );
         osg::Vec3 center( 0., yDim*.5, 0. );
         myShakeBox->addChild( osgBox( center, halfLengths ) );
@@ -315,7 +240,7 @@ void OsgbDice::initialize()
     myShakeBody->setActivationState( DISABLE_DEACTIVATION );
     myWorld->addRigidBody( myShakeBody );
 
-	printf("=====\n=====\nnum of collision objects: %d\n=====\n=====\n",myWorld->getNumCollisionObjects());
+	//printf("=====\n=====\nnum of collision objects: %d\n=====\n=====\n",myWorld->getNumCollisionObjects());
 
     // Create an omegalib scene node and attach the osg node to it. This is used to interact with the 
     // osg object through omegalib interactors.
@@ -326,7 +251,7 @@ void OsgbDice::initialize()
     mySceneNode->setBoundingBoxVisible(true);
     //mySceneNode->setBoundingBoxVisible(false);
     getEngine()->getScene()->addChild(mySceneNode);
-	getEngine()->getDefaultCamera()->setPosition(0,-2,30);
+	getEngine()->getDefaultCamera()->setPosition(0,0,30);
 
     // Set the interactor style used to manipulate meshes.
     if(SystemManager::settingExists("config/interactor"))
@@ -379,7 +304,7 @@ void OsgbDice::update(const UpdateContext& context)
 
 	btVector3 btTrans(shakeTrans->getMatrix().getTrans().x(), shakeTrans->getMatrix().getTrans().y(), 0.25);
 	
-	/*/ 
+	// 
 	printf("bullet:\n");
 	for (int i=0;i<2;i++)
 	{
@@ -401,7 +326,7 @@ void OsgbDice::update(const UpdateContext& context)
 	world.setOrigin( btTrans );
     myShakeMotion->setWorldTransform( world );
 
-	/*/
+	//
 	printf("motion:\n");
 	{
 		printf("motion (worldtrans): (%lf, %lf, %lf)\n", //一直不变
@@ -415,7 +340,7 @@ void OsgbDice::update(const UpdateContext& context)
 	}
 	//*/
 
-	/*/
+	//
 	printf("osg:\n");
 	for (int i=0;i<2;i++)
 	{
@@ -432,7 +357,7 @@ void OsgbDice::update(const UpdateContext& context)
 	}
 	//*/
 
-	/*/
+	//
 	printf("omegalib:\n");
 	printf("box: (%lf, %lf, %lf)\n",
 		myOso->getTransformedNode()->getMatrix().getTrans().x(),
@@ -440,22 +365,12 @@ void OsgbDice::update(const UpdateContext& context)
 		myOso->getTransformedNode()->getMatrix().getTrans().z());
 	//*/
 
-	/*/
+	//
 	printf("world(new): (%lf, %lf, %lf)\n",
 		world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
 	//*/
 
-	/*/ debug print
-	for (int i=0;i<2;i++)
-	{
-		printf("%d: (%d, %d, %d)\n", i+1,
-			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().x(),
-			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().y(),
-			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().z());
-	}
-	//*/
-
-	/*/
+	//
 	printf("  1: (%d, %d, %d)\n", // strange, strange
 		die1->getMatrix().getTrans().x(),
 		die1->getMatrix().getTrans().y(),

@@ -107,6 +107,8 @@ public:
                 myRoot = SceneNode::create("osgRoot");
                 myRoot->addComponent(oso);
                 myRoot->setScale(0.05f, 0.05f, 0.05f);
+
+				getEngine()->getDefaultCamera()->setPosition(0,0,30);
         }
 
 		virtual btCollisionWorld* initCollision();
