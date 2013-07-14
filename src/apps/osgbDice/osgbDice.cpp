@@ -300,10 +300,6 @@ void OsgbDice::initialize()
 
 void OsgbDice::update(const UpdateContext& context)
 {
-	osg::MatrixTransform* shakeTrans = myShakeMotion->getTransform()->asMatrixTransform();
-
-	btVector3 btTrans(shakeTrans->getMatrix().getTrans().x(), shakeTrans->getMatrix().getTrans().y(), 0.25);
-	
 	// 
 	printf("bullet:\n");
 	for (int i=0;i<2;i++)
@@ -321,15 +317,21 @@ void OsgbDice::update(const UpdateContext& context)
 	}
 	//*/
 	
+	//osg::MatrixTransform* shakeTrans = myShakeMotion->getTransform()->asMatrixTransform();
+	//btVector3 btTrans(shakeTrans->getMatrix().getTrans().x(), shakeTrans->getMatrix().getTrans().y(), 0.25);
+
 	btTransform world;
     myShakeMotion->getWorldTransform( world );
-	world.setOrigin( btTrans );
+	btVector3 o = world.getOrigin();
+	o[ 2 ] = -0.25;
+	world.setOrigin( o );
+	//world.setOrigin( btTrans );
     myShakeMotion->setWorldTransform( world );
 
 	//
 	printf("motion:\n");
 	{
-		printf("motion (worldtrans): (%lf, %lf, %lf)\n", //一直不变
+		printf("motion (worldtrans): (%lf, %lf, %lf)\n",
 			world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
 	}
 	{
@@ -363,11 +365,6 @@ void OsgbDice::update(const UpdateContext& context)
 		myOso->getTransformedNode()->getMatrix().getTrans().x(),
 		myOso->getTransformedNode()->getMatrix().getTrans().y(),
 		myOso->getTransformedNode()->getMatrix().getTrans().z());
-	//*/
-
-	//
-	printf("world(new): (%lf, %lf, %lf)\n",
-		world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
 	//*/
 
 	//
