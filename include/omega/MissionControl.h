@@ -54,28 +54,38 @@ namespace omega {
 	class MissionControlMessageIds
 	{
 	public:
-		//! bye! - tells the server this connection is over and will be closed after this message.
+		//! bye! - tells the server this connection is over and will be closed 
+		//!after this message.
 		static const char* Bye;
-		//! mnis <name> - updates the name the server will use to identify this connection.
+		//! mnis <name> - updates the name the server will use to identify 
+		//!this connection.
 		static const char* MyNameIs;
-		//! smsg <string> - sent by the server to a client: contains a log or response message that can be printed to the local console.
+		//! smsg <string> - sent by the server to a client: contains a log or 
+		//!response message that can be printed to the local console.
 		static const char* LogMessage;
-		//! sdto <name> - tells the server than messages from this connection should go ONLY to the named client.
+		//! sdto <name> - tells the server than messages from this connection 
+		//! should go ONLY to the named client.
 		static const char* SendTo;
-		//! sall - tells the server that messaged from this connection should be broadcast to all other clients. This is the default behavior.
+		//! sall - tells the server that messaged from this connection should
+		//! be broadcast to all other clients. This is the default behavior.
 		static const char* SendAll;
 
 		//! scmd <command> - default behavior (see MissionControlMessageHandler): 
 		//! the receiver will dispatch <command> to the script interpreter.
 		static const char* ScriptCommand;
-		//! strq [statname][|statname]* - default behavior (see MissionControlMessageHandler): 
-		//! the receiver will send back a strq message with a list of pipe | separated stat names
+		//! strq [statname][|statname]* - default behavior 
+		//! (see MissionControlMessageHandler): the receiver will send back a 
+		//! strq message with a list of pipe | separated stat names
 		static const char* StatRequest;
-		//! sted [statname]+ - default behavior (see MissionControlMessageHandler): 
-		//! the receiver will enable a set of statistics whose data will be returned back for each stat update message
+		//! sted [statname]+ - default behavior 
+		//! (see MissionControlMessageHandler): the receiver will enable a set 
+		//! of statistics whose data will be returned back for each stat 
+		//! update message
 		static const char* StatEnable;
-		//! stup [name cur min max avg]* - default behavior (see MissionControlMessageHandler): 
-		//! the receiver will send back a stup message with current data (name, min, max, average times / values) about statistics enabled by a sten message.
+		//! stup [name cur min max avg]* - default behavior 
+		//! (see MissionControlMessageHandler): the receiver will send back a 
+		//! stup message with current data (name, min, max, average 
+		//! times / values) about statistics enabled by a sten message.
 		static const char* StatUpdate;
 
 	private:
@@ -87,14 +97,18 @@ namespace omega {
 	class OMEGA_API IMissionControlMessageHandler: public ReferenceType
 	{
 	public:
-		virtual bool handleMessage(MissionControlConnection* sender, const char* header, char* data, int size) = 0;
+		virtual bool handleMessage(
+			MissionControlConnection* sender, 
+			const char* header, char* data, int size) = 0;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
 	class OMEGA_API MissionControlMessageHandler: public IMissionControlMessageHandler
 	{
 	public:
-		virtual bool handleMessage(MissionControlConnection* sender, const char* header, char* data, int size);
+		virtual bool handleMessage(
+			MissionControlConnection* sender, 
+			const char* header, char* data, int size);
 	private:
 		List<Stat*> myEnabledStats;
 	};
@@ -160,11 +174,14 @@ namespace omega {
 		MissionControlClient(): EngineModule("MissionControlClient") {}
 		virtual ~MissionControlClient() 
 		{ 
-			// We make sure the connection object is destroyed here. This is important because if we
-			// let default destruction take place, the io_service object may get destroyed before the
-			// connection that uses it, leading to a crash. io_service is declared before the connection
-			// object in the class members so things would work anyways, but it's better to be explicit.
-			// In the future it would be good to keep this required behavior hidden in a base TcpClient class.
+			// We make sure the connection object is destroyed here. This is
+			// important because if we let default destruction take place, the 
+			// io_service object may get destroyed before the connection that 
+			// uses it, leading to a crash. io_service is declared before the 
+			// connection object in the class members so things would work 
+			// anyways, but it's better to be explicit. In the future it would
+			// be good to keep this required behavior hidden in a base 
+			// TcpClient class.
 			dispose(); 
 		}
 

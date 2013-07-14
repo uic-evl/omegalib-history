@@ -109,7 +109,9 @@ SystemManager::SystemManager():
 	myExitRequested(false),
 	myIsInitialized(false),
 	myIsMaster(true),
-	mySageManager(NULL)
+	mySageManager(NULL),
+	myMissionControlServer(NULL),
+	myMissionControlClient(NULL)
 {
 	myDataManager = DataManager::getInstance();
 	myInterpreter = new PythonInterpreter();
@@ -348,6 +350,36 @@ void SystemManager::setupDisplaySystem()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void SystemManager::setupMissionControl(const String& mode)
+{
+	int port = MissionControlServer::DefaultPort;
+	String host = "127.0.0.1";
+
+	if(mySystemConfig->exists("config/missionControl"))
+	{
+		Setting& s = mySystemConfig->lookup("config/missionControl");
+		port = Config::getIntValue("port", s, port);
+		host = Config::getStringValue("host", s, host);
+	}
+
+	if(mode == "default")
+	{
+		omsg("Initializing mission control server...");
+
+		MissionControlMessageHandler* msgHandler = new MissionControlMessageHandler();
+
+		myMissionControlServer = new MissionControlServer();
+		myMissionControlServer->setMessageHandler(msgHandler);
+		myMissionControlServer->setPort(port);
+
+		// Register the mission control server. The service manager will take care of polling the server
+		// periodically to check for new connections.
+		myServiceManager->addService(myMissionControlServer);
+		myMissionControlServer->start();
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void SystemManager::initialize()
 {
 	if(myDisplaySystem) myDisplaySystem->initialize(this);
@@ -448,4 +480,3 @@ const String& SystemManager::getHostnameAndPort()
 { 
 	return myHostname;
 }
-
