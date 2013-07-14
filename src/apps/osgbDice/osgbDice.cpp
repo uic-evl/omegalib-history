@@ -232,6 +232,7 @@ void OsgbDice::initialize()
 
     myShakeMotion = new osgbDynamics::MotionState();
     myShakeMotion->setTransform( myShakeBox );
+	//myShakeMotion->setWorldTransform( myShakeBox );
     btScalar mass( 0.0 );
     btVector3 inertia( 0, 0, 0 );
     btRigidBody::btRigidBodyConstructionInfo rb( mass, myShakeMotion, compoundShape, inertia );
@@ -317,15 +318,15 @@ void OsgbDice::update(const UpdateContext& context)
 	}
 	//*/
 	
-	//osg::MatrixTransform* shakeTrans = myShakeMotion->getTransform()->asMatrixTransform();
-	//btVector3 btTrans(shakeTrans->getMatrix().getTrans().x(), shakeTrans->getMatrix().getTrans().y(), 0.25);
+	osg::MatrixTransform* shakeTrans = myShakeMotion->getTransform()->asMatrixTransform();
+	btVector3 btTrans(shakeTrans->getMatrix().getTrans().x(), shakeTrans->getMatrix().getTrans().y(), -0.25);
 
 	btTransform world;
     myShakeMotion->getWorldTransform( world );
-	btVector3 o = world.getOrigin();
-	o[ 2 ] = -0.25;
-	world.setOrigin( o );
-	//world.setOrigin( btTrans );
+	//btVector3 o = world.getOrigin();
+	//o[ 2 ] = -0.25;
+	//world.setOrigin( o );
+	world.setOrigin( btTrans );
     myShakeMotion->setWorldTransform( world );
 
 	//

@@ -1,90 +1,245 @@
+#include <osgUtil/Optimizer>
+#include <osg/PositionAttitudeTransform>
+#include <osg/MatrixTransform>
+#include <osg/Light>
+#include <osg/LightSource>
+#include <osg/Material>
+
+#define OMEGA_NO_GL_HEADERS
+#include <omega.h>
+#include <omegaToolkit.h>
+#include <omegaOsg.h>
+
+#include <osgViewer/Viewer>
+#include <osgDB/ReadFile>
+#include <osgGA/TrackballManipulator>
+#include <osgGA/GUIEventHandler>
+#include <osg/MatrixTransform>
+#include <osg/Geode>
+#include <osgwTools/Shapes.h>
+#include <osgwTools/Version.h>
+#include <osg/ShapeDrawable>
+
+#include <osgbDynamics/MotionState.h>
+#include <osgbCollision/CollisionShapes.h>
+#include <osgbDynamics/RigidBody.h>
+#include <osgbCollision/Utils.h>
+
+#include <btBulletDynamicsCommon.h>
+
+#include <string>
+
+#include <osg/io_utils>
+#include <iostream>
+
+//#include "GLDebugDrawer.h"
+
+using namespace omega;
+using namespace omegaToolkit;
+using namespace omegaOsg;
+
+//static GLDebugDrawer gDebugDraw;
+
+///create 125 (5x5x5) dynamic object
+#define ARRAY_SIZE_X 5
+#define ARRAY_SIZE_Y 5
+#define ARRAY_SIZE_Z 5
+
+//maximum number of objects (and allow user to shoot additional boxes)
+#define MAX_PROXIES (ARRAY_SIZE_X*ARRAY_SIZE_Y*ARRAY_SIZE_Z + 1024)
+
+///scaling of the objects (0.1 = 20 centimeter boxes )
+#define SCALING 1.
+#define START_POS_X -5
+#define START_POS_Y -5
+#define START_POS_Z -3
+
+// create a box
+// 100% osg stuff
+osg::Geode* osgBox( const osg::Vec3& center, const osg::Vec3& halfLengths )
+{
+    osg::Vec3 l( halfLengths * 2. );
+    osg::Box* box = new osg::Box( center, l.x(), l.y(), l.z() );
+    osg::ShapeDrawable* shape = new osg::ShapeDrawable( box );
+    shape->setColor( osg::Vec4( 1., 1., 1., 1. ) );
+    osg::Geode* geode = new osg::Geode();
+    geode->addDrawable( shape );
+
+    return( geode );
+}
+
+//================================================================================
+
 class OsgbBasicDemo : public EngineModule
 {
-
-	//keep the collision shapes, for deletion/cleanup
-	btAlignedObjectArray<btCollisionShape*>	myCollisionShapes;
-
-	btBroadphaseInterface*	myDBroadphase;
-
-	btCollisionDispatcher*	myispatcher;
-
-	btConstraintSolver*	mySolver;
-
-	btDefaultCollisionConfiguration* myCollisionConfiguration;
-
-	public:
-
+public:
 	OsgbBasicDemo()
 	{
+		myOsg = new OsgModule();
+		ModuleServices::addModule(myOsg);
+		myWorld = initBtPhysicsWorld();
 	}
-	virtual ~OsgbBasicDemo()
-	{
-		exitPhysics();
-	}
-	
-	void initPhysics();
-	void exitPhysics();
+
+	virtual void initialize();
+	virtual void update(const UpdateContext& context);
+
+	btDynamicsWorld* initBtPhysicsWorld();
+	//void exitPhysics();
 
 	//virtual void clientMoveAndDisplay();
 
 	//virtual void displayCallback();
-	void resetScene();
-	
-	virtual void initialize();
-	virtual void update(const UpdateContext& context);
+	//void resetScene();
 
-	static DemoApplication* Create()
-	{
-		OsgbBasicDemo* demo = new OsgbBasicDemo;
-		demo->myinit();
-		demo->initPhysics();
-		return demo;
-	}
+private:
+
+	Ref<OsgModule> myOsg;
+	btDynamicsWorld* myWorld;
+	Ref<SceneNode> mySceneNode;
+	Actor* myInteractor;
+	OsgSceneObject* myOsgSceneObj;
+
+	osg::MatrixTransform* myGround;
+
+	osg::MatrixTransform* myCol;
+
+	//keep the collision shapes, for deletion/cleanup
+	//btAlignedObjectArray<btCollisionShape*>	myCollisionShapes;
 	
 };
 
-void BasicDemo::exitPhysics()
+// initial steps to create bullet dynamics world
+// 100% bullet stuff
+btDynamicsWorld* OsgbBasicDemo::initBtPhysicsWorld()
 {
+	btDefaultCollisionConfiguration * collisionConfiguration = new btDefaultCollisionConfiguration();
+	btCollisionDispatcher * dispatcher = new btCollisionDispatcher( collisionConfiguration );
+	btBroadphaseInterface * inter = new btDbvtBroadphase();
+	btConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
 
-	//cleanup in the reverse order of creation/initialization
-	//remove the rigidbodies from the dynamics world and delete them
-	for (int i=m_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
-	{
-		btCollisionObject* obj = myDynamicsWorld->getCollisionObjectArray()[i];
-		btRigidBody* body = btRigidBody::upcast(obj);
-		if (body && body->getMotionState())
-		{
-			delete body->getMotionState();
-		}
-		m_dynamicsWorld->removeCollisionObject( obj );
-		delete obj;
-	}
-
-	//delete collision shapes
-	for (int j=0;j<m_collisionShapes.size();j++)
-	{
-		btCollisionShape* shape = m_collisionShapes[j];
-		delete shape;
-	}
-	m_collisionShapes.clear();
-
-	delete m_dynamicsWorld;
+	btDynamicsWorld * dw = new btDiscreteDynamicsWorld( dispatcher, inter, solver, collisionConfiguration );
 	
-	delete m_solver;
-	
-	delete m_broadphase;
-	
-	delete m_dispatcher;
-
-	delete m_collisionConfiguration;
-
-	
+	//dw->setDebugDrawer(&gDebugDraw);
+	dw->setGravity( btVector3(0, -10, 0) );
+ 
+	return ( dw );
 }
 
-void OsgbBasicDemo::resetScene()
+void OsgbBasicDemo::initialize()
 {
-	exitPhysics();
-	initPhysics();
+	osg::Group* root = new osg::Group;
+	//create a few basic rigid bodies
+
+	osg::Vec3 halfLengths( 50., 50., 50. );
+	osg::Vec3 center( 0., -50., 0 );
+	btBoxShape* groundShape = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
+	//groundShape->initializePolyhedralFeatures();
+//	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),50);
+	
+	//myCollisionShapes.push_back(groundShape);
+
+	btTransform groundTransform;
+	groundTransform.setIdentity();
+	groundTransform.setOrigin( osgbCollision::asBtVector3( center ) );
+	
+	{
+		myGround = new osg::MatrixTransform;
+		myGround->addChild( osgBox( center, halfLengths ) );
+
+		osgbDynamics::MotionState* ms = new osgbDynamics::MotionState();
+		//ms->setWorldTransform(groundTransform);
+		ms->setTransform(myGround);
+		btScalar mass( 0.0 );
+		btVector3 inertia( 0, 0, 0 );
+		btRigidBody::btRigidBodyConstructionInfo rb( mass, ms, groundShape, inertia );
+		btRigidBody* body = new btRigidBody( rb );
+
+		myWorld->addRigidBody(body);
+	}
+
+	root->addChild(myGround);
+
+	{
+		//create a few dynamic rigidbodies
+		// Re-using the same collision is better for memory usage and performance
+
+		btBoxShape* colShape = new btBoxShape( btVector3(SCALING*1,SCALING*1,SCALING*1) );
+		//btCollisionShape* colShape = new btSphereShape(btScalar(1.));
+		//myCollisionShapes.push_back(colShape);
+
+		/// Create Dynamic Objects
+		btTransform startTransform;
+		startTransform.setIdentity();
+
+		btScalar	mass(1.f);
+
+		//rigidbody is dynamic if and only if mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0,0,0);
+		if (isDynamic)
+			colShape->calculateLocalInertia(mass,localInertia);
+
+		float start_x = START_POS_X - ARRAY_SIZE_X/2;
+		float start_y = START_POS_Y;
+		float start_z = START_POS_Z - ARRAY_SIZE_Z/2;
+
+		mySceneNode = new SceneNode(getEngine());
+
+		for (int k=0;k<ARRAY_SIZE_Y;k++)
+		{
+			for (int i=0;i<ARRAY_SIZE_X;i++)
+			{
+				for(int j = 0;j<ARRAY_SIZE_Z;j++)
+				{
+					startTransform.setOrigin(SCALING*btVector3(
+										btScalar(2.0*i + start_x),
+										btScalar(20+2.0*k + start_y),
+										btScalar(2.0*j + start_z)));
+
+					myCol = new osg::MatrixTransform;
+					myCol->addChild( osgBox( center, halfLengths ) );
+
+					myOsgSceneObj = new OsgSceneObject(myCol);
+					root->addChild( myOsgSceneObj->getTransformedNode() );
+
+					mySceneNode->addComponent(myOsgSceneObj);
+
+					//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+					osgbDynamics::MotionState* ms = new osgbDynamics::MotionState();
+					ms->setTransform(myCol);
+					btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, ms, colShape, localInertia);
+					btRigidBody* body = new btRigidBody(rbInfo);
+					
+					myWorld->addRigidBody(body);
+				}
+			}
+		}
+	}
+    
+    //mySceneNode->setBoundingBoxVisible(true);
+    mySceneNode->setBoundingBoxVisible(false);
+    getEngine()->getScene()->addChild(mySceneNode);
+	getEngine()->getDefaultCamera()->setPosition(0,0,30);
+
+    // Set the interactor style used to manipulate meshes.
+    if(SystemManager::settingExists("config/interactor"))
+    {
+        Setting& sinteractor = SystemManager::settingLookup("config/interactor");
+        myInteractor = ToolkitUtils::createInteractor(sinteractor);
+        if(myInteractor != NULL)
+        {
+            ModuleServices::addModule(myInteractor);
+        }
+    }
+
+    if(myInteractor != NULL)
+    {
+        myInteractor->setSceneNode(mySceneNode);
+    }
+
+    // Set the osg node as the root node
+    myOsg->setRootNode(root);
 }
 
 void OsgbBasicDemo::update(const UpdateContext& context)
@@ -95,5 +250,5 @@ void OsgbBasicDemo::update(const UpdateContext& context)
 int main(int argc, char** argv)
 {
 	Application<OsgbBasicDemo> app("osgbBasicDemo");
-	return omain(OsgbBasicDemo, argc, argv);
+	return omain(app, argc, argv);
 }
