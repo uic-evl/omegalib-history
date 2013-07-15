@@ -66,11 +66,6 @@ Camera::Camera(Engine* e, uint flags):
 
 	// set camera Id and increment the counter
 	this->myCameraId = omega::CamerasCounter++;
-
-	for(int i = 0; i < GpuContext::MaxContexts; i++)
-	{
-		myOutput[i] = new CameraOutput(isOffscreen());
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,6 +182,13 @@ void Camera::focusOn(SceneNode* node)
 CameraOutput* Camera::getOutput(uint contextId)
 {
 	oassert(contextId < GpuContext::MaxContexts);
+	// Camera outputs are created on-demand here.
+	if(myOutput[contextId] == NULL)
+	{
+		ofmsg("Camera::getOutput: creating camera output for context %1%", %contextId);
+		myOutput[contextId] = new CameraOutput(isOffscreen());
+	}
+
 	return myOutput[contextId].get();
 }
 
