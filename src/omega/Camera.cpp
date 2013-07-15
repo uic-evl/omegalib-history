@@ -60,7 +60,8 @@ Camera::Camera(Engine* e, uint flags):
 	myHeadOrientation(Quaternion::Identity()),
 	myHeadOffset(Vector3f::Zero()),
 	myMask(0),
-	myEyeSeparation(0.06f)
+	myEyeSeparation(0.06f),
+	myListener(NULL)
 {
 	//myProjectionOffset = -Vector3f::UnitZ();
 
@@ -211,6 +212,14 @@ bool Camera::isEnabled(const DrawContext& context)
 ///////////////////////////////////////////////////////////////////////////////
 const DrawContext& Camera::beginDraw(const DrawContext& context)
 {
+	if(myListener != NULL) myListener->beginDraw(this, context);
+
+	// Default camera: just return back the original draw context. Also, camera
+	// outputs are ignored. This is a work-in-progress change, camera output
+	// mechanics may be changed / simplified in the future. To avoid breaking
+	// current code (mostly porthole) things are kept as they are for now.
+	if(getEngine()->getDefaultCamera() == this) return context;
+	
 	CameraOutput* output = getOutput(context.gpuContext->getId());
 	DrawContext& dc = myDrawContext[context.gpuContext->getId()];
 
@@ -240,6 +249,14 @@ const DrawContext& Camera::beginDraw(const DrawContext& context)
 ///////////////////////////////////////////////////////////////////////////////
 void Camera::endDraw(const DrawContext& context)
 {
+	if(myListener != NULL) myListener->endDraw(this, context);
+
+	// Default camera: just return back the original draw context. Also, camera
+	// outputs are ignored. This is a work-in-progress change, camera output
+	// mechanics may be changed / simplified in the future. To avoid breaking
+	// current code (mostly porthole) things are kept as they are for now.
+	if(getEngine()->getDefaultCamera() == this) return;
+
 	CameraOutput* output = getOutput(context.gpuContext->getId());
 	DrawContext& dc = myDrawContext[context.gpuContext->getId()];
 	output->endDraw(dc);
@@ -248,6 +265,14 @@ void Camera::endDraw(const DrawContext& context)
 ///////////////////////////////////////////////////////////////////////////////
 void Camera::startFrame(const FrameInfo& frame)
 {
+	if(myListener != NULL) myListener->startFrame(this, frame);
+
+	// Default camera: just return back the original draw context. Also, camera
+	// outputs are ignored. This is a work-in-progress change, camera output
+	// mechanics may be changed / simplified in the future. To avoid breaking
+	// current code (mostly porthole) things are kept as they are for now.
+	if(getEngine()->getDefaultCamera() == this) return;
+
 	CameraOutput* output = getOutput(frame.gpuContext->getId());
 	output->startFrame(frame);
 }
@@ -255,6 +280,14 @@ void Camera::startFrame(const FrameInfo& frame)
 ///////////////////////////////////////////////////////////////////////////////
 void Camera::finishFrame(const FrameInfo& frame)
 {
+	if(myListener != NULL) myListener->finishFrame(this, frame);
+
+	// Default camera: just return back the original draw context. Also, camera
+	// outputs are ignored. This is a work-in-progress change, camera output
+	// mechanics may be changed / simplified in the future. To avoid breaking
+	// current code (mostly porthole) things are kept as they are for now.
+	if(getEngine()->getDefaultCamera() == this) return;
+
 	CameraOutput* output = getOutput(frame.gpuContext->getId());
 	output->finishFrame(frame);
 }
