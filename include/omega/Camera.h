@@ -58,7 +58,7 @@ namespace omega {
 	{
 	public:
 		virtual void endDraw(Camera* cam, const DrawContext& context) {}
-		virtual const DrawContext& beginDraw(Camera* cam, const DrawContext& context) {}
+		virtual void beginDraw(Camera* cam, const DrawContext& context) { }
 		virtual void startFrame(Camera* cam, const FrameInfo& frame) {}
 		virtual void finishFrame(Camera* cam, const FrameInfo& frame) {}
 	};

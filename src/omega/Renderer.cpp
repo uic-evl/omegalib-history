@@ -1,29 +1,39 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The omegalib renderer is the entry point for all of omegalib rendering code.
+ *	The renderer does not draw anything: it just manages rendering resources, 
+ *	cameras and render passes.
+ ******************************************************************************/
 #include "omega/Renderer.h"
 #include "omega/Engine.h"
 #include "omega/DisplaySystem.h"
@@ -36,7 +46,7 @@
 
 using namespace omega;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Renderer::Renderer(Engine* engine)
 {
 	myRenderer = new DrawInterface();
@@ -44,7 +54,7 @@ Renderer::Renderer(Engine* engine)
 	myServer->addRenderer(this);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Texture* Renderer::createTexture()
 {
 	Texture* tex = new Texture(this->myGpuContext);
@@ -52,7 +62,7 @@ Texture* Renderer::createTexture()
 	return tex;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::addRenderPass(RenderPass* pass, bool addToFront)
 {
 	myRenderPassLock.lock();
@@ -68,7 +78,7 @@ void Renderer::addRenderPass(RenderPass* pass, bool addToFront)
 	myRenderPassLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::removeRenderPass(RenderPass* pass)
 {
 	myRenderPassLock.lock();
@@ -76,7 +86,7 @@ void Renderer::removeRenderPass(RenderPass* pass)
 	myRenderPassLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::removeAllRenderPasses()
 {
 	myRenderPassLock.lock();
@@ -84,7 +94,7 @@ void Renderer::removeAllRenderPasses()
 	myRenderPassLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 RenderPass* Renderer::getRenderPass(const String& name)
 {
 	foreach(RenderPass* rp, myRenderPassList)
@@ -94,7 +104,7 @@ RenderPass* Renderer::getRenderPass(const String& name)
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::initialize()
 {
 	ofmsg("@Renderer::Initialize: id = %1%", %getGpuContext()->getId());
@@ -110,7 +120,7 @@ void Renderer::initialize()
 	//myServer->clientInitialize(this);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::queueCommand(IRendererCommand* cmd)
 {
 	myRenderCommandLock.lock();
@@ -118,7 +128,7 @@ void Renderer::queueCommand(IRendererCommand* cmd)
 	myRenderCommandLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::startFrame(const FrameInfo& frame)
 {
 #ifdef OMEGA_DEBUG_FLOW
@@ -131,7 +141,7 @@ void Renderer::startFrame(const FrameInfo& frame)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::finishFrame(const FrameInfo& frame)
 {
 #ifdef OMEGA_DEBUG_FLOW
@@ -152,7 +162,7 @@ void Renderer::finishFrame(const FrameInfo& frame)
 	foreach(Texture* tex, txlist) myTextures.remove(tex);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::draw(const DrawContext& context)
 {
 #ifdef OMEGA_DEBUG_FLOW
@@ -203,10 +213,17 @@ void Renderer::draw(const DrawContext& context)
 	}
 
 	// Draw once for the default camera (using the passed main draw context).
-	innerDraw(context, myServer->getDefaultCamera());
+	// NOTE: We use the draw context returned by the camera because in principle
+	// the camera may adjust the context before drawing. In practice, for the 
+	// default camera the context should stay the same as what is passed to this
+	// method.
+	Camera* cam = myServer->getDefaultCamera();
+	const DrawContext& cameraContext = cam->beginDraw(context);
+	innerDraw(cameraContext, myServer->getDefaultCamera());
+	cam->endDraw(context);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Renderer::innerDraw(const DrawContext& context, Camera* cam)
 {
 	// NOTE: Scene.draw traversal only runs for cameras that do not have a mask specified

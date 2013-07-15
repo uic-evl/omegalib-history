@@ -24,8 +24,8 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************************************/
-#ifndef __RENDERER_H__
-#define __RENDERER_H__
+#ifndef __DRAW_INTERFACE_H__
+#define __DRAW_INTERFACE_H__
 
 #include "osystem.h"
 #include "omega/Color.h"

@@ -1,39 +1,44 @@
-###################################################################################################
+###############################################################################
 # THE OMEGA LIB PROJECT
-#-------------------------------------------------------------------------------------------------
-# Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+#-----------------------------------------------------------------------------
+# Copyright 2010-2013		Electronic Visualization Laboratory, 
+#							University of Illinois at Chicago
 # Authors:										
 #  Alessandro Febretti		febret@gmail.com
-#-------------------------------------------------------------------------------------------------
-# Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+#-----------------------------------------------------------------------------
+# Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+# University of Illinois at Chicago
 # All rights reserved.
-# Redistribution and use in source and binary forms, with or without modification, are permitted 
-# provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without modification, 
+# are permitted provided that the following conditions are met:
 # 
-# Redistributions of source code must retain the above copyright notice, this list of conditions 
-# and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
-# notice, this list of conditions and the following disclaimer in the documentation and/or other 
-# materials provided with the distribution. 
+# Redistributions of source code must retain the above copyright notice, this 
+# list of conditions and the following disclaimer. Redistributions in binary 
+# form must reproduce the above copyright notice, this list of conditions and 
+# the following disclaimer in the documentation and/or other materials provided 
+# with the distribution. 
 # 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
-# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################################
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+###############################################################################
 
-###################################################################################################
+###############################################################################
 # Find required packages
 find_package(OpenGL REQUIRED)
 
-###################################################################################################
+###############################################################################
 # Compile definitions
 add_definitions(-DOMEGA_EXPORTING -DGLEW_STATIC -DEQ_FABRIC_STATIC -DFREEGLUT_STATIC -DFTGL_LIBRARY_STATIC  -DFREEIMAGE_LIB)
 
-###################################################################################################
+###############################################################################
 # Source files
 SET( srcs 
 		DisplayConfig.cpp
@@ -80,7 +85,7 @@ SET( srcs
 		WandEmulationService.cpp
         )
 		
-###################################################################################################
+###############################################################################
 # Headers
 SET( headers 
 		${OmegaLib_SOURCE_DIR}/include/omega.h
@@ -138,7 +143,7 @@ SET( headers
 		${OmegaLib_SOURCE_DIR}/include/omega/WandEmulationService.h
 		)
         
-###################################################################################################
+###############################################################################
 # Enable / disable specific modules within omegalib
 if(OMEGA_USE_PYTHON)
 	add_definitions(-DBOOST_PYTHON_SOURCE)
@@ -250,19 +255,20 @@ if(NOT WIN32)
 	endif()
 endif()
 
-###################################################################################################
-# Group source files into separate folders for visual studio project (this is just eye candy)
+###############################################################################
+# Group source files into separate folders for visual studio project 
+# (this is just eye candy)
 source_group(omega REGULAR_EXPRESSION omega/)		
 source_group(eqinternal REGULAR_EXPRESSION eqinternal/)		
 source_group(boostPython REGULAR_EXPRESSION boostPython/)		
 
-###################################################################################################
+###############################################################################
 # Create the library with the provided sources and headers
 enable_precompiled_headers(precompiled.h srcs)
 add_library( omega SHARED ${srcs} ${headers})
 target_link_libraries(omega ${OMICRON_LIB} freetype ftgl FreeImage)
 
-###################################################################################################
+###############################################################################
 # Setup module-specific link info
 set(EXT_LIB_DIR ${OmegaLib_SOURCE_DIR}/external/libs32)
 set(EXT_INCLUDE_DIR ${OmegaLib_SOURCE_DIR}/external/include)
@@ -299,7 +305,7 @@ if(OMEGA_USE_FASTIMAGE)
 	target_link_libraries(omega ${JPEG_LIBRARIES})
 endif()
 
-###################################################################################################
+###############################################################################
 # See if we can setup Python support for this build
 if(OMEGA_USE_PYTHON)
 	if(APPLE)
@@ -334,5 +340,5 @@ endif()
 # Boost includes
 include_directories(${CMAKE_BINARY_DIR}/omicron/omicron/include/boost)
 
-###################################################################################################
+###############################################################################
 configure_file(omegaConfig.h.in ${CMAKE_BINARY_DIR}/include/omegaConfig.h)

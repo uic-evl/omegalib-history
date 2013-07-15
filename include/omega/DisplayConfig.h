@@ -66,6 +66,7 @@ namespace omega
 			enabled(false),
 			camera(NULL),
 			id(0),
+			flags(0),
 			invertStereo(false),
 			isInGrid(false),
 			settingData(s)

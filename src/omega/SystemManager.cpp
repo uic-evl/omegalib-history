@@ -109,6 +109,7 @@ SystemManager::SystemManager():
 	myExitRequested(false),
 	myIsInitialized(false),
 	myIsMaster(true),
+	myServiceManager(NULL),
 	mySageManager(NULL),
 	myMissionControlServer(NULL),
 	myMissionControlClient(NULL)
@@ -162,7 +163,6 @@ void SystemManager::setup(Config* appcfg)
 		// the multi instance configuration parameters that are used during service configuration.
 		setupDisplaySystem();
 
-		setupServiceManager();
 		if(myInterpreter->isEnabled())
 		{
 			if(mySystemConfig->exists("config"))
@@ -181,6 +181,16 @@ void SystemManager::setup(Config* appcfg)
 				}
 			}
 		}
+
+		myServiceManager = new ServiceManager();
+
+		// NOTE: We initialize the interpreter here (instead of the 
+		// SystemManager::initialize function) to allow it to load optional modules
+		// that may provide services that we then want do setup during
+		// setupServiceManager()
+		myInterpreter->initialize("omegalib");
+
+		setupServiceManager();
 	}
 	catch(libconfig::SettingTypeException ste)
 	{
@@ -259,8 +269,6 @@ void SystemManager::adjustNetServicePort(Setting& stnetsvc)
 ///////////////////////////////////////////////////////////////////////////////
 void SystemManager::setupServiceManager()
 {
-	myServiceManager = new ServiceManager();
-
 	myServiceManager->registerService("MouseService", (ServiceAllocator)MouseService::New);
 	myServiceManager->registerService("KeyboardService", (ServiceAllocator)KeyboardService::New);
 	myServiceManager->registerService("ObserverUpdateServiceExt", (ServiceAllocator)ObserverUpdateServiceExt::New);
@@ -300,10 +308,9 @@ void SystemManager::setupServiceManager()
 void SystemManager::setupDisplaySystem()
 {
 	// Instantiate input services
-	Setting& stRoot = mySystemConfig->getRootSetting();
-	if(stRoot.exists("config/display"))
+	if(mySystemConfig->exists("config/display"))
 	{
-		Setting& stDS = stRoot["config/display"][0];
+		Setting& stDS = mySystemConfig->lookup("config/display");
 		DisplaySystem* ds = NULL;
 
 		String displaySystemType;
@@ -382,10 +389,13 @@ void SystemManager::setupMissionControl(const String& mode)
 ///////////////////////////////////////////////////////////////////////////////
 void SystemManager::initialize()
 {
-	if(myDisplaySystem) myDisplaySystem->initialize(this);
+	// Initialize the service manager before the display system so services get
+	// a chance to modify the display configuration before the display is 
+	// initialized. This is used by services in external modules like the
+	// Oculus Rift service.
 	myServiceManager->initialize();
 
-	myInterpreter->initialize("omegalib");
+	if(myDisplaySystem) myDisplaySystem->initialize(this);
 
 	myStatsManager = new StatsManager();
 	myIsInitialized = true;

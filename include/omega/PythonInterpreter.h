@@ -142,6 +142,9 @@ namespace omega
 		bool myEnabled;
 		bool myShellEnabled;
 		bool myDebugShell;
+		// Command read from a configuration file and executed during 
+		// initialization. Helpful to load or setup optional modules.
+		String myInitCommand;
 		PythonInteractiveThread* myInteractiveThread;
 
 		Lock myInteractiveCommandLock;

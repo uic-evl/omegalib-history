@@ -171,7 +171,9 @@ void PythonInterpreter::setup(const Setting& setting)
 {
 	myShellEnabled = Config::getBoolValue("pythonShellEnabled", setting, myShellEnabled);
 	myDebugShell = Config::getBoolValue("pythonShellDebug", setting, myDebugShell);
-	
+	// Command read from a configuration file and executed during 
+	// initialization. Helpful to load or setup optional modules.
+	myInitCommand = Config::getStringValue("initCommand", setting, "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -250,7 +252,9 @@ void PythonInterpreter::initialize(const char* programName)
 	// Initialize internal Apis
 	omegaPythonApiInit();
 
+	// Run initialization commands
 	PyRun_SimpleString("from omega import *");
+	if(myInitCommand != "") PyRun_SimpleString(myInitCommand.c_str());
 	
 	omsg("Python Interpreter initialized.");
 }
