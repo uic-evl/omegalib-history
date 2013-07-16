@@ -61,7 +61,7 @@ osg::Geode* osgBox( const osg::Vec3& center, const osg::Vec3& halfLengths )
     osg::Vec3 l( halfLengths * 2. );
     osg::Box* box = new osg::Box( center, l.x(), l.y(), l.z() );
     osg::ShapeDrawable* shape = new osg::ShapeDrawable( box );
-    shape->setColor( osg::Vec4( 1., 1., 1., 1. ) );
+    shape->setColor( osg::Vec4( 1., 0., 1., 1. ) );
     osg::Geode* geode = new osg::Geode();
     geode->addDrawable( shape );
 
@@ -103,6 +103,9 @@ private:
 
 	osg::MatrixTransform* myCol;
 
+	//osgbDynamics::MotionState* myGroundMotionState;
+
+	//osgbDynamics::MotionState* myColMotionState;
 	//keep the collision shapes, for deletion/cleanup
 	//btAlignedObjectArray<btCollisionShape*>	myCollisionShapes;
 	
@@ -128,8 +131,8 @@ btDynamicsWorld* OsgbBasicDemo::initBtPhysicsWorld()
 void OsgbBasicDemo::initialize()
 {
 	osg::Group* root = new osg::Group;
-	//create a few basic rigid bodies
 
+	//create a few basic rigid bodies
 	osg::Vec3 halfLengths( 50., 50., 50. );
 	osg::Vec3 center( 0., -50., 0 );
 	btBoxShape* groundShape = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
@@ -143,14 +146,17 @@ void OsgbBasicDemo::initialize()
 	groundTransform.setOrigin( osgbCollision::asBtVector3( center ) );
 	
 	{
-		myGround = new osg::MatrixTransform;
-		myGround->addChild( osgBox( center, halfLengths ) );
+		myGround = new osg::MatrixTransform( osgbCollision::asOsgMatrix( groundTransform ) );
+		myGround->addChild( osgBox( osg::Vec3(0,0,0), halfLengths ) );
 
 		osgbDynamics::MotionState* ms = new osgbDynamics::MotionState();
-		//ms->setWorldTransform(groundTransform);
+		ms->setWorldTransform(groundTransform);
 		ms->setTransform(myGround);
+		//myGroundMotionState->setWorldTransform(groundTransform);
+		//myGroundMotionState->setTransform(myGround);
 		btScalar mass( 0.0 );
 		btVector3 inertia( 0, 0, 0 );
+		//btRigidBody::btRigidBodyConstructionInfo rb( mass, myGroundMotionState, groundShape, inertia );
 		btRigidBody::btRigidBodyConstructionInfo rb( mass, ms, groundShape, inertia );
 		btRigidBody* body = new btRigidBody( rb );
 
@@ -158,18 +164,19 @@ void OsgbBasicDemo::initialize()
 	}
 
 	root->addChild(myGround);
-
+	
 	{
 		//create a few dynamic rigidbodies
 		// Re-using the same collision is better for memory usage and performance
 
-		btBoxShape* colShape = new btBoxShape( btVector3(SCALING*1,SCALING*1,SCALING*1) );
+		osg::Vec3 halfLengths(SCALING*1, SCALING*1,SCALING*1);
+
+		btBoxShape* colShape = new btBoxShape( osgbCollision::asBtVector3( halfLengths ) );
 		//btCollisionShape* colShape = new btSphereShape(btScalar(1.));
 		//myCollisionShapes.push_back(colShape);
 
 		/// Create Dynamic Objects
 		btTransform startTransform;
-		startTransform.setIdentity();
 
 		btScalar	mass(1.f);
 
@@ -180,9 +187,9 @@ void OsgbBasicDemo::initialize()
 		if (isDynamic)
 			colShape->calculateLocalInertia(mass,localInertia);
 
-		float start_x = START_POS_X - ARRAY_SIZE_X/2;
+		float start_x = START_POS_X - ARRAY_SIZE_X/2.0;
 		float start_y = START_POS_Y;
-		float start_z = START_POS_Z - ARRAY_SIZE_Z/2;
+		float start_z = START_POS_Z - ARRAY_SIZE_Z/2.0;
 
 		mySceneNode = new SceneNode(getEngine());
 
@@ -192,13 +199,14 @@ void OsgbBasicDemo::initialize()
 			{
 				for(int j = 0;j<ARRAY_SIZE_Z;j++)
 				{
-					startTransform.setOrigin(SCALING*btVector3(
-										btScalar(2.0*i + start_x),
-										btScalar(20+2.0*k + start_y),
-										btScalar(2.0*j + start_z)));
+					// first one at (-7.5, 15, -5.5)
+					osg::Vec3 center( btScalar(2.0*i + start_x), btScalar(20+2.0*k + start_y), btScalar(2.0*j + start_z) );
 
-					myCol = new osg::MatrixTransform;
-					myCol->addChild( osgBox( center, halfLengths ) );
+					startTransform.setIdentity();
+					startTransform.setOrigin( SCALING * osgbCollision::asBtVector3(center) );
+
+					myCol = new osg::MatrixTransform( osgbCollision::asOsgMatrix(startTransform) );
+					myCol->addChild( osgBox( osg::Vec3(0,0,0), halfLengths ) );
 
 					myOsgSceneObj = new OsgSceneObject(myCol);
 					root->addChild( myOsgSceneObj->getTransformedNode() );
@@ -206,21 +214,33 @@ void OsgbBasicDemo::initialize()
 					mySceneNode->addComponent(myOsgSceneObj);
 
 					//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-					osgbDynamics::MotionState* ms = new osgbDynamics::MotionState();
-					ms->setTransform(myCol);
-					btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, ms, colShape, localInertia);
-					btRigidBody* body = new btRigidBody(rbInfo);
-					
-					myWorld->addRigidBody(body);
+					/*
+					if (k==0 && i == 0 && j == 0) {
+						myColMotionState->setWorldTransform(startTransform);
+						myColMotionState->setTransform(myCol);
+						btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myColMotionState, colShape, localInertia);
+						btRigidBody* body = new btRigidBody(rbInfo);
+						myWorld->addRigidBody(body);
+					}*/
+					//else {
+						osgbDynamics::MotionState* motionState = new osgbDynamics::MotionState();
+						motionState->setWorldTransform(startTransform);
+						motionState->setTransform(myCol);
+						btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, colShape, localInertia);
+						btRigidBody* body = new btRigidBody(rbInfo);
+						myWorld->addRigidBody(body);
+					//}
+
 				}
 			}
 		}
 	}
     
-    //mySceneNode->setBoundingBoxVisible(true);
-    mySceneNode->setBoundingBoxVisible(false);
+    mySceneNode->setBoundingBoxVisible(true);
+    //mySceneNode->setBoundingBoxVisible(false);
     getEngine()->getScene()->addChild(mySceneNode);
-	getEngine()->getDefaultCamera()->setPosition(0,0,30);
+	getEngine()->getDefaultCamera()->setPosition(0,0,60);
+	//getEngine()->getDefaultCamera()->setOrientation(1, 0, -1, -3);
 
     // Set the interactor style used to manipulate meshes.
     if(SystemManager::settingExists("config/interactor"))
@@ -240,11 +260,64 @@ void OsgbBasicDemo::initialize()
 
     // Set the osg node as the root node
     myOsg->setRootNode(root);
+
+	/*/
+	printf("bullet:\n");
+	for (int i=0;i<10;i++)
+	{
+		printf("object %d: (worldtrans) (%lf, %lf, %lf)\n", i,
+			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().x(),
+			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().y(),
+			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().z());
+	}
+	printf("\n");
+
+	printf("osg:\n");
+	for (int i=0;i<10;i++)
+	{
+		printf("object %d: (myOsg.child(i)) (%lf, %lf, %lf)\n", i,
+			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().x(),
+			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().y(),
+			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().z());
+	}
+	//*/
 }
 
 void OsgbBasicDemo::update(const UpdateContext& context)
 {
+	double elapsed = 1./60.;
+	myWorld->stepSimulation( elapsed, 4, elapsed/4. );
 
+	//
+	printf("bullet:\n");
+	for (int i=0;i<5;i++)
+	{
+		printf("object %d: (worldtrans) (%lf, %lf, %lf)\n", i,
+			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().x(),
+			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().y(),
+			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().z());
+	}
+	//*/
+	/*/
+	printf("motion:\n");
+	btTransform world;
+	for (int i=0;i<5;i++)
+	{
+		ms[i]->getWorldTransform( world );
+		printf("object %d: (worldtrans): (%lf, %lf, %lf)\n", i,
+			world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
+	}
+	//*/
+	//
+	printf("osg:\n");
+	for (int i=0;i<5;i++)
+	{
+		printf("object %d: (myOsg.child(i)) (%lf, %lf, %lf)\n", i,
+			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().x(),
+			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().y(),
+			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().z());
+	}
+	//*/
 }
 
 int main(int argc, char** argv)

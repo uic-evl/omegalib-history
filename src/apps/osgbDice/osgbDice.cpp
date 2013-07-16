@@ -301,7 +301,7 @@ void OsgbDice::initialize()
 
 void OsgbDice::update(const UpdateContext& context)
 {
-	// 
+	/*/ 
 	printf("bullet:\n");
 	for (int i=0;i<2;i++)
 	{
@@ -329,7 +329,7 @@ void OsgbDice::update(const UpdateContext& context)
 	world.setOrigin( btTrans );
     myShakeMotion->setWorldTransform( world );
 
-	//
+	/*/
 	printf("motion:\n");
 	{
 		printf("motion (worldtrans): (%lf, %lf, %lf)\n",
@@ -343,7 +343,7 @@ void OsgbDice::update(const UpdateContext& context)
 	}
 	//*/
 
-	//
+	/*/
 	printf("osg:\n");
 	for (int i=0;i<2;i++)
 	{
@@ -360,7 +360,7 @@ void OsgbDice::update(const UpdateContext& context)
 	}
 	//*/
 
-	//
+	/*/
 	printf("omegalib:\n");
 	printf("box: (%lf, %lf, %lf)\n",
 		myOso->getTransformedNode()->getMatrix().getTrans().x(),
@@ -368,7 +368,7 @@ void OsgbDice::update(const UpdateContext& context)
 		myOso->getTransformedNode()->getMatrix().getTrans().z());
 	//*/
 
-	//
+	/*/
 	printf("  1: (%d, %d, %d)\n", // strange, strange
 		die1->getMatrix().getTrans().x(),
 		die1->getMatrix().getTrans().y(),
