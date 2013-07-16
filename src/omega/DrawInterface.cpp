@@ -1,29 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	Contains utility functions used to draw and manage graphic resources
+ ******************************************************************************/
 #include "omega/DrawInterface.h"
 #include "omega/DisplaySystem.h"
 #include "omega/Texture.h"
@@ -35,7 +43,7 @@
 using namespace omega;
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 DrawInterface::DrawInterface():
 	//myTargetTexture(NULL),
 	myDrawing(false),
@@ -44,7 +52,7 @@ DrawInterface::DrawInterface():
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::beginDraw3D(const DrawContext& context)
 {
     glMatrixMode(GL_MODELVIEW);
@@ -71,7 +79,7 @@ void DrawInterface::beginDraw3D(const DrawContext& context)
 	//ofmsg("OpenGL capabilities: max varying floats = %1%", %maxVaryingFloats);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::beginDraw2D(const DrawContext& context)
 {
     glMatrixMode(GL_MODELVIEW);
@@ -101,7 +109,7 @@ void DrawInterface::beginDraw2D(const DrawContext& context)
 	myContext = &context;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::endDraw()
 {
     glMatrixMode(GL_PROJECTION);
@@ -112,7 +120,7 @@ void DrawInterface::endDraw()
 	myDrawing = false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::setGlColor(const Color& col)
 {
 	glColor4f(
@@ -123,7 +131,7 @@ void DrawInterface::setGlColor(const Color& col)
 	);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::pushTransform(const AffineTransform3& transform)
 {
     glMatrixMode(GL_MODELVIEW);
@@ -131,14 +139,14 @@ void DrawInterface::pushTransform(const AffineTransform3& transform)
 	glMultMatrixd(transform.data());
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::popTransform()
 {
     glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawRectGradient(Vector2f pos, Vector2f size, Orientation orientation, 
 	Color startColor, Color endColor, float pc)
 {
@@ -184,7 +192,7 @@ void DrawInterface::drawRectGradient(Vector2f pos, Vector2f size, Orientation or
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawRect(Vector2f pos, Vector2f size, Color color)
 {
 	int x = pos[0];
@@ -196,7 +204,7 @@ void DrawInterface::drawRect(Vector2f pos, Vector2f size, Color color)
 	glRecti(x, y, x + width, y + height);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawRectOutline(Vector2f pos, Vector2f size, Color color)
 {
 	int x = pos[0];
@@ -223,7 +231,7 @@ void DrawInterface::drawRectOutline(Vector2f pos, Vector2f size, Color color)
 	glEnd();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawText(const String& text, Font* font, const Vector2f& position, unsigned int align, Color color) 
 { 
 	setGlColor(color);
@@ -242,7 +250,7 @@ void DrawInterface::drawText(const String& text, Font* font, const Vector2f& pos
 	font->render(text, x, y); 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawRectTexture(Texture* texture, const Vector2f& position, const Vector2f size, uint flipFlags, const Vector2f& minUV, const Vector2f& maxUV)
 {
 	glEnable(GL_TEXTURE_2D);
@@ -292,7 +300,7 @@ void DrawInterface::drawRectTexture(Texture* texture, const Vector2f& position, 
 	glDisable(GL_TEXTURE_2D);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawCircleOutline(Vector2f position, float radius, const Color& color, int segments)
 {
 	glPushAttrib(GL_ENABLE_BIT);
@@ -314,7 +322,7 @@ void DrawInterface::drawCircleOutline(Vector2f position, float radius, const Col
 	glPopAttrib();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawCircle(Vector2f position, float radius, const Color& color, int segments)
 {
 	glPushAttrib(GL_ENABLE_BIT);
@@ -337,7 +345,7 @@ void DrawInterface::drawCircle(Vector2f position, float radius, const Color& col
 	glPopAttrib();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::drawWireSphere(const Color& color, int segments, int slices)
 {
 	glPushAttrib(GL_ENABLE_BIT);
@@ -374,7 +382,7 @@ void DrawInterface::drawWireSphere(const Color& color, int segments, int slices)
 	glPopAttrib();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Font* DrawInterface::createFont(omega::String fontName, omega::String filename, int size)
 {
 	Font::lock();
@@ -413,7 +421,7 @@ Font* DrawInterface::createFont(omega::String fontName, omega::String filename, 
 	return font;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Font* DrawInterface::getFont(omega::String fontName)
 {
 	if(myFonts.find(fontName) != myFonts.end())
@@ -431,26 +439,26 @@ Font* DrawInterface::getFont(omega::String fontName)
 	return createFont(fontName, fontFile, fontSize);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::fillTexture(TextureSource* texture)
 {
 	myBrush.texture = texture->getTexture(*myContext);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::textureFlip(uint flipflags)
 {
 	myBrush.flip = flipflags;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::textureRegion(float su, float sv, float eu, float ev)
 {
 	myBrush.startuv = Vector2f(su, sv);
 	myBrush.enduv = Vector2f(eu, ev);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void DrawInterface::rect(float x, float y, float width, float height)
 {
 	if(!myBrush.texture.isNull())
@@ -463,4 +471,60 @@ void DrawInterface::rect(float x, float y, float width, float height)
 			myBrush.startuv,
 			myBrush.enduv);
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+GLuint DrawInterface::makeShaderFromSource(const char* source, ShaderType Type)
+{
+    if (source == NULL)
+        return 0;
+    GLint length = strlen(source);
+
+	unsigned long type;
+	if(Type == VertexShader) type = GL_VERTEX_SHADER;
+	else if(Type == FragmentShader) type = GL_FRAGMENT_SHADER;
+
+    GLuint shaderId = glCreateShader(type);
+    glShaderSource(shaderId, 1, &source, &length);
+    glCompileShader(shaderId);
+
+    int infologLength = 0;
+    int charsWritten  = 0;
+    char *infoLog;
+    glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH,&infologLength);
+    if (infologLength > 1)
+    {
+        infoLog = new char[infologLength];
+        glGetShaderInfoLog(shaderId, infologLength, &charsWritten, infoLog);
+        omsg(infoLog);
+        delete [] infoLog;
+    }
+
+    return shaderId;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+GLuint DrawInterface::createProgram(GLuint vertextShader, GLuint fragmentShader)
+{
+    GLuint program = glCreateProgram();
+
+    glAttachShader(program, vertextShader);
+    glAttachShader(program, fragmentShader);
+
+    glLinkProgram(program);
+
+    int infologLength = 0;
+    int charsWritten  = 0;
+    char *infoLog;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH,&infologLength);
+    if (infologLength > 1)
+    {
+        infoLog = new char[infologLength];
+        glGetProgramInfoLog(program, infologLength, &charsWritten, infoLog);
+        omsg(infoLog);
+        delete [] infoLog;
+    }
+
+    glUseProgram(0);
+    return program;
 }
