@@ -9,6 +9,9 @@ using namespace omega;
 // barrel correction shaders during postprocessing
 uint RiftEnabledFlag = 1 << 16;
 
+// The global service instance, used by the python API to control the service.
+class OculusRiftService* sInstance = NULL;
+
 ///////////////////////////////////////////////////////////////////////////////
 // The oculus rift service implements the ICameraListener interface to perform
 // postprocessing during rendering.
@@ -20,7 +23,8 @@ public:
 	OculusRiftService():
 		myCamera(NULL),
 		myInitialized(false)
-		{}
+		{
+		}
 
 	// Service overrides
 	virtual void initialize();
@@ -35,6 +39,14 @@ public:
 	virtual void beginDraw(Camera* cam, const DrawContext& context);
 	virtual void endDraw(Camera* cam, const DrawContext& context);
 
+	// Barrel shader parameters
+	float getLensOffset() { return myLensOffset; }
+	void setLensOffset(float value) { myLensOffset = value; }
+	void setDistortionParam(int index, float value) { myDistortion[index] = value; }
+	float getDistortionParam(int index) { return myDistortion[index]; }
+	void setScaleParam(int index, float value) { myScaleParams[index] = value; }
+	float getScaleParam(int index) { return myScaleParams[index]; }
+
 private:
 	bool myInitialized;
 	Ref<Camera> myCamera;
@@ -43,6 +55,8 @@ private:
 	Vector2f myViewportSize;
 
 	Vector4f myDistortion;
+	Vector4f myScaleParams;
+	float myLensOffset;
 
 	// Shader stuff
 	GLuint myPostprocessProgram;
@@ -55,6 +69,8 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Python API follows
+
 // this fuction register the Oculus Rift service with the omegalib service
 // manager
 void registerService()
@@ -63,19 +79,46 @@ void registerService()
 	sm->registerService("OculusRiftService", (ServiceAllocator)OculusRiftService::New);
 }
 
+// Returns true when the rift service is enabled
+bool isEnabled()
+{
+	if(sInstance != NULL) return true;
+	return false;
+}
+
+// Returns a service instance
+OculusRiftService* getService()
+{
+	return sInstance;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Python wrapper code.
 #ifdef OMEGA_USE_PYTHON
 #include "omega/PythonInterpreterWrapper.h"
 BOOST_PYTHON_MODULE(rift)
 {
+	PYAPI_REF_BASE_CLASS(OculusRiftService)
+		PYAPI_METHOD(OculusRiftService, getLensOffset)
+		PYAPI_METHOD(OculusRiftService, setLensOffset)
+		PYAPI_METHOD(OculusRiftService, setScaleParam)
+		PYAPI_METHOD(OculusRiftService, getScaleParam)
+		PYAPI_METHOD(OculusRiftService, setDistortionParam)
+		PYAPI_METHOD(OculusRiftService, getDistortionParam)
+		;
+
 	def("registerService", registerService);
+	def("isEnabled", isEnabled);
+	def("getService", getService, PYAPI_RETURN_REF);
 }
 #endif
+
 
 ///////////////////////////////////////////////////////////////////////////////
 void OculusRiftService::initialize() 
 {
+	sInstance = this;
+
 	// Loop through display tiles and see which ones are marked to use the rift.
 	// This is done for performance reasons: checking a flag at render time is
 	// faster than going through the tile settings.
@@ -97,6 +140,12 @@ void OculusRiftService::initialize()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void OculusRiftService::dispose() 
+{
+	sInstance = NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void OculusRiftService::start() 
 {}
 
@@ -113,10 +162,6 @@ void OculusRiftService::poll()
 
 ///////////////////////////////////////////////////////////////////////////////
 void OculusRiftService::stop() 
-{}
-
-///////////////////////////////////////////////////////////////////////////////
-void OculusRiftService::dispose() 
 {}
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -150,6 +195,12 @@ void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& conte
 
 	// Set default distortion values
 	myDistortion = Vector4f(1.0f, 0.22f, 0.24f, 0.0f);
+
+	// Set default scale parameters
+	myScaleParams = Vector4f(0.145806f,  0.233290f, 4.0f, 2.5f);
+
+	// Set default lens offset parameter
+	myLensOffset =  0.287994f - 0.25f;
 
 	myInitialized = true;
 }
@@ -187,9 +238,9 @@ void OculusRiftService::endDraw(Camera* cam, const DrawContext& context)
 			glUseProgram(myPostprocessProgram);
 
 			// Set uniforms common to left and right eye
-			glUniform2f(myScaleUniform, 0.145806f,  0.233290f);
+			glUniform2f(myScaleUniform, myScaleParams[0],  myScaleParams[1]);
 
-			glUniform2f(myScaleInUniform, 4.0f, 2.5f);
+			glUniform2f(myScaleInUniform, myScaleParams[2], myScaleParams[3]);
 
 			glUniform4f(myHmdWarpParamUniform,
 				myDistortion[0],
@@ -201,12 +252,9 @@ void OculusRiftService::endDraw(Camera* cam, const DrawContext& context)
 			// drawRectTexture function).
 			glUniform1i(myTexture0Uniform, 0);
 		
-			// this value ripped from the TinyRoom demo at runtime
-			const float lensOff = 0.287994f - 0.25f;
-			
 			// Draw left eye
 			// The left screen is centered at (0.25, 0.5)
-			glUniform2f(myLensCenterUniform, 0.25f + lensOff, 0.5f);
+			glUniform2f(myLensCenterUniform, 0.25f + myLensOffset, 0.5f);
 			glUniform2f(myScreenCenterUniform, 0.25f, 0.5f);
 			di->drawRectTexture(myRenderTexture, 
 				Vector2f::Zero(), 
@@ -217,7 +265,7 @@ void OculusRiftService::endDraw(Camera* cam, const DrawContext& context)
 			// Draw right eye
 			// The right screen is centered at (0.75, 0.5)
 			glUniform2f(myLensCenterUniform, 0.75f, 0.5f);
-			glUniform2f(myScreenCenterUniform, 0.75f - lensOff, 0.5f);
+			glUniform2f(myScreenCenterUniform, 0.75f - myLensOffset, 0.5f);
 			di->drawRectTexture(myRenderTexture, 
 				Vector2f(myViewportSize[0] / 2, 0), 
 				Vector2f(myViewportSize[0] / 2, myViewportSize[1]),
