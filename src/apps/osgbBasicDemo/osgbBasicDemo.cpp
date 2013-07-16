@@ -196,7 +196,7 @@ void OsgbBasicDemo::initialize()
 		float start_y = START_POS_Y;
 		float start_z = START_POS_Z - ARRAY_SIZE_Z/2.0;
 
-		mySceneNode = new SceneNode(getEngine());
+		//mySceneNode = new SceneNode(getEngine());
 
 		for (int k=0;k<ARRAY_SIZE_Y;k++)
 		{
@@ -213,10 +213,10 @@ void OsgbBasicDemo::initialize()
 					myCol = new osg::MatrixTransform( osgbCollision::asOsgMatrix(startTransform) );
 					myCol->addChild( osgBox( osg::Vec3(0,0,0), halfLengths ) );
 
-					myOsgSceneObj = new OsgSceneObject(myCol);
-					root->addChild( myOsgSceneObj->getTransformedNode() );
-
-					mySceneNode->addComponent(myOsgSceneObj);
+					//myOsgSceneObj = new OsgSceneObject(myCol);
+					//root->addChild( myOsgSceneObj->getTransformedNode() );
+					//mySceneNode->addComponent(myOsgSceneObj);
+					root->addChild( myCol );
 
 					
 					if (k==0 && i == 0 && j == 0) {
@@ -241,14 +241,14 @@ void OsgbBasicDemo::initialize()
 		}
 	}
     
-    mySceneNode->setBoundingBoxVisible(true);
+    //mySceneNode->setBoundingBoxVisible(true);
     //mySceneNode->setBoundingBoxVisible(false);
-    getEngine()->getScene()->addChild(mySceneNode);
+    //getEngine()->getScene()->addChild(mySceneNode);
 	getEngine()->getDefaultCamera()->setPosition(0,0,60);
 	//getEngine()->getDefaultCamera()->setOrientation(1, 0, -1, -3);
 
     // Set the interactor style used to manipulate meshes.
-    if(SystemManager::settingExists("config/interactor"))
+    /*if(SystemManager::settingExists("config/interactor"))
     {
         Setting& sinteractor = SystemManager::settingLookup("config/interactor");
         myInteractor = ToolkitUtils::createInteractor(sinteractor);
@@ -262,7 +262,7 @@ void OsgbBasicDemo::initialize()
     {
         myInteractor->setSceneNode(mySceneNode);
     }
-
+	*/
     // Set the osg node as the root node
     myOsg->setRootNode(root);
 
@@ -290,8 +290,8 @@ void OsgbBasicDemo::initialize()
 
 void OsgbBasicDemo::update(const UpdateContext& context)
 {
-	double elapsed = 1./60.;
-	myWorld->stepSimulation( elapsed, 4, elapsed/4. );
+	double elapsed = 1./30.;
+	myWorld->stepSimulation( elapsed, 4, elapsed/2. );
 
 	//
 	printf("bullet:\n");
