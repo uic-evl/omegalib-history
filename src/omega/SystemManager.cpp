@@ -197,23 +197,38 @@ void SystemManager::setupConfig(Config* appcfg)
 	if(appcfg->exists("config/systemConfig"))
 	{
 		String systemCfgName = appcfg->lookup("config/systemConfig");
-		mySystemConfig = new Config(systemCfgName);
-	}
-	else
-	{
-		// LOGIC CHANGE: 24Jul2012
-		// App config has no systemConfig entry. 
-		// Open default.cfg and lookup systemConfig there.
-		Config* defaultCfg = new Config("default.cfg");
-		if(defaultCfg->load())
+		// If system config specified 'DEFAULT', open default.cfg and read the system
+		// config entry there.
+		// LOGIC CHANGE: 13Jul2013
+		// RATIONALE: we can have application config files that don't have to
+		// specify an exact system configuration, and just say 'use whatever the
+		// default is for this platform.
+		if(systemCfgName == "DEFAULT")
 		{
-			String systemCfgName = defaultCfg->lookup("config/systemConfig");
-			mySystemConfig = new Config(systemCfgName);
+			Config* defaultCfg = new Config("default.cfg");
+			if(defaultCfg->load())
+			{
+				String systemCfgName = defaultCfg->lookup("config/systemConfig");
+				mySystemConfig = new Config(systemCfgName);
+			}
+			else
+			{
+				oerror("SystemManager::setup: FATAL - coult not load default.cfg");
+			}
 		}
 		else
 		{
-			oerror("SystemManager::setup: FATAL - coult not load default.cfg");
+			ofmsg("SystemManager::setup: systemConfig = %1%", %systemCfgName);
+			mySystemConfig = new Config(systemCfgName);
 		}
+	}
+	else
+	{
+		// LOGIC CHANGE: 13Jul2013
+		// If the app config has no systemConfig section, we will use it as 
+		// the system configuration file.
+		omsg("SystemManager::setup: using app config as sysem config file");
+		mySystemConfig = myAppConfig;
 	}
 
 	// Make sure the configuration is loaded.

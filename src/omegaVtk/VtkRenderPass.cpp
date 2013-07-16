@@ -35,6 +35,8 @@
 #include <vtkRenderState.h>
 #include <vtkOpenGLRenderer.h>
 
+#include <omegaGl.h>
+
 #include "CustomDepthPeelingPass.h"
 #include "omegaVtk/VtkRenderPass.h"
 #include "omegaVtk/vtkGenericOpenGLRenderWindow.h"
@@ -134,6 +136,7 @@ void VtkRenderPass::render(Renderer* mng, const DrawContext& context)
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_LIGHTING);
+		glUseProgram(0);
 
 		//myRenderer->Render();
 

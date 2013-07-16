@@ -53,6 +53,7 @@ void VtkAttachPoint::attachProp(vtkProp3D* prop)
 {
 	myProps.push_back(prop);
 	myDirty = true;
+	requestBoundingBoxUpdate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,7 @@ void VtkAttachPoint::detachProp(vtkProp3D* prop)
 {
 	myProps.remove(prop);
 	myDirty = true;
+	requestBoundingBoxUpdate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
