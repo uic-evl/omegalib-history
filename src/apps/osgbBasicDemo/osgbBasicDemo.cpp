@@ -61,7 +61,7 @@ osg::Geode* osgBox( const osg::Vec3& center, const osg::Vec3& halfLengths )
     osg::Vec3 l( halfLengths * 2. );
     osg::Box* box = new osg::Box( center, l.x(), l.y(), l.z() );
     osg::ShapeDrawable* shape = new osg::ShapeDrawable( box );
-    shape->setColor( osg::Vec4( 1., 0., 1., 1. ) );
+    shape->setColor( osg::Vec4( 1., 1., 1., 1. ) );
     osg::Geode* geode = new osg::Geode();
     geode->addDrawable( shape );
 
@@ -106,6 +106,8 @@ private:
 	osgbDynamics::MotionState* myGroundMotionState;
 
 	osgbDynamics::MotionState* myColMotionState;
+
+	osg::Light* myLight;
 	//keep the collision shapes, for deletion/cleanup
 	//btAlignedObjectArray<btCollisionShape*>	myCollisionShapes;
 	
@@ -244,8 +246,8 @@ void OsgbBasicDemo::initialize()
     //mySceneNode->setBoundingBoxVisible(true);
     //mySceneNode->setBoundingBoxVisible(false);
     //getEngine()->getScene()->addChild(mySceneNode);
-	getEngine()->getDefaultCamera()->setPosition(0,0,60);
-	//getEngine()->getDefaultCamera()->setOrientation(1, 0, -1, -3);
+	getEngine()->getDefaultCamera()->setPosition(0,10,80);
+	//getEngine()->getDefaultCamera()->setOrientation(1, 1, 1, 0);
 
     // Set the interactor style used to manipulate meshes.
     /*if(SystemManager::settingExists("config/interactor"))
@@ -286,6 +288,21 @@ void OsgbBasicDemo::initialize()
 			myOsg->getRootNode()->asGroup()->getChild(i)->asTransform()->asMatrixTransform()->getMatrix().getTrans().z());
 	}
 	//*/
+
+	// Setup shading
+	myLight = new osg::Light;
+	myLight->setLightNum(0);
+	myLight->setPosition(osg::Vec4(100, 100, 0, 1.0));
+	myLight->setAmbient(osg::Vec4(0.1f,0.1f,0.2f,1.0f));
+	myLight->setDiffuse(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
+	myLight->setSpotExponent(0);
+	myLight->setSpecular(osg::Vec4(0.0f,0.0f,0.0f,1.0f));
+
+	osg::LightSource* ls = new osg::LightSource();
+	ls->setLight(myLight);
+	ls->setStateSetModes(*root->getOrCreateStateSet(), osg::StateAttribute::ON);
+
+	root->addChild(ls);
 }
 
 void OsgbBasicDemo::update(const UpdateContext& context)
@@ -293,7 +310,7 @@ void OsgbBasicDemo::update(const UpdateContext& context)
 	double elapsed = 1./30.;
 	myWorld->stepSimulation( elapsed, 4, elapsed/2. );
 
-	//
+	/*/
 	printf("bullet:\n");
 	for (int i=0;i<5;i++)
 	{
@@ -303,18 +320,15 @@ void OsgbBasicDemo::update(const UpdateContext& context)
 			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().z());
 	}
 	//*/
-	//
+	/*/
 	printf("motion:\n");
 	btTransform world;
 	myGroundMotionState->getWorldTransform( world );
 	printf("ground: (worldtrans): (%lf, %lf, %lf)\n", world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
-	//for (int i=0;i<5;i++)
-	//{
 		myColMotionState->getWorldTransform( world );
 		printf("object 0: (worldtrans): (%lf, %lf, %lf)\n", world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
-	//}
 	//*/
-	//
+	/*/
 	printf("osg:\n");
 	for (int i=0;i<5;i++)
 	{
