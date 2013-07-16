@@ -103,9 +103,9 @@ private:
 
 	osg::MatrixTransform* myCol;
 
-	//osgbDynamics::MotionState* myGroundMotionState;
+	osgbDynamics::MotionState* myGroundMotionState;
 
-	//osgbDynamics::MotionState* myColMotionState;
+	osgbDynamics::MotionState* myColMotionState;
 	//keep the collision shapes, for deletion/cleanup
 	//btAlignedObjectArray<btCollisionShape*>	myCollisionShapes;
 	
@@ -149,15 +149,20 @@ void OsgbBasicDemo::initialize()
 		myGround = new osg::MatrixTransform( osgbCollision::asOsgMatrix( groundTransform ) );
 		myGround->addChild( osgBox( osg::Vec3(0,0,0), halfLengths ) );
 
+		btScalar mass( 0.0 );
+		btVector3 inertia( 0, 0, 0 );
+		/*/
 		osgbDynamics::MotionState* ms = new osgbDynamics::MotionState();
 		ms->setWorldTransform(groundTransform);
 		ms->setTransform(myGround);
-		//myGroundMotionState->setWorldTransform(groundTransform);
-		//myGroundMotionState->setTransform(myGround);
-		btScalar mass( 0.0 );
-		btVector3 inertia( 0, 0, 0 );
-		//btRigidBody::btRigidBodyConstructionInfo rb( mass, myGroundMotionState, groundShape, inertia );
 		btRigidBody::btRigidBodyConstructionInfo rb( mass, ms, groundShape, inertia );
+		//*/
+		//
+		myGroundMotionState = new osgbDynamics::MotionState();
+		myGroundMotionState->setWorldTransform(groundTransform);
+		myGroundMotionState->setTransform(myGround);
+		btRigidBody::btRigidBodyConstructionInfo rb( mass, myGroundMotionState, groundShape, inertia );
+		//*/
 		btRigidBody* body = new btRigidBody( rb );
 
 		myWorld->addRigidBody(body);
@@ -213,23 +218,23 @@ void OsgbBasicDemo::initialize()
 
 					mySceneNode->addComponent(myOsgSceneObj);
 
-					//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-					/*
+					
 					if (k==0 && i == 0 && j == 0) {
+						myColMotionState = new osgbDynamics::MotionState();
 						myColMotionState->setWorldTransform(startTransform);
 						myColMotionState->setTransform(myCol);
 						btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myColMotionState, colShape, localInertia);
 						btRigidBody* body = new btRigidBody(rbInfo);
 						myWorld->addRigidBody(body);
-					}*/
-					//else {
+					}
+					else {
 						osgbDynamics::MotionState* motionState = new osgbDynamics::MotionState();
 						motionState->setWorldTransform(startTransform);
 						motionState->setTransform(myCol);
 						btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, colShape, localInertia);
 						btRigidBody* body = new btRigidBody(rbInfo);
 						myWorld->addRigidBody(body);
-					//}
+					}
 
 				}
 			}
@@ -298,15 +303,16 @@ void OsgbBasicDemo::update(const UpdateContext& context)
 			myWorld->getCollisionObjectArray().at(i)->getWorldTransform().getOrigin().z());
 	}
 	//*/
-	/*/
+	//
 	printf("motion:\n");
 	btTransform world;
-	for (int i=0;i<5;i++)
-	{
-		ms[i]->getWorldTransform( world );
-		printf("object %d: (worldtrans): (%lf, %lf, %lf)\n", i,
-			world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
-	}
+	myGroundMotionState->getWorldTransform( world );
+	printf("ground: (worldtrans): (%lf, %lf, %lf)\n", world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
+	//for (int i=0;i<5;i++)
+	//{
+		myColMotionState->getWorldTransform( world );
+		printf("object 0: (worldtrans): (%lf, %lf, %lf)\n", world.getOrigin().x(), world.getOrigin().y(), world.getOrigin().z());
+	//}
 	//*/
 	//
 	printf("osg:\n");
