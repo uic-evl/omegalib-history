@@ -40,8 +40,8 @@ public:
 	virtual void initializeGraphics(Camera* cam, const DrawContext& context);
 
 	// ICameraListener overrides
-	virtual void beginDraw(Camera* cam, const DrawContext& context);
-	virtual void endDraw(Camera* cam, const DrawContext& context);
+	virtual void beginDraw(Camera* cam, DrawContext& context);
+	virtual void endDraw(Camera* cam, DrawContext& context);
 
 	// Barrel shader parameters
 	float getLensOffset() { return myLensOffset; }
@@ -149,6 +149,7 @@ void OculusRiftService::initialize()
 			tile->flags |= RiftEnabledFlag;
 			// Force the stereo mode for this tile to be side-by-side.
 			tile->stereoMode = DisplayTileConfig::SideBySide;
+			tile->isHMD = true;
 			ofmsg("OculusRiftService::initialize: rift postprocessing enabled for tile %1%", %tile->name);
 		}
 	}
@@ -272,7 +273,7 @@ void OculusRiftService::stop()
 void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& context)
 {
 	myViewportSize = Vector2f(
-		context.tile->pixelSize[0], context.tile->pixelSize[1]);
+		context.tile->pixelSize[0] * 2, context.tile->pixelSize[1] * 2);
 
 	myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderToTexture);
 	myRenderTexture = new Texture(context.gpuContext);
@@ -303,11 +304,26 @@ void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& conte
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void OculusRiftService::beginDraw(Camera* cam, const DrawContext& context)
+void OculusRiftService::beginDraw(Camera* cam, DrawContext& context)
 {
 	// Do we need to do rift postprocessing on this tile?
 	if(context.tile->flags & RiftEnabledFlag)
 	{
+		if(context.eye == DrawContext::EyeLeft)
+		{
+			context.viewport.min[0] = 0;
+			context.viewport.max[0] = myViewportSize[0] / 2;
+			context.viewport.min[1] = 0;
+			context.viewport.max[1] = myViewportSize[1];
+		}
+		else if(context.eye == DrawContext::EyeRight)
+		{
+			context.viewport.min[0] = myViewportSize[0] / 2;
+			context.viewport.max[0] = myViewportSize[0];
+			context.viewport.min[1] = 0;
+			context.viewport.max[1] = myViewportSize[1];
+		}
+			
 		// Create a render target if we have not done it yet.
 		if(!myInitialized) initializeGraphics(cam, context);
 
@@ -316,7 +332,7 @@ void OculusRiftService::beginDraw(Camera* cam, const DrawContext& context)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void OculusRiftService::endDraw(Camera* cam, const DrawContext& context)
+void OculusRiftService::endDraw(Camera* cam, DrawContext& context)
 {
 	// Do we need to do rift postprocessing on this tile?
 	if(context.tile->flags & RiftEnabledFlag)
@@ -348,14 +364,17 @@ void OculusRiftService::endDraw(Camera* cam, const DrawContext& context)
 			// Set texture binding to texture unit 0 (the default used by the
 			// drawRectTexture function).
 			glUniform1i(myTexture0Uniform, 0);
+
+			int vw = context.viewport.width();
+			int vh = context.viewport.height();
 		
 			// Draw left eye
 			// The left screen is centered at (0.25, 0.5)
 			glUniform2f(myLensCenterUniform, 0.25f + myLensOffset, 0.5f);
 			glUniform2f(myScreenCenterUniform, 0.25f, 0.5f);
 			di->drawRectTexture(myRenderTexture, 
-				Vector2f(myViewportSize[0] / 2, 0), 
-				Vector2f(myViewportSize[0] / 2, myViewportSize[1]),
+				Vector2f(vw / 2, 0), 
+				Vector2f(vw / 2, vh),
 				0,
 				Vector2f(0, 0),	Vector2f(0.5f, 1.0f));
 
@@ -365,7 +384,7 @@ void OculusRiftService::endDraw(Camera* cam, const DrawContext& context)
 			glUniform2f(myScreenCenterUniform, 0.75f, 0.5f);
 			di->drawRectTexture(myRenderTexture, 
 				Vector2f::Zero(), 
-				Vector2f(myViewportSize[0] / 2, myViewportSize[1]),
+				Vector2f(vw / 2, vh),
 				0,
 				Vector2f(0.5, 0),	Vector2f(1.0f, 1.0f));
 
