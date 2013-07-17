@@ -1,10 +1,4 @@
 <html>
-  <head>
-    <meta content="text/html; charset=windows-1252"
-      http-equiv="Content-Type">
-    <title>Wandaid</title>
-    <meta content="Jason Leigh" name="author">
-  </head>
   <body>
     <h1><font face="Helvetica, Arial, sans-serif">Wandaid</font></h1>
     <font face="Helvetica, Arial, sans-serif">(C) 2013 by <a
