@@ -53,7 +53,7 @@ During initialization, the service checks the display configuration and keeps tr
 **NOTE** Altough the rift module requires `LibOVR` to interface to an Oculus Rift, you can build it with the `RIFT_EMULATE` option enabled to remove the dependency.
 
 ## Python API
-The `rift` module exposes several fnctions to control the service:
+The `rift` module exposes several functions to control the service:
 
 ### Global functions
 | **Function** | Description
