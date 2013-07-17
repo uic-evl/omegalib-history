@@ -276,7 +276,8 @@ void EqualizerDisplaySystem::generateEqConfig()
 		tileCfg +=
 			L("bottom_left " + ostr("[ %1% %2% %3% ]", %t->bottomLeft[0] %t->bottomLeft[1] %t->bottomLeft[2])) +
 			L("bottom_right " + ostr("[ %1% %2% %3% ]", %t->bottomRight[0] %t->bottomRight[1] %t->bottomRight[2])) +
-			L("top_left " + ostr("[ %1% %2% %3% ]", %t->topLeft[0] %t->topLeft[1] %t->topLeft[2]));
+			L("top_left " + ostr("[ %1% %2% %3% ]", %t->topLeft[0] %t->topLeft[1] %t->topLeft[2])) +
+			L("type " + (t->isHMD ? "HMD" : "fixed") );
 		END_BLOCK(tileCfg)
 		END_BLOCK(tileCfg)
 		result += tileCfg;
