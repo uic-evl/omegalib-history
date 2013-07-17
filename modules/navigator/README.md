@@ -1,10 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-  <head>
-    <meta content="text/html; charset=windows-1252"
-      http-equiv="Content-Type">
-    <title>Walkabout</title>
-  </head>
   <body>
     <h1><font face="Helvetica, Arial, sans-serif">Walkabout</font></h1>
     <p><font face="Helvetica, Arial, sans-serif">(C) 2013 by <a
@@ -18,7 +12,7 @@
         navigate a virtual space where they can climb stairs, jump off
         platforms, and not walk through walls.</font></p>
     <div align="left"><font face="Helvetica, Arial, sans-serif"><img
-          alt="" src="walkabout-pic.png" height="238" width="494"></font></div>
+          alt="" src="http://febret.github.io/omegalib/navigator/walkabout-pic.png" height="238" width="494"></font></div>
     <p><font face="Helvetica, Arial, sans-serif">The demo.py file
         contains an example of how to use the module. It also provides a
         simple scene in which one can navigate the space to test
@@ -34,7 +28,7 @@
       </font></p>
     <p><font face="Helvetica, Arial, sans-serif"><b>Documentation on the
           API can be found </b><b><a
-            href="html/namespacewalkabout.html">HERE</a></b><b>.<br>
+            href="http://febret.github.io/omegalib/navigator/html/namespacewalkabout.html">HERE</a></b><b>.<br>
         </b></font></p>
     <h2><font face="Helvetica, Arial, sans-serif"><b>Release Notes</b></font></h2>
     <ul>
@@ -66,7 +60,7 @@
         0.3 x head height. <br>
       </font></p>
     <p><font face="Helvetica, Arial, sans-serif"><img alt=""
-          src="walkabout-explain.png" height="356" width="350"><br>
+          src="http://febret.github.io/omegalib/navigator/walkabout-explain.png" height="356" width="350"><br>
       </font></p>
   </body>
 </html>
