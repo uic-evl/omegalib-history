@@ -163,7 +163,7 @@ void Renderer::finishFrame(const FrameInfo& frame)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Renderer::draw(const DrawContext& context)
+void Renderer::draw(DrawContext& context)
 {
 #ifdef OMEGA_DEBUG_FLOW
 	String eyeName = "Cyclops";

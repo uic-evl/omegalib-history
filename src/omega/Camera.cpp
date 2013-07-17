@@ -210,7 +210,7 @@ bool Camera::isEnabled(const DrawContext& context)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-const DrawContext& Camera::beginDraw(const DrawContext& context)
+DrawContext& Camera::beginDraw(DrawContext& context)
 {
 	if(myListener != NULL) myListener->beginDraw(this, context);
 
@@ -247,7 +247,7 @@ const DrawContext& Camera::beginDraw(const DrawContext& context)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Camera::endDraw(const DrawContext& context)
+void Camera::endDraw(DrawContext& context)
 {
 	if(myListener != NULL) myListener->endDraw(this, context);
 
