@@ -3,4 +3,5 @@ if(OMEGA_BUILD_OSG_LIB)
 	#templateModule
 	add_subdirectory(templateModule)
 	add_subdirectory(pointCloud)
+	add_subdirectory(rift)
 endif()

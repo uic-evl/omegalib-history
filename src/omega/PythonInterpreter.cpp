@@ -171,7 +171,9 @@ void PythonInterpreter::setup(const Setting& setting)
 {
 	myShellEnabled = Config::getBoolValue("pythonShellEnabled", setting, myShellEnabled);
 	myDebugShell = Config::getBoolValue("pythonShellDebug", setting, myDebugShell);
-	
+	// Command read from a configuration file and executed during 
+	// initialization. Helpful to load or setup optional modules.
+	myInitCommand = Config::getStringValue("initCommand", setting, "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -250,7 +252,9 @@ void PythonInterpreter::initialize(const char* programName)
 	// Initialize internal Apis
 	omegaPythonApiInit();
 
+	// Run initialization commands
 	PyRun_SimpleString("from omega import *");
+	if(myInitCommand != "") PyRun_SimpleString(myInitCommand.c_str());
 	
 	omsg("Python Interpreter initialized.");
 }
@@ -324,17 +328,8 @@ void PythonInterpreter::eval(const String& cscript, const char* format, ...)
 			String sscript = script.substr(1, script.length() - 1);
 			handled = ModuleServices::handleCommand(sscript);
 
-			// NOTE: the python interpreter is not an engine module, so it does 
-			// not have a handleCommand function per se... we still implement 
-			// some quick commands here. if command is a ':post' we still 
-			// execute it.
-			if(StringUtils::startsWith(sscript, "post"))
-			{
-				String cmd = sscript.substr(5);
-				eval(cmd);
-			}
 			// Enable / disable debug mode.
-			else if(sscript == "debug on") myDebugShell = true;
+			if(sscript == "debug on") myDebugShell = true;
 			else if(sscript == "debug off") myDebugShell = false;
 		}
 		else		

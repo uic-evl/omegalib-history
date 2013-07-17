@@ -49,6 +49,20 @@ namespace omega {
 	static int CamerasCounter = 0;
 
 	class CameraController;
+	class Camera;
+	///////////////////////////////////////////////////////////////////////////
+	//! Implements a listener that can be attached to cameras to listen to draw
+	//! methods. All user method implementations must be reentrant, since they
+	//! can be called from mulitple threads.
+	class ICameraListener
+	{
+	public:
+		virtual void endDraw(Camera* cam, const DrawContext& context) {}
+		virtual void beginDraw(Camera* cam, const DrawContext& context) { }
+		virtual void startFrame(Camera* cam, const FrameInfo& frame) {}
+		virtual void finishFrame(Camera* cam, const FrameInfo& frame) {}
+	};
+
 	///////////////////////////////////////////////////////////////////////////
 	//!	The Camera class handles information about a view transformation, head 
 	//!	tracking and optional target buffers for off screen rendering
@@ -143,6 +157,11 @@ namespace omega {
 		void setMask(uint mask) { myMask = mask; }
 		uint getMask() { return myMask; }
 
+		//! Gets or sets the camera listener. Currently, only one listener is 
+		//! supported. Setting an additional listener will replace the current one.
+		void addListener(ICameraListener* listener);
+		void removeListener(ICameraListener* listener);
+
 	protected:
 		void updateTraversal(const UpdateContext& context);
 	
@@ -190,6 +209,9 @@ namespace omega {
 		int myCameraId;
 
 		uint myMask;
+
+		// Camera listener. Right now only one listener is supported.
+		ICameraListener* myListener;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -217,6 +239,14 @@ namespace omega {
 	///////////////////////////////////////////////////////////////////////////
 	inline int Camera::getCameraId()
 	{ return myCameraId; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Camera::addListener(ICameraListener* listener)
+	{ myListener = listener; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Camera::removeListener(ICameraListener* listener)
+	{ myListener = NULL; }
 }; // namespace omega
 
 #endif

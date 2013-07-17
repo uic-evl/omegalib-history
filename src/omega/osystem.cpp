@@ -137,25 +137,6 @@ namespace omega
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-	void setupMissionControl(const String& mode, SystemManager* sys, const Setting& s)
-	{
-		int port = Config::getIntValue("port", s, MissionControlServer::DefaultPort);
-		String serverHost = Config::getStringValue("host", s, "127.0.0.1");
-		if(mode == "default")
-		{
-			omsg("Initializing mission control server...");
-			MissionControlServer* srv = new MissionControlServer();
-			srv->setMessageHandler(new MissionControlMessageHandler());
-			srv->setPort(port);
-
-			// Register the mission control server. The service manager will take care of polling the server
-			// periodically to check for new connections.
-			SystemManager::instance()->getServiceManager()->addService(srv);
-			srv->start();
-		}
-	}
-
-	///////////////////////////////////////////////////////////////////////////
 	int omain(omega::ApplicationBase& app, int argc, char** argv)
 	{
 		// register the abort handler.
@@ -351,11 +332,7 @@ namespace omega
 				else
 				{
 					sys->setup(cfg);
-					Config* syscfg = sys->getSystemConfig();
-					if(syscfg->exists("config/missionControl"))
-					{
-						setupMissionControl(mcmode, sys, syscfg->lookup("config/missionControl"));
-					}
+					sys->setupMissionControl(mcmode);
 				}
 
 				sys->initialize();

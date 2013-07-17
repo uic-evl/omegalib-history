@@ -58,7 +58,7 @@ namespace omega
 	public:
 		enum StereoMode { Mono, LineInterleaved, PixelInterleaved, SideBySide, Default };
 
-		DisplayTileConfig(): 
+		DisplayTileConfig(const Setting& s = Setting(NULL)): 
 			drawStats(false), 
 			disableScene(false), 
 			disableOverlay(false), 
@@ -66,9 +66,16 @@ namespace omega
 			enabled(false),
 			camera(NULL),
 			id(0),
+			flags(0),
 			invertStereo(false),
-			isInGrid(false)
-			 {}
+			isInGrid(false),
+			settingData(s)
+			{
+			}
+
+		//! Stores the tile setting unparsed data. Useful to allow user code
+		//! process additional custom options.
+		const Setting& settingData;
 
 		StereoMode stereoMode;
 		//! When set to true, eyes are inverted in stereo mode.
@@ -99,6 +106,9 @@ namespace omega
 		//! 2d position of this tile (normalized) with respect to the global canvas. 
 		//! Used for mapping 2d interaction and for mapping physical tiles to logical views.
 		//Vector4f viewport;
+
+		//! Field for storing user-defined flags about this tile.
+		uint flags;
 
 		int device;
 		Vector3f center;

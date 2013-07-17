@@ -128,7 +128,7 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 			const Setting& sTile = sTileHost[j];
 			if(sTile.getType() == Setting::TypeGroup)
 			{
-				DisplayTileConfig* tc = new DisplayTileConfig();
+				DisplayTileConfig* tc = new DisplayTileConfig(sTile);
 				cfg.tiles[sTile.getName()] = tc;
 				tc->name = sTile.getName();
 

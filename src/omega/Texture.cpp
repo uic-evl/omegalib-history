@@ -40,15 +40,21 @@ Texture::Texture(GpuContext* context):
 {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void Texture::initialize(int width, int height)
+void Texture::initialize(int width, int height, uint format)
 {
 	myWidth = width; 
 	myHeight = height; 
 
+	GLuint texfmt = GL_RGBA;
+	if(format != 0)
+	{
+		texfmt = format;
+	}
+
 	//Now generate the OpenGL texture object 
 	glGenTextures(1, &myId);
 	glBindTexture(GL_TEXTURE_2D, myId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, myWidth, myHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, texfmt, myWidth, myHeight, 0, texfmt, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	
 	if(sUsePbo)

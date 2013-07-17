@@ -49,6 +49,9 @@ namespace omega
 	class MissionControlServer;
 	// Forward declaration of SageManager to break header circular dependency
 	class SageManager;
+	// Forward decl of Mission Control classes to break header circular dependency
+	class MissionControlClient;
+	class MissionControlServer;
 
 	///////////////////////////////////////////////////////////////////////////
 	//! Contains data about multi-instance mode.
@@ -150,23 +153,30 @@ namespace omega
 
 		bool isInitialized();
 		
-		bool isMaster() 
-		{ return myIsMaster; }
+		bool isMaster(); 
 
 		String getHostname();
 		const String& getHostnameAndPort();
 
-		PythonInterpreter* getScriptInterpreter() 
-		{ return myInterpreter; }
+		PythonInterpreter* getScriptInterpreter(); 
 
-		SageManager* getSageManager() 
-		{ return mySageManager; }
+		SageManager* getSageManager(); 
 
 		void setupServiceManager();
 		void setupDisplaySystem();
 
-		MultiInstanceConfig& getMultiInstanceConfig() 
-		{ return myMultiInstanceConfig; }
+		MultiInstanceConfig& getMultiInstanceConfig(); 
+
+		//! Mission Control
+		//@{
+		//! Returns a mission control server instance. Returns NULL if no 
+		//! mission control server is runnning.
+		MissionControlServer* getMissionControlServer();
+		//! Returns a mission control client instance. Returns NULL if no 
+		//! mission control client is runnning.
+		MissionControlClient* getMissionControlClient();
+		void setupMissionControl(const String& mode);
+		//@}
 
 	private:
 		SystemManager();
@@ -207,6 +217,10 @@ namespace omega
 
 		// SAGE
 		SageManager* mySageManager;
+
+		// Mission Contol
+		MissionControlServer* myMissionControlServer;
+		MissionControlClient* myMissionControlClient;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -258,8 +272,33 @@ namespace omega
 	{ return mySystemConfig; }
 
 	///////////////////////////////////////////////////////////////////////////
+	inline bool SystemManager::isMaster() 
+	{ return myIsMaster; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline PythonInterpreter* SystemManager::getScriptInterpreter() 
+	{ return myInterpreter; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline SageManager* SystemManager::getSageManager() 
+	{ return mySageManager; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline MultiInstanceConfig& SystemManager::getMultiInstanceConfig() 
+	{ return myMultiInstanceConfig; }
+
+	///////////////////////////////////////////////////////////////////////////
 	inline StatsManager* SystemManager::getStatsManager() 
 	{ return myStatsManager; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline MissionControlServer* SystemManager::getMissionControlServer()
+	{ return myMissionControlServer; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline MissionControlClient* SystemManager::getMissionControlClient()
+	{ return myMissionControlClient; }
+
 }; // namespace omega
 
 #endif
