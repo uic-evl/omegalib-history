@@ -1,7 +1,9 @@
 #include <omega.h>
 #include <omegaGl.h>
 
-#include <OVR.h>
+#ifndef RIFT_EMULATE
+	#include <OVR.h>
+#endif
 
 #include "OVRShaders.h"
 
@@ -13,8 +15,6 @@ uint RiftEnabledFlag = 1 << 16;
 
 // The global service instance, used by the python API to control the service.
 class OculusRiftService* sInstance = NULL;
-
-#define OVR_METERS_2_GRID 65.0
 
 ///////////////////////////////////////////////////////////////////////////////
 // The oculus rift service implements the ICameraListener interface to perform
@@ -75,12 +75,14 @@ private:
 	GLint  myHmdWarpParamUniform;
 	GLint  myTexture0Uniform;
 	
+#ifndef RIFT_EMULATE
     /// OVR hardware
     OVR::Ptr<OVR::DeviceManager>  myManager;
     OVR::Ptr<OVR::HMDDevice>      myHMD;
     OVR::Ptr<OVR::SensorDevice>   mySensor;
     OVR::SensorFusion             mySFusion;
     OVR::HMDInfo                  myHMDInfo;
+#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -169,6 +171,7 @@ void OculusRiftService::initialize()
 ///////////////////////////////////////////////////////////////////////////////
 void OculusRiftService::initOVR()
 {
+#ifndef RIFT_EMULATE
 	omsg("\n\n>>>>> OculusRiftService::initOVR");
 	
     OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
@@ -223,14 +226,17 @@ void OculusRiftService::initOVR()
 
     if (myHMDInfo.HResolution > 0)
 	omsg("<<<<<< OculusRiftService::initOVR\n\n");
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void OculusRiftService::dispose() 
 {
 	sInstance = NULL;
+#ifndef RIFT_EMULATE
     // No OVR functions involving memory are allowed after this.
     OVR::System::Destroy();
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -247,6 +253,7 @@ void OculusRiftService::poll()
 		myCamera->addListener(this);
 	}
 	
+#ifndef RIFT_EMULATE
 	// Update head orientation;
 	OVR::Quatf o = mySFusion.GetOrientation();
 	myCamera->setOrientation(Quaternion(o.w, o.x, o.y, o.z));
@@ -254,6 +261,7 @@ void OculusRiftService::poll()
 	{
 		myCamera->getController()->reset();
 	}
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -270,7 +278,7 @@ void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& conte
 	myRenderTexture = new Texture(context.gpuContext);
 	myRenderTexture->initialize(myViewportSize[0], myViewportSize[1]);
 	myDepthTexture = new Texture(context.gpuContext);
-	myDepthTexture->initialize(myViewportSize[0], myViewportSize[1]);
+	myDepthTexture->initialize(myViewportSize[0], myViewportSize[1], GL_DEPTH_COMPONENT);
 	myRenderTarget->setTextureTarget(myRenderTexture, myDepthTexture);
 
 	// Setup shaders. Use some functions from the omegalib draw interface class 

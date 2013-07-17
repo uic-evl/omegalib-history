@@ -45,7 +45,7 @@ namespace omega
 		Texture(GpuContext* context);
 
 		//! Initializes this texture object
-		void initialize(int width, int height); 
+		void initialize(int width, int height, uint format = 0); 
 		bool isInitialized() { return myInitialized; }
 
 		void writePixels(PixelData* data);

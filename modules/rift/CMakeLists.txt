@@ -4,11 +4,17 @@ if(MODULES_ENABLE_RIFT)
 	# Set the module name here
 	set(MODULE_NAME rift)
 
-	# Oculus SDK include and library
-	set(OVR_INCLUDE_DIR CACHE PATH "Oculus SDK include directory")
-	set(OVR_LIB CACHE PATH "Oculus SDK library")
+	set(RIFT_EMULATE false CACHE BOOL "When set to true, compiles the rift module without using the OVR library")
+	if(RIFT_EMULATE)
+		add_definitions(-DRIFT_EMULATE)
+	endif()
 
-	include_directories(${OVR_INCLUDE_DIR})
+	if(NOT RIFT_EMULATE)
+		# Oculus SDK include and library
+		set(OVR_INCLUDE_DIR CACHE PATH "Oculus SDK include directory")
+		set(OVR_LIB CACHE PATH "Oculus SDK library")
+		include_directories(${OVR_INCLUDE_DIR})
+	endif()
 	
 	# Set module name and source files here
 	add_library(${MODULE_NAME} SHARED 
@@ -16,13 +22,17 @@ if(MODULES_ENABLE_RIFT)
 
 	# Set the module library dependencies here
 	target_link_libraries(${MODULE_NAME}
-		omega
-		${OVR_LIB})
+		omega)
 
-	# link with libraries needed on a linux install.
-	if( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
-	  set_target_properties(${MODULE_NAME} PROPERTIES LINK_FLAGS "-ludev -lXinerama")
-	endif( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+	if(NOT RIFT_EMULATE)
+		target_link_libraries(${MODULE_NAME}
+			${OVR_LIB})
+		
+		# link with libraries needed on a linux install.
+		if( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+		  set_target_properties(${MODULE_NAME} PROPERTIES LINK_FLAGS "-ludev -lXinerama")
+		endif( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+	endif()
 	
 	#------------------------------------------------------------------------------
 	# DO NOT MODIFY ANYTHING BELOW AFTER THIS LINE
