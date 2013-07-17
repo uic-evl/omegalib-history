@@ -76,7 +76,6 @@ namespace omega {
 			ForceMono = 1 << 1,
 			DrawScene = 1 << 2,
 			DrawOverlay = 1 << 3,
-			Offscreen = 1 << 4,
 			DefaultFlags = DrawScene | DrawOverlay
 		};
 
@@ -88,8 +87,6 @@ namespace omega {
 
 	public:
 		Camera(Engine* engine, uint flags = DefaultFlags);
-
-		bool isOffscreen() { return myFlags & Offscreen; }
 
 		CameraOutput* getOutput(uint contextId);
 

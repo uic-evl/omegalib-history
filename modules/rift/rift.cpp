@@ -273,7 +273,7 @@ void OculusRiftService::stop()
 void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& context)
 {
 	myViewportSize = Vector2f(
-		context.tile->pixelSize[0] * 2, context.tile->pixelSize[1] * 2);
+		context.tile->pixelSize[0], context.tile->pixelSize[1]);
 
 	myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderToTexture);
 	myRenderTexture = new Texture(context.gpuContext);
