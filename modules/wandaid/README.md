@@ -1,4 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
     <meta content="text/html; charset=windows-1252"
@@ -21,7 +20,7 @@
         An application can customize the labels by using the Wandaid
         API.</font></p>
     <p><font face="Helvetica, Arial, sans-serif"><img alt=""
-          src="wandaid.png" height="344" width="394"><br>
+          src="http://febret.github.io/omegalib/wandaid/wandaid.png" height="344" width="394"><br>
       </font></p>
     <p><font face="Helvetica, Arial, sans-serif">The demo.py file
         contains an example of how to use the wandaid API. Run it as you
