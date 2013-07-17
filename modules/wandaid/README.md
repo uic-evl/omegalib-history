@@ -34,7 +34,7 @@
         &nbsp;&nbsp;&nbsp; setenv OSG_LIBRARY_PATH /</font><font
         face="Helvetica, Arial, sans-serif">data/evl/omegalib-user/build/bin/osgPlugins-3.0.1</font></p>
     <p><font face="Helvetica, Arial, sans-serif"><b>Documentation on the
-          API can be found </b><b><a href="html/namespacewandaid.html">HERE</a></b><b>.<br>
+          API can be found </b><b><a href="http://febret.github.io/omegalib/wandaid/html/namespacewandaid.html">HERE</a></b><b>.<br>
         </b></font></p>
     <h2><font face="Helvetica, Arial, sans-serif"><b>Release Notes</b></font></h2>
     <ul>
