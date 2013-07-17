@@ -1,6 +1,8 @@
 #include <omega.h>
 #include <omegaGl.h>
 
+#include <OVR.h>
+
 #include "OVRShaders.h"
 
 using namespace omega;
@@ -11,6 +13,8 @@ uint RiftEnabledFlag = 1 << 16;
 
 // The global service instance, used by the python API to control the service.
 class OculusRiftService* sInstance = NULL;
+
+#define OVR_METERS_2_GRID 65.0
 
 ///////////////////////////////////////////////////////////////////////////////
 // The oculus rift service implements the ICameraListener interface to perform
@@ -48,10 +52,14 @@ public:
 	float getScaleParam(int index) { return myScaleParams[index]; }
 
 private:
+	void initOVR();
+	
+private:
 	bool myInitialized;
 	Ref<Camera> myCamera;
 	Ref<RenderTarget> myRenderTarget;
 	Ref<Texture> myRenderTexture;
+	Ref<Texture> myDepthTexture;
 	Vector2f myViewportSize;
 
 	Vector4f myDistortion;
@@ -66,6 +74,13 @@ private:
 	GLint  myScaleInUniform;
 	GLint  myHmdWarpParamUniform;
 	GLint  myTexture0Uniform;
+	
+    /// OVR hardware
+    OVR::Ptr<OVR::DeviceManager>  myManager;
+    OVR::Ptr<OVR::HMDDevice>      myHMD;
+    OVR::Ptr<OVR::SensorDevice>   mySensor;
+    OVR::SensorFusion             mySFusion;
+    OVR::HMDInfo                  myHMDInfo;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,14 +150,87 @@ void OculusRiftService::initialize()
 			ofmsg("OculusRiftService::initialize: rift postprocessing enabled for tile %1%", %tile->name);
 		}
 	}
+	
+	// Set default distortion values
+	myDistortion = Vector4f(1.0f, 0.22f, 0.24f, 0.0f);
+
+	// Set default scale parameters
+	myScaleParams = Vector4f(0.145806f,  0.233290f, 4.0f, 2.5f);
+
+	// Set default lens offset parameter
+	myLensOffset =  0.12f;
+
+	// Initialize the Oculus Rift
+	initOVR();
 
 	// The camera does not exist yet here, so we deal with it in the poll function.
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void OculusRiftService::initOVR()
+{
+	omsg("\n\n>>>>> OculusRiftService::initOVR");
+	
+    OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
+	
+    myManager = *OVR::DeviceManager::Create();
+    myHMD  = *myManager->EnumerateDevices<OVR::HMDDevice>().CreateDevice();
+    if (myHMD != NULL)
+    {
+        mySensor = *myHMD->GetSensor();
+
+        // This will initialize HMDInfo with information about configured IPD,
+        // screen size and other variables needed for correct projection.
+        // We pass HMD DisplayDeviceName into the renderer to select the
+        // correct monitor in full-screen mode.
+        if (myHMD->GetDeviceInfo(&myHMDInfo))
+        {
+			int windowWidth  = myHMDInfo.HResolution;
+			int windowHeight = myHMDInfo.VResolution;
+			ofmsg("HMD resolution: %1% x %2%", %windowWidth %windowHeight);
+			
+			float ets = myHMDInfo.EyeToScreenDistance;
+			ofmsg("Eye to screen distance: %1%", %ets);
+			
+			float sw = myHMDInfo.HScreenSize;
+			float sh = myHMDInfo.VScreenSize;
+			ofmsg("Screen size: %1% %2%", %sw %sh );
+			
+			float as = float(windowWidth) / float(windowHeight);
+			float scaleFactor = 1.0f / 1.0;			
+			
+			myScaleParams[0] = 0.25 * scaleFactor;
+			myScaleParams[1] = 0.5 * scaleFactor * as;
+			myScaleParams[2] = 4.0f;
+			myScaleParams[3] = 2.0f / as;
+			
+			myDistortion[0] = myHMDInfo.DistortionK[0];
+			myDistortion[1] = myHMDInfo.DistortionK[1];
+			myDistortion[2] = myHMDInfo.DistortionK[2];
+			myDistortion[3] = myHMDInfo.DistortionK[3];
+		
+			// distance between lens centers
+			myLensOffset = myHMDInfo.LensSeparationDistance;
+        }
+        if (mySensor)
+        {
+            // We need to attach sensor to SensorFusion object for it to receive 
+            // body frame messages and update orientation. SFusion.GetOrientation() 
+            // is used in OnIdle() to orient the view.
+            mySFusion.AttachToSensor(mySensor);
+        }
+    }
+
+    if (myHMDInfo.HResolution > 0)
+	omsg("<<<<<< OculusRiftService::initOVR\n\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void OculusRiftService::dispose() 
 {
 	sInstance = NULL;
+    // No OVR functions involving memory are allowed after this.
+    OVR::System::Destroy();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,6 +245,14 @@ void OculusRiftService::poll()
 		// Register myself as a camera listener.
 		myCamera = Engine::instance()->getDefaultCamera();
 		myCamera->addListener(this);
+	}
+	
+	// Update head orientation;
+	OVR::Quatf o = mySFusion.GetOrientation();
+	myCamera->setOrientation(Quaternion(o.w, o.x, o.y, o.z));
+	if(myCamera->getController() != NULL)
+	{
+		myCamera->getController()->reset();
 	}
 }
 
@@ -173,7 +269,9 @@ void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& conte
 	myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderToTexture);
 	myRenderTexture = new Texture(context.gpuContext);
 	myRenderTexture->initialize(myViewportSize[0], myViewportSize[1]);
-	myRenderTarget->setTextureTarget(myRenderTexture);
+	myDepthTexture = new Texture(context.gpuContext);
+	myDepthTexture->initialize(myViewportSize[0], myViewportSize[1]);
+	myRenderTarget->setTextureTarget(myRenderTexture, myDepthTexture);
 
 	// Setup shaders. Use some functions from the omegalib draw interface class 
 	// to simplify shader and program creation.
@@ -192,15 +290,6 @@ void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& conte
 	myScaleInUniform = glGetUniformLocation(myPostprocessProgram, "ScaleIn");
 	myHmdWarpParamUniform = glGetUniformLocation(myPostprocessProgram, "HmdWarpParam");
 	myTexture0Uniform = glGetUniformLocation(myPostprocessProgram, "Texture0");
-
-	// Set default distortion values
-	myDistortion = Vector4f(1.0f, 0.22f, 0.24f, 0.0f);
-
-	// Set default scale parameters
-	myScaleParams = Vector4f(0.145806f,  0.233290f, 4.0f, 2.5f);
-
-	// Set default lens offset parameter
-	myLensOffset =  0.287994f - 0.25f;
 
 	myInitialized = true;
 }
@@ -257,17 +346,17 @@ void OculusRiftService::endDraw(Camera* cam, const DrawContext& context)
 			glUniform2f(myLensCenterUniform, 0.25f + myLensOffset, 0.5f);
 			glUniform2f(myScreenCenterUniform, 0.25f, 0.5f);
 			di->drawRectTexture(myRenderTexture, 
-				Vector2f::Zero(), 
+				Vector2f(myViewportSize[0] / 2, 0), 
 				Vector2f(myViewportSize[0] / 2, myViewportSize[1]),
 				0,
 				Vector2f(0, 0),	Vector2f(0.5f, 1.0f));
 
 			// Draw right eye
 			// The right screen is centered at (0.75, 0.5)
-			glUniform2f(myLensCenterUniform, 0.75f, 0.5f);
-			glUniform2f(myScreenCenterUniform, 0.75f - myLensOffset, 0.5f);
+			glUniform2f(myLensCenterUniform, 0.75f - myLensOffset, 0.5f);
+			glUniform2f(myScreenCenterUniform, 0.75f, 0.5f);
 			di->drawRectTexture(myRenderTexture, 
-				Vector2f(myViewportSize[0] / 2, 0), 
+				Vector2f::Zero(), 
 				Vector2f(myViewportSize[0] / 2, myViewportSize[1]),
 				0,
 				Vector2f(0.5, 0),	Vector2f(1.0f, 1.0f));

@@ -158,7 +158,7 @@ void EqualizerDisplaySystem::generateEqConfig()
 				//else
 				//{
 					winX = tc.position[0] + eqcfg.windowOffset[0];
-					winY = tc.position[1] + eqcfg.windowOffset[0];
+					winY = tc.position[1] + eqcfg.windowOffset[1];
 				//}
 			
 				String tileName = tc.name;
