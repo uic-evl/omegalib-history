@@ -58,8 +58,16 @@ Renderer::Renderer(Engine* engine)
 Texture* Renderer::createTexture()
 {
 	Texture* tex = new Texture(this->myGpuContext);
-	myTextures.push_back(tex);
+	myResources.push_back(tex);
 	return tex;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+RenderTarget* Renderer::createRenderTarget(RenderTarget::Type type)
+{
+	RenderTarget* rt = new RenderTarget(this->myGpuContext, type);
+	myResources.push_back(rt);
+	return rt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,13 +161,19 @@ void Renderer::finishFrame(const FrameInfo& frame)
 		cam->finishFrame(frame);
 	}
 
-	// Dispose of unused textures
-	List<Texture*> txlist;
-	foreach(Texture* tex, myTextures)
+	bool shuttingDown = SystemManager::instance()->isExitRequested();
+
+	// Dispose of unused resources. When shutting down, clean everything.
+	List<GpuResource*> txlist;
+	foreach(GpuResource* tex, myResources)
 	{
-		if(tex->refCount() == 1) txlist.push_back(tex);
+		if(tex->refCount() == 1 || shuttingDown)
+		{
+			tex->dispose();
+			txlist.push_back(tex);
+		}
 	}
-	foreach(Texture* tex, txlist) myTextures.remove(tex);
+	foreach(GpuResource* gr, txlist) myResources.remove(gr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

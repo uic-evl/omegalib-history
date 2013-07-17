@@ -27,6 +27,7 @@
 #include "omega/CameraOutput.h"
 #include "omega/Camera.h"
 #include "omega/PixelData.h"
+#include "omega/Renderer.h"
 
 using namespace omega;
 
@@ -95,7 +96,7 @@ void CameraOutput::beginDraw(const DrawContext& context)
 {
 	if(myRenderTarget == NULL)
 	{
-		myRenderTarget = new RenderTarget(context.gpuContext, myType);
+		myRenderTarget = context.renderer->createRenderTarget(myType);
 		if(myReadbackColorTarget != NULL) 
 		{
 			myRenderTarget->setReadbackTarget(myReadbackColorTarget, myReadbackDepthTarget, myReadbackViewport);

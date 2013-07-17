@@ -275,16 +275,18 @@ void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& conte
 	myViewportSize = Vector2f(
 		context.tile->pixelSize[0], context.tile->pixelSize[1]);
 
-	myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderToTexture);
-	myRenderTexture = new Texture(context.gpuContext);
+	Renderer* r = context.renderer;
+
+	myRenderTarget = r->createRenderTarget(RenderTarget::RenderToTexture);
+	myRenderTexture = r->createTexture();
 	myRenderTexture->initialize(myViewportSize[0], myViewportSize[1]);
-	myDepthTexture = new Texture(context.gpuContext);
+	myDepthTexture = r->createTexture();
 	myDepthTexture->initialize(myViewportSize[0], myViewportSize[1], GL_DEPTH_COMPONENT);
 	myRenderTarget->setTextureTarget(myRenderTexture, myDepthTexture);
 
 	// Setup shaders. Use some functions from the omegalib draw interface class 
 	// to simplify shader and program creation.
-	DrawInterface* di = context.renderer->getRenderer();
+	DrawInterface* di = r->getRenderer();
 	GLuint vs = di->makeShaderFromSource(PostProcessVertexShaderSrc, 
 		DrawInterface::VertexShader);
 

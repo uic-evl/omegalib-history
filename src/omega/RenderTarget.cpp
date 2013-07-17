@@ -52,11 +52,12 @@ RenderTarget::RenderTarget(GpuContext* context, Type type, GLuint id):
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-RenderTarget::~RenderTarget()
+void RenderTarget::dispose() 
 {
 	if(myId != 0)
 	{
 		glDeleteFramebuffers(1, &myId);
+		myId = 0;
 	}
 }
 

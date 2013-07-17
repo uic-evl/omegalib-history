@@ -40,6 +40,7 @@ namespace omega
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	class OMEGA_API RenderTarget: public GpuResource
 	{
+	friend class Renderer;
 	public:
 		enum Type {
 			//! Render to the main framebuffer. Supports readback targets.
@@ -50,9 +51,6 @@ namespace omega
 			RenderToTexture};
 
 	public:
-		RenderTarget(GpuContext* context, Type type, GLuint id = 0);
-		~RenderTarget();
-
 		//! Render target configuration
 		//@{
 		int getWidth();
@@ -73,6 +71,11 @@ namespace omega
 		//@}
 
 		GLuint getId() { return myId; };
+		virtual void dispose();
+
+	protected:
+		// Only renderer can allocate Render targets.
+		RenderTarget(GpuContext* context, Type type, GLuint id = 0);
 
 	private:
 		GLuint myId;

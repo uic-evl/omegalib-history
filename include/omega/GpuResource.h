@@ -71,8 +71,9 @@ namespace omega
 	class OMEGA_API GpuResource: public ReferenceType
 	{
 	public:
-		GpuResource(GpuContext* ctx): myContext(ctx) {}
+		GpuResource(GpuContext* ctx): myContext(ctx) { dispose(); }
 		GpuContext* getContext() { return myContext; }
+		virtual void dispose() {}
 	private:
 		GpuContext* myContext;
 	};

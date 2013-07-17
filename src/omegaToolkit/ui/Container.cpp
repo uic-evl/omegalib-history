@@ -796,9 +796,10 @@ void ContainerRenderable::beginDraw(const DrawContext& context)
 				myTexture->getWidth() != myOwner->getWidth() ||
 				myTexture->getHeight() != myOwner->getHeight())
 			{
- 				myTexture = new Texture(context.gpuContext);
+				Renderer* r = context.renderer;
+ 				myTexture = r->createTexture();
 				myTexture->initialize(myOwner->getWidth(), myOwner->getHeight());
-				myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderToTexture);
+				myRenderTarget = r->createRenderTarget(RenderTarget::RenderToTexture);
 				myRenderTarget->setTextureTarget(myTexture);
 			}
 		}
@@ -809,9 +810,10 @@ void ContainerRenderable::beginDraw(const DrawContext& context)
 				pixels->getWidth() != myOwner->getWidth() ||
 				pixels->getHeight() != myOwner->getHeight())
 			{
+				Renderer* r = context.renderer;
 				// Resize the pixel buffer.
 				pixels->resize(myOwner->getWidth(), myOwner->getHeight());
-				myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderOffscreen);
+				myRenderTarget = r->createRenderTarget(RenderTarget::RenderOffscreen);
 				myRenderTarget->setReadbackTarget(pixels);
 			}
 			pixels->setDirty(true);

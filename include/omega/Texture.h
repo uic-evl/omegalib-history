@@ -38,12 +38,11 @@ namespace omega
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	class OMEGA_API Texture: public GpuResource
 	{
+	friend class Renderer;
 	public:
 		static void enablePboTransfers(bool value) { sUsePbo = value; }
 
 	public:
-		Texture(GpuContext* context);
-
 		//! Initializes this texture object
 		void initialize(int width, int height, uint format = 0); 
 		bool isInitialized() { return myInitialized; }
@@ -63,6 +62,10 @@ namespace omega
 		bool isBound();
 		GpuContext::TextureUnit getTextureUnit();
 		//@}
+
+	protected:
+		// Only renderer can allocate textures.
+		Texture(GpuContext* context);
 
 	private:
 		static bool sUsePbo;

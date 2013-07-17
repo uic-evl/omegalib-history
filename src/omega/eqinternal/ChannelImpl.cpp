@@ -302,9 +302,9 @@ void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
 		{
 			if(myStatsBuffer == NULL)
 			{
-				myStatsTexture = new Texture(myDC.gpuContext);
+				myStatsTexture = myDC.renderer->createTexture();
 				myStatsTexture->initialize(myDC.tile->pixelSize[0], myDC.tile->pixelSize[1]);
-				myStatsBuffer = new RenderTarget(myDC.gpuContext, RenderTarget::RenderToTexture);
+				myStatsBuffer = myDC.renderer->createRenderTarget(RenderTarget::RenderToTexture);
 				myStatsBuffer->setTextureTarget(myStatsTexture);
 			}
 			myStatsBuffer->bind();
