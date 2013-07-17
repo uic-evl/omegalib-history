@@ -246,7 +246,8 @@ void OsgbBasicDemo::initialize()
     //mySceneNode->setBoundingBoxVisible(true);
     //mySceneNode->setBoundingBoxVisible(false);
     //getEngine()->getScene()->addChild(mySceneNode);
-	getEngine()->getDefaultCamera()->setPosition(0,10,80);
+	getEngine()->getDefaultCamera()->setPosition(0,20,80);
+	//getEngine()->getDefaultCamera()->lookAt(omicron::Vector3f(0,0,0), omicron::Vector3f(1,1,0)); 
 	//getEngine()->getDefaultCamera()->setOrientation(1, 1, 1, 0);
 
     // Set the interactor style used to manipulate meshes.
