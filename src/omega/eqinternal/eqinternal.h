@@ -246,7 +246,7 @@ public:
 	DrawContext& getDrawContext() { return myDC; }
 
 protected:
-    void setupDrawContext(DrawContext* context, const uint128_t& spin);
+    void setupDrawContext(DrawContext* context, const uint128_t& spin, eq::fabric::Eye eye);
 
 	void drawStats();
     virtual bool configInit(const uint128_t& initID);
