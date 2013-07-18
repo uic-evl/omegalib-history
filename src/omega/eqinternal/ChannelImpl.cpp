@@ -92,7 +92,7 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128_t& spin)
+void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128_t& spin, eq::fabric::Eye eye)
 {
     WindowImpl* window = static_cast<WindowImpl*>(getWindow());
     Renderer* client = window->getRenderer();
@@ -113,7 +113,7 @@ void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128
     // (spin is 128 bits, gets truncated to 64... do we really need 128 bits anyways!?)
     context->frameNum = spin.low();
 
-    switch( getEye() )
+	switch( eye )
     {
         case eq::fabric::EYE_LEFT:
             context->eye = DrawContext::EyeLeft;
@@ -237,7 +237,7 @@ void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
     //PipeImpl* pipe = static_cast<PipeImpl*>(getPipe());
     //Renderer* client = pipe->getClient();
 
-    setupDrawContext(&myDC, frameID);
+    setupDrawContext(&myDC, frameID, getEye());
 
 	// Configure stencil test when rendering interleaved with stencil is enabled.
 	if(myStencilInitialized)
@@ -285,9 +285,8 @@ void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
 	// So, if we are in stereo mode skip one eye.
 	if(getEye() != eq::fabric::EYE_LAST && getEye() != eq::fabric::EYE_CYCLOP) return;
 
-    setupDrawContext(&myDC, frameID);
+	setupDrawContext(&myDC, frameID, eq::fabric::EYE_CYCLOP);
     myDC.task = DrawContext::OverlayDrawTask;
-    myDC.eye = DrawContext::EyeCyclop;
 
     EQ_GL_CALL( applyBuffer( ));
     EQ_GL_CALL( applyViewport( ));
@@ -303,9 +302,9 @@ void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
 		{
 			if(myStatsBuffer == NULL)
 			{
-				myStatsTexture = new Texture(myDC.gpuContext);
+				myStatsTexture = myDC.renderer->createTexture();
 				myStatsTexture->initialize(myDC.tile->pixelSize[0], myDC.tile->pixelSize[1]);
-				myStatsBuffer = new RenderTarget(myDC.gpuContext, RenderTarget::RenderToTexture);
+				myStatsBuffer = myDC.renderer->createRenderTarget(RenderTarget::RenderToTexture);
 				myStatsBuffer->setTextureTarget(myStatsTexture);
 			}
 			myStatsBuffer->bind();

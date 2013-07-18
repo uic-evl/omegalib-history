@@ -41,6 +41,7 @@
 #include "Renderable.h"
 #include "omega/ApplicationBase.h"
 #include "omega/SystemManager.h"
+#include "omega/RenderTarget.h"
 
 namespace omega {
 	class RenderPass;
@@ -69,7 +70,7 @@ namespace omega {
 		void queueCommand(IRendererCommand* cmd);
 
 		virtual void initialize();
-		virtual void draw(const DrawContext& context);
+		virtual void draw(DrawContext& context);
 		virtual void startFrame(const FrameInfo& frame);
 		virtual void finishFrame(const FrameInfo& frame);
 
@@ -83,7 +84,12 @@ namespace omega {
 		ServiceManager*   getServiceManager()   { return SystemManager::instance()->getServiceManager(); }
 		DisplaySystem*  getDisplaySystem() { return SystemManager::instance()->getDisplaySystem(); }
 
+		//! Resource management
+		//@{
 		Texture* createTexture();
+		RenderTarget* createRenderTarget(RenderTarget::Type type);
+		//@}
+
 	private:
 		void innerDraw(const DrawContext& context, Camera* camera);
 
@@ -100,7 +106,7 @@ namespace omega {
 		List< Ref<RenderPass> > myRenderPassList;
 		Queue< Ref<IRendererCommand> > myRenderableCommands;
 
-		List< Ref<Texture> > myTextures;
+		List< Ref<GpuResource> > myResources;
 	};
 
 	///////////////////////////////////////////////////////////////////////////

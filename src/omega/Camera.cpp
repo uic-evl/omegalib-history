@@ -187,7 +187,7 @@ CameraOutput* Camera::getOutput(uint contextId)
 	if(myOutput[contextId] == NULL)
 	{
 		ofmsg("Camera::getOutput: creating camera output for context %1%", %contextId);
-		myOutput[contextId] = new CameraOutput(isOffscreen());
+		myOutput[contextId] = new CameraOutput();
 	}
 
 	return myOutput[contextId].get();
@@ -210,8 +210,14 @@ bool Camera::isEnabled(const DrawContext& context)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-const DrawContext& Camera::beginDraw(const DrawContext& context)
+DrawContext& Camera::beginDraw(DrawContext& context)
 {
+	CameraOutput* output = myOutput[context.gpuContext->getId()];
+	if(output != NULL && output->isEnabled())
+	{
+		output->beginDraw(context);
+	}
+
 	if(myListener != NULL) myListener->beginDraw(this, context);
 
 	// Default camera: just return back the original draw context. Also, camera
@@ -220,7 +226,6 @@ const DrawContext& Camera::beginDraw(const DrawContext& context)
 	// current code (mostly porthole) things are kept as they are for now.
 	if(getEngine()->getDefaultCamera() == this) return context;
 	
-	CameraOutput* output = getOutput(context.gpuContext->getId());
 	DrawContext& dc = myDrawContext[context.gpuContext->getId()];
 
 	dc = context;
@@ -229,8 +234,6 @@ const DrawContext& Camera::beginDraw(const DrawContext& context)
 
 	// DO not apply any head transformation for custom cameras
 	dc.modelview = myViewTransform;
-
-	dc.viewport = output->getReadbackViewport();
 	if(myAutoAspect)
 	{
 		float aspect = (float)dc.viewport.width() / dc.viewport.height();
@@ -238,17 +241,22 @@ const DrawContext& Camera::beginDraw(const DrawContext& context)
 	}
 	dc.projection = myProjection;
 
-	output->beginDraw(dc);
-	if(myFlags & Offscreen)
+	if(output != NULL && output->isEnabled())
 	{
+		dc.viewport = output->getReadbackViewport();
 		dc.drawBuffer = output->getRenderTarget();
 	}
 	return dc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Camera::endDraw(const DrawContext& context)
+void Camera::endDraw(DrawContext& context)
 {
+	CameraOutput* output = myOutput[context.gpuContext->getId()];
+	if(output != NULL && output->isEnabled())
+	{
+		output->beginDraw(context);
+	}
 	if(myListener != NULL) myListener->endDraw(this, context);
 
 	// Default camera: just return back the original draw context. Also, camera
@@ -256,15 +264,17 @@ void Camera::endDraw(const DrawContext& context)
 	// mechanics may be changed / simplified in the future. To avoid breaking
 	// current code (mostly porthole) things are kept as they are for now.
 	if(getEngine()->getDefaultCamera() == this) return;
-
-	CameraOutput* output = getOutput(context.gpuContext->getId());
-	DrawContext& dc = myDrawContext[context.gpuContext->getId()];
-	output->endDraw(dc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void Camera::startFrame(const FrameInfo& frame)
 {
+	CameraOutput* output = myOutput[frame.gpuContext->getId()];
+	if(output != NULL && output->isEnabled())
+	{
+		output->startFrame(frame);
+	}
+
 	if(myListener != NULL) myListener->startFrame(this, frame);
 
 	// Default camera: just return back the original draw context. Also, camera
@@ -272,14 +282,16 @@ void Camera::startFrame(const FrameInfo& frame)
 	// mechanics may be changed / simplified in the future. To avoid breaking
 	// current code (mostly porthole) things are kept as they are for now.
 	if(getEngine()->getDefaultCamera() == this) return;
-
-	CameraOutput* output = getOutput(frame.gpuContext->getId());
-	output->startFrame(frame);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void Camera::finishFrame(const FrameInfo& frame)
 {
+	CameraOutput* output = myOutput[frame.gpuContext->getId()];
+	if(output != NULL && output->isEnabled())
+	{
+		output->finishFrame(frame);
+	}
 	if(myListener != NULL) myListener->finishFrame(this, frame);
 
 	// Default camera: just return back the original draw context. Also, camera
@@ -287,9 +299,6 @@ void Camera::finishFrame(const FrameInfo& frame)
 	// mechanics may be changed / simplified in the future. To avoid breaking
 	// current code (mostly porthole) things are kept as they are for now.
 	if(getEngine()->getDefaultCamera() == this) return;
-
-	CameraOutput* output = getOutput(frame.gpuContext->getId());
-	output->finishFrame(frame);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

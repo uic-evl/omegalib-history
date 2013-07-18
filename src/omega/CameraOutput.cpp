@@ -27,8 +27,29 @@
 #include "omega/CameraOutput.h"
 #include "omega/Camera.h"
 #include "omega/PixelData.h"
+#include "omega/Renderer.h"
 
 using namespace omega;
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+CameraOutput::CameraOutput(): 
+	myEnabled(false), myRenderTarget(NULL), myType(RenderTarget::RenderOffscreen),
+	myReadbackColorTarget(NULL), myReadbackDepthTarget(NULL),
+	myTextureColorTarget(NULL), myTextureDepthTarget(NULL)
+{
+	reset(RenderTarget::RenderOffscreen);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+void CameraOutput::reset(RenderTarget::Type type)
+{
+	myType = type;
+	if(myRenderTarget != NULL)
+	{
+		delete myRenderTarget;
+		myRenderTarget = NULL;
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void CameraOutput::setReadbackTarget(PixelData* color, PixelData* depth)
@@ -51,20 +72,40 @@ void CameraOutput::setReadbackTarget(PixelData* color, PixelData* depth, const R
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void CameraOutput::setTextureTarget(Texture* color, Texture* depth)
+{
+	myTextureColorTarget = color;
+	myTextureDepthTarget = depth;
+	if(myTextureColorTarget != NULL)
+	{
+		myReadbackViewport = Rect(
+			0, 0, 
+			myTextureColorTarget->getWidth(), myTextureColorTarget->getHeight());
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void CameraOutput::setTextureTarget(Texture* color, Texture* depth, const Rect& readbackViewport)
+{
+	setTextureTarget(color, depth);
+	myReadbackViewport = readbackViewport;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void CameraOutput::beginDraw(const DrawContext& context)
 {
 	if(myRenderTarget == NULL)
 	{
-		if(myOffscreen) 
+		myRenderTarget = context.renderer->createRenderTarget(myType);
+		if(myReadbackColorTarget != NULL) 
 		{
-			myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderOffscreen);
+			myRenderTarget->setReadbackTarget(myReadbackColorTarget, myReadbackDepthTarget, myReadbackViewport);
 		}
-		else
+		else if(myTextureColorTarget != NULL)
 		{
-			myRenderTarget = new RenderTarget(context.gpuContext, RenderTarget::RenderOnscreen);
+			myRenderTarget->setTextureTarget(myTextureColorTarget, myTextureDepthTarget);
 		}
 	}
-	myRenderTarget->setReadbackTarget(myReadbackColorTarget, myReadbackDepthTarget, myReadbackViewport);
 	myRenderTarget->bind();
 }
 

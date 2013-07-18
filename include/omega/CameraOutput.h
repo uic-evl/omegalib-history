@@ -37,9 +37,9 @@ namespace omega {
 	class OMEGA_API CameraOutput: public ReferenceType
 	{
 	public:
-		CameraOutput(bool offscreen = false): myEnabled(false), myRenderTarget(NULL), myOffscreen(offscreen),
-			myReadbackColorTarget(NULL), myReadbackDepthTarget(NULL)
-		{}
+		CameraOutput();
+
+		void reset(RenderTarget::Type type);
 
 		void beginDraw(const DrawContext& context);
 		void endDraw(const DrawContext& context);
@@ -51,21 +51,28 @@ namespace omega {
 
 		void setReadbackTarget(PixelData* color, PixelData* depth = NULL);
 		void setReadbackTarget(PixelData* color, PixelData* depth, const Rect& readbackViewport);
+		void setTextureTarget(Texture* color, Texture* depth = NULL);
+		void setTextureTarget(Texture* color, Texture* depth, const Rect& readbackViewport);
 
 		const Rect& getReadbackViewport() { return myReadbackViewport; }
 
 		RenderTarget* getRenderTarget() { return myRenderTarget; }
+		RenderTarget::Type getType() { return myType; }
 
 		void lock() { myLock.lock();}
 		void unlock() { myLock.unlock();}
 
 	private:
 		bool myEnabled;
-		bool myOffscreen;
+
+		RenderTarget::Type myType;
 		RenderTarget* myRenderTarget;
 
 		PixelData* myReadbackColorTarget;
 		PixelData* myReadbackDepthTarget;
+		Texture* myTextureColorTarget;
+		Texture* myTextureDepthTarget;
+
 		Rect myReadbackViewport;
 
 		Lock myLock;

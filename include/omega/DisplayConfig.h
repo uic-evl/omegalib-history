@@ -69,7 +69,8 @@ namespace omega
 			flags(0),
 			invertStereo(false),
 			isInGrid(false),
-			settingData(s)
+			settingData(s),
+			isHMD(false)
 			{
 			}
 
@@ -123,6 +124,10 @@ namespace omega
 		bool disableMouse;
 
 		bool enabled;
+
+		//! When set to true this tile is treated as outputting to a head 
+		//! mounted display
+		bool isHMD;
 
 		//! When set to true render this tile offscreen.
 		bool offscreen;

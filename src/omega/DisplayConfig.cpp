@@ -158,6 +158,8 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 
 				tc->disableMouse = Config::getBoolValue("disableMouse", sTile, false);
 
+				tc->isHMD = Config::getBoolValue("isHMD", sTile, false);
+
 				//tc->viewport = Config::getVector4fValue("viewport", sTile, tc->viewport);
 
 				// If the tile config contains a size entry use it, oterwise use the default tile and bezel size data

@@ -63,6 +63,7 @@ namespace omega {
 		float myPitchMultiplier;
 		uint myMoveFlags;
 		bool myRotating;
+		bool myAltRotating;
 		Vector3f myLastPointerPosition;
 		Quaternion myBaseOrientation;
 		float myYaw;

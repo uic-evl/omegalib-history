@@ -48,6 +48,7 @@ KeyboardMouseCameraController::KeyboardMouseCameraController():
 	myPitch(0),
 	myMoveFlags(0),
 	myRotating(false),
+	myAltRotating(false),
 	myBaseOrientation(Quaternion::Identity())
 {
 }
@@ -66,6 +67,8 @@ void KeyboardMouseCameraController::handleEvent(const Event& evt)
 		NAV_KEY('s', MoveBackward);
 		NAV_KEY('r', MoveUp);
 		NAV_KEY('f', MoveDown);
+
+		myAltRotating = evt.isFlagSet(Event::Alt);
 	}
 	else if(evt.getServiceType() == Service::Pointer)
 	{
@@ -91,7 +94,14 @@ void KeyboardMouseCameraController::update(const UpdateContext& context)
 
 	Vector3f speed = computeSpeedVector(myMoveFlags, mySpeed, myStrafeMultiplier);
 	//updateCamera(speed, myYaw, myPitch, 0, context.dt);
-	c->setOrientation(myBaseOrientation * Math::quaternionFromEuler(Vector3f(myPitch, myYaw, 0)));
+	if(myAltRotating)
+	{
+		c->setHeadOrientation(Math::quaternionFromEuler(Vector3f(myPitch, myYaw, 0)));
+	}
+	else
+	{
+		c->setOrientation(myBaseOrientation * Math::quaternionFromEuler(Vector3f(myPitch, myYaw, 0)));
+	}
 	c->translate(speed * context.dt, Node::TransformLocal);
 }
 

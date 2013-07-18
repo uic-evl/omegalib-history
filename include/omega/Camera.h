@@ -57,8 +57,8 @@ namespace omega {
 	class ICameraListener
 	{
 	public:
-		virtual void endDraw(Camera* cam, const DrawContext& context) {}
-		virtual void beginDraw(Camera* cam, const DrawContext& context) { }
+		virtual void endDraw(Camera* cam, DrawContext& context) {}
+		virtual void beginDraw(Camera* cam, DrawContext& context) { }
 		virtual void startFrame(Camera* cam, const FrameInfo& frame) {}
 		virtual void finishFrame(Camera* cam, const FrameInfo& frame) {}
 	};
@@ -76,7 +76,6 @@ namespace omega {
 			ForceMono = 1 << 1,
 			DrawScene = 1 << 2,
 			DrawOverlay = 1 << 3,
-			Offscreen = 1 << 4,
 			DefaultFlags = DrawScene | DrawOverlay
 		};
 
@@ -88,8 +87,6 @@ namespace omega {
 
 	public:
 		Camera(Engine* engine, uint flags = DefaultFlags);
-
-		bool isOffscreen() { return myFlags & Offscreen; }
 
 		CameraOutput* getOutput(uint contextId);
 
@@ -147,8 +144,8 @@ namespace omega {
 		//! Converts a point from world to local coordinates using the camera position and orientation
 		Vector3f worldToLocalPosition(const Vector3f& position);
 
-		void endDraw(const DrawContext& context);
-		const DrawContext& beginDraw(const DrawContext& context);
+		void endDraw(DrawContext& context);
+		DrawContext& beginDraw(DrawContext& context);
 		void startFrame(const FrameInfo& frame);
 		void finishFrame(const FrameInfo& frame);
 
