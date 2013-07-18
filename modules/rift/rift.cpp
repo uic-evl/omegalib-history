@@ -48,11 +48,15 @@ public:
 	void setLensOffset(float value) { myLensOffset = value; }
 	void setDistortionParam(int index, float value) { myDistortion[index] = value; }
 	float getDistortionParam(int index) { return myDistortion[index]; }
-	void setScaleParam(int index, float value) { myScaleParams[index] = value; }
-	float getScaleParam(int index) { return myScaleParams[index]; }
+	void setScaleFactor(float value) { myScaleFactor = value; }
+	float getScaleFactor() { return myScaleFactor; }
 
 private:
 	void initOVR();
+	void beginEyeDraw();
+	void drawEyeQuad(float x, float y, float w, float h, float u, float v, float uw, float vh);
+	void endEyeDraw();
+
 	
 private:
 	bool myInitialized;
@@ -65,6 +69,8 @@ private:
 	Vector4f myDistortion;
 	Vector4f myScaleParams;
 	float myLensOffset;
+	float myScaleFactor;
+	float myAspectRatio;
 
 	// Shader stuff
 	GLuint myPostprocessProgram;
@@ -118,8 +124,8 @@ BOOST_PYTHON_MODULE(rift)
 	PYAPI_REF_BASE_CLASS(OculusRiftService)
 		PYAPI_METHOD(OculusRiftService, getLensOffset)
 		PYAPI_METHOD(OculusRiftService, setLensOffset)
-		PYAPI_METHOD(OculusRiftService, setScaleParam)
-		PYAPI_METHOD(OculusRiftService, getScaleParam)
+		PYAPI_METHOD(OculusRiftService, setScaleFactor)
+		PYAPI_METHOD(OculusRiftService, getScaleFactor)
 		PYAPI_METHOD(OculusRiftService, setDistortionParam)
 		PYAPI_METHOD(OculusRiftService, getDistortionParam)
 		;
@@ -155,13 +161,16 @@ void OculusRiftService::initialize()
 	}
 	
 	// Set default distortion values
-	myDistortion = Vector4f(1.0f, 0.22f, 0.24f, 0.0f);
+	myDistortion = Vector4f(1.0f, 0.5f, 0.25f, 0.0f);
 
 	// Set default scale parameters
 	myScaleParams = Vector4f(0.145806f,  0.233290f, 4.0f, 2.5f);
 
 	// Set default lens offset parameter
-	myLensOffset =  0.12f;
+	myLensOffset =  0.0f;
+
+	myScaleFactor = 1;
+	myAspectRatio = 1.6;
 
 	// Initialize the Oculus Rift
 	initOVR();
@@ -200,13 +209,7 @@ void OculusRiftService::initOVR()
 			float sh = myHMDInfo.VScreenSize;
 			ofmsg("Screen size: %1% %2%", %sw %sh );
 			
-			float as = float(windowWidth) / float(windowHeight);
-			float scaleFactor = 1.0f / 1.0;			
-			
-			myScaleParams[0] = 0.25 * scaleFactor;
-			myScaleParams[1] = 0.5 * scaleFactor * as;
-			myScaleParams[2] = 4.0f;
-			myScaleParams[3] = 2.0f / as;
+			myAspectRatio = float(windowWidth) / float(windowHeight);
 			
 			myDistortion[0] = myHMDInfo.DistortionK[0];
 			myDistortion[1] = myHMDInfo.DistortionK[1];
@@ -215,6 +218,10 @@ void OculusRiftService::initOVR()
 		
 			// distance between lens centers
 			myLensOffset = myHMDInfo.LensSeparationDistance;
+			ofmsg("Lens separation distance: %1%", %myLensOffset);
+
+			myLensOffset = 0.5 - myLensOffset / sw;
+			ofmsg("normalized lens offset: %1%", %myLensOffset);
         }
         if (mySensor)
         {
@@ -257,11 +264,11 @@ void OculusRiftService::poll()
 #ifndef RIFT_EMULATE
 	// Update head orientation;
 	OVR::Quatf o = mySFusion.GetOrientation();
-	myCamera->setOrientation(Quaternion(o.w, o.x, o.y, o.z));
-	if(myCamera->getController() != NULL)
+	myCamera->setHeadOrientation(Quaternion(o.w, o.x, o.y, o.z));
+	/*if(myCamera->getController() != NULL)
 	{
 		myCamera->getController()->reset();
-	}
+	}*/
 #endif
 }
 
@@ -273,7 +280,7 @@ void OculusRiftService::stop()
 void OculusRiftService::initializeGraphics(Camera* cam, const DrawContext& context)
 {
 	myViewportSize = Vector2f(
-		context.tile->pixelSize[0], context.tile->pixelSize[1]);
+		context.tile->pixelSize[0] *2, context.tile->pixelSize[1]*2);
 
 	Renderer* r = context.renderer;
 
@@ -348,9 +355,13 @@ void OculusRiftService::endDraw(Camera* cam, DrawContext& context)
 			context.eye == DrawContext::EyeCyclop)
 		{
 			DrawInterface* di = context.renderer->getRenderer();
-			di->beginDraw2D(context);
 
-			glUseProgram(myPostprocessProgram);
+			beginEyeDraw();
+
+			myScaleParams[0] = 0.25f * myScaleFactor; //0.25 * myScaleFactor;
+			myScaleParams[1] = 0.25f * myScaleFactor * myAspectRatio;
+			myScaleParams[2] = 4.0f;
+			myScaleParams[3] = 4.0f / myAspectRatio;
 
 			// Set uniforms common to left and right eye
 			glUniform2f(myScaleUniform, myScaleParams[0],  myScaleParams[1]);
@@ -367,33 +378,70 @@ void OculusRiftService::endDraw(Camera* cam, DrawContext& context)
 			// drawRectTexture function).
 			glUniform1i(myTexture0Uniform, 0);
 
-			int vw = context.viewport.width();
-			int vh = context.viewport.height();
-		
 			// Draw left eye
 			// The left screen is centered at (0.25, 0.5)
 			glUniform2f(myLensCenterUniform, 0.25f + myLensOffset, 0.5f);
 			glUniform2f(myScreenCenterUniform, 0.25f, 0.5f);
-			di->drawRectTexture(myRenderTexture, 
-				Vector2f(vw / 2, 0), 
-				Vector2f(vw / 2, vh),
-				0,
-				Vector2f(0, 0),	Vector2f(0.5f, 1.0f));
+			drawEyeQuad(-1, -1, 1, 2, 0, 0, 0.5, 1);
 
 			// Draw right eye
-			// The right screen is centered at (0.75, 0.5)
 			glUniform2f(myLensCenterUniform, 0.75f - myLensOffset, 0.5f);
 			glUniform2f(myScreenCenterUniform, 0.75f, 0.5f);
-			di->drawRectTexture(myRenderTexture, 
-				Vector2f::Zero(), 
-				Vector2f(vw / 2, vh),
-				0,
-				Vector2f(0.5, 0),	Vector2f(1.0f, 1.0f));
+			drawEyeQuad(0, -1, 1, 2, 0.5, 0, 0.5, 1);
 
-			glUseProgram(0);
+			endEyeDraw();
 
-			di->endDraw();
 			myRenderTarget->clear();
 		}
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void OculusRiftService::beginEyeDraw()
+{
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glUseProgram(myPostprocessProgram);
+
+	myRenderTexture->bind(GpuContext::TextureUnit0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void OculusRiftService::drawEyeQuad(
+	float x, float y, float w, float h, float u, float v, float uw, float vh)
+{
+	glBegin(GL_QUADS);
+	glTexCoord2f(u, v);
+	glVertex2f(x, y);
+
+	glTexCoord2f(u + uw, v);
+	glVertex2f(x + w, y);
+
+	glTexCoord2f(u + uw, v + vh);
+	glVertex2f(x + w, y + h);
+
+	glTexCoord2f(u, v + vh);
+	glVertex2f(x, y + h);
+
+	glEnd();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void OculusRiftService::endEyeDraw()
+{
+	myRenderTexture->unbind();
+
+	glUseProgram(0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
 }
