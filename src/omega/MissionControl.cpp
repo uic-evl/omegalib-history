@@ -263,13 +263,15 @@ void MissionControlServer::handleMessage(const char* header, void* data, int siz
 				}
 			}
 		}
-
-		// By default, broadcast the message to all other connected clients.
-		foreach(MissionControlConnection* conn, myConnections)
+		else
 		{
-			if(conn->getState() == TcpConnection::ConnectionOpen && conn != sender)
+			// By default, broadcast the message to all other connected clients.
+			foreach(MissionControlConnection* conn, myConnections)
 			{
-				conn->sendMessage(header, data, size);
+				if(conn->getState() == TcpConnection::ConnectionOpen && conn != sender)
+				{
+					conn->sendMessage(header, data, size);
+				}
 			}
 		}
 	}
