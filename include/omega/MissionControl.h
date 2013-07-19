@@ -171,7 +171,8 @@ namespace omega {
 		static MissionControlClient* create();
 
 	public:
-		MissionControlClient(): EngineModule("MissionControlClient") {}
+		MissionControlClient(): 
+		  EngineModule("MissionControlClient"), myName("client") {}
 		virtual ~MissionControlClient() 
 		{ 
 			// We make sure the connection object is destroyed here. This is
@@ -194,11 +195,14 @@ namespace omega {
 		void postCommand(const String& command);
 		bool isConnected();
 		void closeConnection();
-
-		String getName() { return myConnection->getName(); }
-		virtual void setName(const String& name) { myConnection->setName(name); }
+		void setName(const String& name);
+		String getName();
+		vector<String>& listConnectedClients();
 
 	private:
+		String myName;
+		vector<String> myConnectedClient;
+
 		asio::io_service myIoService;
 		Ref<MissionControlConnection> myConnection;
 		Ref<IMissionControlMessageHandler> myMessageHandler;

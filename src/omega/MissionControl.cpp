@@ -350,3 +350,23 @@ void MissionControlClient::closeConnection()
 		myConnection = NULL;
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::setName(const String& name)
+{
+	myConnection->setName(name);
+	myName = name;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+String MissionControlClient::getName()
+{
+	myConnection->getName();
+	return myName;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+vector<String>& MissionControlClient::listConnectedClients()
+{
+	return myConnectedClient;
+}

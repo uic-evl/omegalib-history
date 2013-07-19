@@ -685,6 +685,12 @@ bool isSoundEnabled()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+MissionControlClient* getMissionControlClient()
+{
+	return SystemManager::instance()->getMissionControlClient();
+}
+	
+///////////////////////////////////////////////////////////////////////////////
 void toggleStats(const String& stats)
 {
 	SystemManager* sm = SystemManager::instance();
@@ -1270,6 +1276,7 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(MissionControlClient, postCommand)
 		PYAPI_METHOD(MissionControlClient, setName)
 		PYAPI_METHOD(MissionControlClient, getName)
+		.def("listConnectedClient", &MissionControlClient::listConnectedClients, PYAPI_RETURN_VALUE)
 		PYAPI_METHOD(MissionControlClient, isConnected)
 		PYAPI_METHOD(MissionControlClient, closeConnection)
 		;
@@ -1330,6 +1337,8 @@ BOOST_PYTHON_MODULE(omega)
 	def("getNearZ", getNearZ);
 	def("getFarZ", getFarZ);
 	def("getDisplayPixelSize", getDisplayPixelSize);
+
+	def("getMissionControlClient", getMissionControlClient, PYAPI_RETURN_REF);
 };
 
 // Black magic. Include the pyeuclid source code (saved as hex file using xdd -i)
