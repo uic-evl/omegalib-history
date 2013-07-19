@@ -271,13 +271,15 @@ void DrawInterface::drawRectTexture(Texture* texture, const Vector2f& position, 
 
 	if((flipFlags & FlipX) == FlipX)
 	{
-		minx = 1;
-		maxx = 0;
+		float tmp = minx;
+		minx = maxx;
+		maxx = tmp;
 	}
 	if((flipFlags & FlipY) == FlipY)
 	{
-		miny = 1;
-		maxy = 0;
+		float tmp = miny;
+		miny = maxy;
+		maxy = tmp;
 	}
 
 	glBegin(GL_TRIANGLE_STRIP);

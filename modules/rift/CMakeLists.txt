@@ -27,6 +27,11 @@ if(MODULES_ENABLE_RIFT)
 	if(NOT RIFT_EMULATE)
 		target_link_libraries(${MODULE_NAME}
 			${OVR_LIB})
+			
+		if(WIN32)
+			# Needed for time functions (timeGetTime etc.)
+			target_link_libraries(${MODULE_NAME} Winmm.lib)
+		endif()
 		
 		# link with libraries needed on a linux install.
 		if( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )

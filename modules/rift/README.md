@@ -15,7 +15,7 @@ Creating your own configuration for the Oculus Rift is very easy. You just need 
 config:
 {
 	// load the Oculus Rift support module and register it.
-	initCommand = "import rift; rift.registerService(); _test = 1";
+	initCommand = "import rift; rift.registerService();";
 	
 	display:
 	{

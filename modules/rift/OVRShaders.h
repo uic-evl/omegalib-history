@@ -4,7 +4,7 @@ static const char* PostProcessVertexShaderSrc =
     "varying  vec2 oTexCoord;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
+    "   gl_Position = gl_Vertex;\n"
     "   oTexCoord = gl_MultiTexCoord0.xy;\n"
     "}\n";
 
