@@ -1276,9 +1276,12 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(MissionControlClient, postCommand)
 		PYAPI_METHOD(MissionControlClient, setName)
 		PYAPI_METHOD(MissionControlClient, getName)
-		.def("listConnectedClient", &MissionControlClient::listConnectedClients, PYAPI_RETURN_VALUE)
+		.def("listConnectedClients", &MissionControlClient::listConnectedClients, PYAPI_RETURN_VALUE)
 		PYAPI_METHOD(MissionControlClient, isConnected)
 		PYAPI_METHOD(MissionControlClient, closeConnection)
+		PYAPI_METHOD(MissionControlClient, setClientConnectedCommand)
+		PYAPI_METHOD(MissionControlClient, setClientDisconnectedCommand)
+		PYAPI_METHOD(MissionControlClient, setClientListUpdatedCommand)
 		;
 
 

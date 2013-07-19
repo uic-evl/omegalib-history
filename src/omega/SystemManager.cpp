@@ -129,7 +129,12 @@ SystemManager::~SystemManager()
 	if(myStatsManager != NULL) delete myStatsManager;
 
 	if(myMissionControlClient != NULL) delete myMissionControlClient;
-	if(myMissionControlServer != NULL) delete myMissionControlServer;
+	if(myMissionControlServer != NULL)
+	{
+		ologremlistener(myMissionControlServer);
+		delete myMissionControlServer;
+
+	}
 	
 	myDisplaySystem = NULL;
 	myInterpreter = NULL;
@@ -384,11 +389,22 @@ void SystemManager::setupMissionControl(const String& mode)
 		{
 			omsg("Initializing mission control server...");
 
-			MissionControlMessageHandler* msgHandler = new MissionControlMessageHandler();
+			// Create a mission control client to handle received messages locally.
+			// This is weird but makes sense if you think about it:
+			// We are running an EMBEDDED mission control server here, so we want
+			// To also act as a client that executed messages locally.
+			// We could create a normal server that just routes messages (like the
+			// standalone mcserver app), and then create a client that connects to
+			// it. But thanks to Mission Control message handler design, we can just
+			// attach a mission control client to the server to act as a message
+			// handler, without having to create a fake connection.
+			myMissionControlClient = new MissionControlClient();
 
 			myMissionControlServer = new MissionControlServer();
-			myMissionControlServer->setMessageHandler(msgHandler);
+			myMissionControlServer->setMessageHandler(myMissionControlClient);
 			myMissionControlServer->setPort(port);
+
+			ologaddlistener(myMissionControlServer);
 
 			// Register the mission control server. The service manager will take care of polling the server
 			// periodically to check for new connections.
