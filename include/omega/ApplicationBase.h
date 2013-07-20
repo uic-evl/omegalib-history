@@ -28,8 +28,9 @@
 #define __APPLICATION_H__
 
 #include "osystem.h"
-#include "SystemManager.h"
+//#include "SystemManager.h"
 #include "DisplayConfig.h"
+#include "GpuResource.h"
 
 namespace omega
 {

@@ -80,9 +80,9 @@ namespace omega {
 		void setGpuContext(GpuContext* ctx) { myGpuContext = ctx; } 
 
 		//ServerBase* getEngine() { return myServer; }
-		SystemManager*  getSystemManager()  { return SystemManager::instance(); }
-		ServiceManager*   getServiceManager()   { return SystemManager::instance()->getServiceManager(); }
-		DisplaySystem*  getDisplaySystem() { return SystemManager::instance()->getDisplaySystem(); }
+		//SystemManager*  getSystemManager()  { return SystemManager::instance(); }
+		//ServiceManager*   getServiceManager()   { return SystemManager::instance()->getServiceManager(); }
+		DisplaySystem*  getDisplaySystem();
 
 		//! Resource management
 		//@{
@@ -116,6 +116,10 @@ namespace omega {
 	///////////////////////////////////////////////////////////////////////////
 	inline Engine* Renderer::getEngine()
 	{ return myServer; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline DisplaySystem*  Renderer::getDisplaySystem() 
+	{ return SystemManager::instance()->getDisplaySystem(); }
 }; // namespace omega
 
 #endif
