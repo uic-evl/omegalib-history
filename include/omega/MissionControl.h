@@ -131,7 +131,7 @@ namespace omega {
 	private:
 		static const int BufferSize = 1024;
 		char myBuffer[BufferSize];
-		Ref<MissionControlServer> myServer;
+		MissionControlServer* myServer;
 		MissionControlConnection* myRecipient; // Message destination when private-message mode is enabled.
 		IMissionControlMessageHandler* myMessageHandler;
 		String myName;

@@ -128,12 +128,20 @@ SystemManager::~SystemManager()
 	if(myDisplaySystem != NULL) delete myDisplaySystem;
 	if(myStatsManager != NULL) delete myStatsManager;
 
-	if(myMissionControlClient != NULL) delete myMissionControlClient;
+	// We are doing explicit reference counting here because we are 
+	// using raw pointers to store the mission control objects. We can't
+	// use refs in the SystemManager header or we would get a circular
+	// inclusion when adding MissionControl.h
+	if(myMissionControlClient != NULL)
+	{
+		myMissionControlClient->unref();
+		myMissionControlClient = NULL;
+	}
 	if(myMissionControlServer != NULL)
 	{
 		ologremlistener(myMissionControlServer);
-		delete myMissionControlServer;
-
+		myMissionControlServer->unref();
+		myMissionControlServer = NULL;
 	}
 	
 	myDisplaySystem = NULL;
@@ -399,8 +407,15 @@ void SystemManager::setupMissionControl(const String& mode)
 			// attach a mission control client to the server to act as a message
 			// handler, without having to create a fake connection.
 			myMissionControlClient = new MissionControlClient();
+			myMissionControlClient->ref();
+
+			// We are doing explicit reference counting here because we are 
+			// using raw pointers to store the mission control objects. We can't
+			// use refs in the SystemManager header or we would get a circular
+			// inclusion when adding MissionControl.h
 
 			myMissionControlServer = new MissionControlServer();
+			myMissionControlServer->ref();
 			myMissionControlServer->setMessageHandler(myMissionControlClient);
 			myMissionControlServer->setPort(port);
 
