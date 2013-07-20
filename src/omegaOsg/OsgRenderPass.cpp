@@ -96,6 +96,13 @@ void OsgRenderPass::collectStat(Stat*& stat, const char* name, float value)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OsgRenderPass::drawView(SceneView* view, const DrawContext& context, bool getstats, OsgModule::DepthPartitionMode dpm)
 {
+	// Bush the current transform state so we can restore it once osg drawing
+	// is done.
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+
 	view->getState()->setContextID(context.tile->id);
 
 	osg::Camera* cam = view->getCamera();
@@ -154,6 +161,11 @@ void OsgRenderPass::drawView(SceneView* view, const DrawContext& context, bool g
 
 	// Collect triangle count statistics (every 10 frames)
 	if(getstats) collectStat(myTriangleCountStat, "osgTrisP%1%", (float)view->getTriangleCount());
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
