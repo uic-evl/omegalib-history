@@ -301,6 +301,7 @@ void OsgbDice::initialize()
 
 void OsgbDice::update(const UpdateContext& context)
 {
+	printf("Scene Node: (%lf, %lf, %lf)\n", mySceneNode->getPosition().x(), mySceneNode->getPosition().y(), mySceneNode->getPosition().z());
 	/*/ 
 	printf("bullet:\n");
 	for (int i=0;i<2;i++)

@@ -196,7 +196,7 @@ private:
 
 	osgbDynamics::MotionState* myColMotionState;
 
-	osg::Light* myLight;
+	//osg::Light* myLight;
 	//keep the collision shapes, for deletion/cleanup
 	//btAlignedObjectArray<btCollisionShape*>	myCollisionShapes;
 	
@@ -287,14 +287,11 @@ void OsgbBasicDemo::initialize()
 		float start_y = START_POS_Y;
 		float start_z = START_POS_Z - ARRAY_SIZE_Z/2.0;
 
-		//mySceneNode = new SceneNode(getEngine());
+		mySceneNode = new SceneNode(getEngine());
 
-		for (int k=0;k<ARRAY_SIZE_Y;k++)
-		{
-			for (int i=0;i<ARRAY_SIZE_X;i++)
-			{
-				for(int j = 0;j<ARRAY_SIZE_Z;j++)
-				{
+		for (int k=0;k<ARRAY_SIZE_Y;k++) {
+			for (int i=0;i<ARRAY_SIZE_X;i++) {
+				for(int j = 0;j<ARRAY_SIZE_Z;j++) {
 					// first one at (-7.5, 15, -5.5)
 					osg::Vec3 center( btScalar(2.0*i + start_x), btScalar(20+2.0*k + start_y), btScalar(2.0*j + start_z) );
 
@@ -304,11 +301,16 @@ void OsgbBasicDemo::initialize()
 					myCol = new osg::MatrixTransform( osgbCollision::asOsgMatrix(startTransform) );
 					myCol->addChild( osgBox( osg::Vec3(0,0,0), halfLengths ) );
 
-					//myOsgSceneObj = new OsgSceneObject(myCol);
-					//root->addChild( myOsgSceneObj->getTransformedNode() );
-					//mySceneNode->addComponent(myOsgSceneObj);
-					root->addChild( myCol );
+					if (k==0 && i==0 && j==4) {
 
+					myOsgSceneObj = new OsgSceneObject(myCol);
+					root->addChild( myOsgSceneObj->getTransformedNode() );
+					mySceneNode->addComponent(myOsgSceneObj);
+					//root->addChild( myCol );
+					}
+					else {
+						root->addChild( myCol );
+					}
 					
 					if (k==0 && i == 0 && j == 0) {
 						myColMotionState = new osgbDynamics::MotionState();
@@ -332,20 +334,17 @@ void OsgbBasicDemo::initialize()
 		}
 	}
     
-    //mySceneNode->setBoundingBoxVisible(true);
+	mySceneNode->setPosition(0,20,0);
+    mySceneNode->setBoundingBoxVisible(true);
     //mySceneNode->setBoundingBoxVisible(false);
-    //getEngine()->getScene()->addChild(mySceneNode);
-	getEngine()->getDefaultCamera()->setPosition(0,20,100);
-	getEngine()->getDefaultCamera()->lookAt(omicron::Vector3f(0,-1,0), omicron::Vector3f(0,0,-1));
-	printf("camera position: %f, %f, %f\n",
-		getEngine()->getDefaultCamera()->getHeadOffset().x(),
-		getEngine()->getDefaultCamera()->getHeadOffset().y(),
-		getEngine()->getDefaultCamera()->getHeadOffset().z());
+    getEngine()->getScene()->addChild(mySceneNode);
+	getEngine()->getDefaultCamera()->setPosition(0,20,80);
+	//getEngine()->getDefaultCamera()->lookAt(omicron::Vector3f(0,-1,-100), omicron::Vector3f(0,0,-1));
+	omicron::Vector3f v (getEngine()->getDefaultCamera()->getHeadOffset());
+	printf("camera position: %f, %f, %f\n", v.x(), v.y(), v.z() ); // (0 2 0) why?
 	
-		
-
     // Set the interactor style used to manipulate meshes.
-    /*if(SystemManager::settingExists("config/interactor"))
+    if(SystemManager::settingExists("config/interactor"))
     {
         Setting& sinteractor = SystemManager::settingLookup("config/interactor");
         myInteractor = ToolkitUtils::createInteractor(sinteractor);
@@ -359,9 +358,8 @@ void OsgbBasicDemo::initialize()
     {
         myInteractor->setSceneNode(mySceneNode);
     }
-	*/
-    // Set the osg node as the root node
-    myOsg->setRootNode(root);
+
+	printf("Scene Node: (%lf, %lf, %lf)\n", mySceneNode->getPosition().x(), mySceneNode->getPosition().y(), mySceneNode->getPosition().z());
 
 	/*/
 	printf("bullet:\n");
@@ -384,7 +382,7 @@ void OsgbBasicDemo::initialize()
 	}
 	//*/
 
-	// Setup shading
+	/*/ Setup shading
 	myLight = new osg::Light;
 	myLight->setLightNum(0);
 	myLight->setPosition(osg::Vec4(100, 100, 0, 1.0));
@@ -398,8 +396,13 @@ void OsgbBasicDemo::initialize()
 	ls->setStateSetModes(*root->getOrCreateStateSet(), osg::StateAttribute::ON);
 
 	root->addChild(ls);
+	//*/
 
 	root->addChild( createAxes( ).get( ) );
+
+	// Set the osg node as the root node
+    myOsg->setRootNode(root);
+	
 }
 
 void OsgbBasicDemo::update(const UpdateContext& context)
