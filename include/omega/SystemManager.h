@@ -46,7 +46,6 @@ namespace omega
 	class ApplicationBase;
 	class DisplaySystem;
 	class PythonInterpreter;
-	class MissionControlServer;
 	// Forward declaration of SageManager to break header circular dependency
 	class SageManager;
 	// Forward decl of Mission Control classes to break header circular dependency

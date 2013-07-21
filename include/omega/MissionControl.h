@@ -63,12 +63,17 @@ namespace omega {
 		//! smsg <string> - sent by the server to a client: contains a log or 
 		//!response message that can be printed to the local console.
 		static const char* LogMessage;
-		//! sdto <name> - tells the server than messages from this connection 
-		//! should go ONLY to the named client.
-		static const char* SendTo;
-		//! sall - tells the server that messaged from this connection should
-		//! be broadcast to all other clients. This is the default behavior.
-		static const char* SendAll;
+		//! ccon <name> - Sent by the server to all clients when a new client 
+		//! connects.
+		static const char* ClientConnected;
+		//! dcon <name> - Sent by the server to all clients when a client 
+		//! disconnects.
+		static const char* ClientDisconnected;
+		//! clls <client list> - Sent by the server to clients, contains a list
+		//! of space-separated client names for all the clients currently 
+		//! connected to the server.
+		static const char* ClientList;
+
 
 		//! scmd <command> - default behavior (see MissionControlMessageHandler): 
 		//! the receiver will dispatch <command> to the script interpreter.
@@ -94,7 +99,7 @@ namespace omega {
 	};
 
 	///////////////////////////////////////////////////////////////////////////
-	class OMEGA_API IMissionControlMessageHandler: public ReferenceType
+	class OMEGA_API IMissionControlMessageHandler
 	{
 	public:
 		virtual bool handleMessage(
@@ -103,26 +108,18 @@ namespace omega {
 	};
 
 	///////////////////////////////////////////////////////////////////////////
-	class OMEGA_API MissionControlMessageHandler: public IMissionControlMessageHandler
-	{
-	public:
-		virtual bool handleMessage(
-			MissionControlConnection* sender, 
-			const char* header, char* data, int size);
-	private:
-		List<Stat*> myEnabledStats;
-	};
-
-	///////////////////////////////////////////////////////////////////////////
 	class OMEGA_API MissionControlConnection: public TcpConnection
 	{
 	public:
-		MissionControlConnection(ConnectionInfo ci, IMissionControlMessageHandler* msgHandler, MissionControlServer* server);
+		MissionControlConnection(
+			ConnectionInfo ci, IMissionControlMessageHandler* msgHandler, 
+			MissionControlServer* server);
 		virtual ~MissionControlConnection() {}
 
 		virtual void handleData();
 		virtual void handleClosed();
 		virtual void handleConnected();
+		virtual void handleError(const ConnectionError& err);
 
 		void sendMessage(const char* header, void* data, int size);
 		//! Client side: tells the server we are done talking and waits for graceful close.
@@ -134,9 +131,9 @@ namespace omega {
 	private:
 		static const int BufferSize = 1024;
 		char myBuffer[BufferSize];
-		Ref<MissionControlServer> myServer;
+		MissionControlServer* myServer;
 		MissionControlConnection* myRecipient; // Message destination when private-message mode is enabled.
-		Ref<IMissionControlMessageHandler> myMessageHandler;
+		IMissionControlMessageHandler* myMessageHandler;
 		String myName;
 	};
 
@@ -146,13 +143,17 @@ namespace omega {
 	public:
 		static const int DefaultPort = 22500;
 	public:
+		MissionControlServer():
+		  myMessageHandler(NULL)
+		  {}
+
 		virtual void initialize();
 		virtual void dispose();
 
 		virtual TcpConnection* createConnection(const ConnectionInfo& ci);
 		void closeConnection(MissionControlConnection* conn);
 		MissionControlConnection* findConnection(const String& name);
-		void broadcastMessage(const char* header, void* data, int size, MissionControlConnection* sender = NULL);
+		void handleMessage(const char* header, void* data, int size, MissionControlConnection* sender = NULL);
 		void setMessageHandler(IMissionControlMessageHandler* msgHandler) { myMessageHandler = msgHandler; }
 	
 		// from ILogListener
@@ -160,18 +161,20 @@ namespace omega {
 
 	private:
 		List<MissionControlConnection*> myConnections;
-		Ref<IMissionControlMessageHandler> myMessageHandler;
+		IMissionControlMessageHandler* myMessageHandler;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
-	class OMEGA_API MissionControlClient: public EngineModule
+	class OMEGA_API MissionControlClient: public EngineModule, 
+		public IMissionControlMessageHandler
 	{
 	public:
 		//! Utility method: creates a new client and registers it as a module.
 		static MissionControlClient* create();
 
 	public:
-		MissionControlClient(): EngineModule("MissionControlClient") {}
+		MissionControlClient(): 
+		  EngineModule("MissionControlClient"), myName("client") {}
 		virtual ~MissionControlClient() 
 		{ 
 			// We make sure the connection object is destroyed here. This is
@@ -194,15 +197,43 @@ namespace omega {
 		void postCommand(const String& command);
 		bool isConnected();
 		void closeConnection();
+		void setName(const String& name);
+		String getName();
+		vector<String>& listConnectedClients();
 
-		String getName() { return myConnection->getName(); }
-		virtual void setName(const String& name) { myConnection->setName(name); }
+		void setClientConnectedCommand(const String& cmd);
+		void setClientDisconnectedCommand(const String& cmd);
+		void setClientListUpdatedCommand(const String& cmd);
 
+		// IMissionControlMessageHandler override
+		virtual bool handleMessage(
+			MissionControlConnection* sender, 
+			const char* header, char* data, int size);
 	private:
+		String myName;
+		vector<String> myConnectedClients;
+
+		// Script callbacks
+		String myClientConnectedCommand;
+		String myClientDisconnectedCommand;
+		String myClientListUpdatedCommand;
+
 		asio::io_service myIoService;
 		Ref<MissionControlConnection> myConnection;
-		Ref<IMissionControlMessageHandler> myMessageHandler;
+		List<Stat*> myEnabledStats;
 	};
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void MissionControlClient::setClientConnectedCommand(const String& cmd)
+	{ myClientConnectedCommand = cmd; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void MissionControlClient::setClientDisconnectedCommand(const String& cmd)
+	{ myClientDisconnectedCommand = cmd; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void MissionControlClient::setClientListUpdatedCommand(const String& cmd)
+	{ myClientListUpdatedCommand = cmd; }
 }; // namespace omicron
 
 #endif

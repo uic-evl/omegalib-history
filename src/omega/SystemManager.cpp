@@ -127,6 +127,22 @@ SystemManager::~SystemManager()
 	if(myServiceManager != NULL) delete myServiceManager;
 	if(myDisplaySystem != NULL) delete myDisplaySystem;
 	if(myStatsManager != NULL) delete myStatsManager;
+
+	// We are doing explicit reference counting here because we are 
+	// using raw pointers to store the mission control objects. We can't
+	// use refs in the SystemManager header or we would get a circular
+	// inclusion when adding MissionControl.h
+	if(myMissionControlClient != NULL)
+	{
+		myMissionControlClient->unref();
+		myMissionControlClient = NULL;
+	}
+	if(myMissionControlServer != NULL)
+	{
+		ologremlistener(myMissionControlServer);
+		myMissionControlServer->unref();
+		myMissionControlServer = NULL;
+	}
 	
 	myDisplaySystem = NULL;
 	myInterpreter = NULL;
@@ -361,28 +377,84 @@ void SystemManager::setupMissionControl(const String& mode)
 {
 	int port = MissionControlServer::DefaultPort;
 	String host = "127.0.0.1";
+	bool serverEnabled = false;
 
+	// Read config from file.
 	if(mySystemConfig->exists("config/missionControl"))
 	{
 		Setting& s = mySystemConfig->lookup("config/missionControl");
 		port = Config::getIntValue("port", s, port);
 		host = Config::getStringValue("host", s, host);
+		serverEnabled = Config::getBoolValue("serverEnabled", s, serverEnabled);
 	}
 
-	if(mode == "default")
+	// If mode is default and server is enabled in the configuration, or
+	// if we specify server mode explicitly in the mode string, start a mission
+	// control server.
+	if(mode == "default" || mode == "server")
 	{
-		omsg("Initializing mission control server...");
+		if(serverEnabled || mode == "server")
+		{
+			omsg("Initializing mission control server...");
 
-		MissionControlMessageHandler* msgHandler = new MissionControlMessageHandler();
+			// Create a mission control client to handle received messages locally.
+			// This is weird but makes sense if you think about it:
+			// We are running an EMBEDDED mission control server here, so we want
+			// To also act as a client that executed messages locally.
+			// We could create a normal server that just routes messages (like the
+			// standalone mcserver app), and then create a client that connects to
+			// it. But thanks to Mission Control message handler design, we can just
+			// attach a mission control client to the server to act as a message
+			// handler, without having to create a fake connection.
+			myMissionControlClient = new MissionControlClient();
+			myMissionControlClient->ref();
 
-		myMissionControlServer = new MissionControlServer();
-		myMissionControlServer->setMessageHandler(msgHandler);
-		myMissionControlServer->setPort(port);
+			// We are doing explicit reference counting here because we are 
+			// using raw pointers to store the mission control objects. We can't
+			// use refs in the SystemManager header or we would get a circular
+			// inclusion when adding MissionControl.h
 
-		// Register the mission control server. The service manager will take care of polling the server
-		// periodically to check for new connections.
-		myServiceManager->addService(myMissionControlServer);
-		myMissionControlServer->start();
+			myMissionControlServer = new MissionControlServer();
+			myMissionControlServer->ref();
+			myMissionControlServer->setMessageHandler(myMissionControlClient);
+			myMissionControlServer->setPort(port);
+
+			ologaddlistener(myMissionControlServer);
+
+			// Register the mission control server. The service manager will take care of polling the server
+			// periodically to check for new connections.
+			myServiceManager->addService(myMissionControlServer);
+			myMissionControlServer->start();
+		}
+	}
+	// If mode is client, start a client and connect to a server using host and
+	// port from the configuration file. By default connects to a local server.
+	else if(mode == "client")
+	{
+		omsg("Initializing mission control client...");
+		myMissionControlClient = MissionControlClient::create();
+		myMissionControlClient->connect(host, port);
+	}
+	// If string begins with @, we are going to connect to a server specified 
+	// in the string.
+	else if(mode[0] == '@')
+	{
+		int pos = mode.find(':');
+		if(pos == -1)
+		{
+			// use default port 
+			port = MissionControlServer::DefaultPort;
+			host = mode.substr(1);
+		}
+		else
+		{
+			port = boost::lexical_cast<int>(mode.substr(pos + 1));
+			host = mode.substr(1, pos - 2);
+		}
+
+		omsg("Initializing mission control client...");
+		myMissionControlClient = MissionControlClient::create();
+		myMissionControlClient->connect(host, port);
 	}
 }
 

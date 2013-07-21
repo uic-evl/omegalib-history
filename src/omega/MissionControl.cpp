@@ -52,22 +52,412 @@ const char* MissionControlMessageIds::StatRequest = "strq";
 const char* MissionControlMessageIds::StatEnable = "sten";
 const char* MissionControlMessageIds::StatUpdate = "stup";
 const char* MissionControlMessageIds::LogMessage = "smsg";
-const char* MissionControlMessageIds::SendTo = "sdto";
-const char* MissionControlMessageIds::SendAll = "sall";
+const char* MissionControlMessageIds::ClientConnected = "ccon";
+const char* MissionControlMessageIds::ClientDisconnected = "dcon";
+const char* MissionControlMessageIds::ClientList = "clls";
+
 
 ///////////////////////////////////////////////////////////////////////////////
-bool MissionControlMessageHandler::handleMessage(MissionControlConnection* sender, const char* header, char* data, int size)
+MissionControlConnection::MissionControlConnection(ConnectionInfo ci, IMissionControlMessageHandler* msgHandler, MissionControlServer* server): 
+	TcpConnection(ci),
+	myServer(server),
+	myMessageHandler(msgHandler),
+	myRecipient(NULL)
+{
+}
+        
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlConnection::setName(const String& name)
+{
+	myName = name;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlConnection::handleData()
+{
+    // Read message header.
+	char header[4];
+    read(myBuffer, 4);
+	memcpy(header, myBuffer, 4);
+
+    // Read data length.
+	int dataSize;
+    read(myBuffer, 4);
+	memcpy(&dataSize, myBuffer, 4);
+
+    // Read data.
+    read(myBuffer, dataSize);
+	myBuffer[dataSize] = '\0';
+
+	// 'bye!' message closes the connection
+	if(!strncmp(header, MissionControlMessageIds::Bye, 4)) 
+	{
+		close();
+		return;
+	}
+
+	// Handle message locally, if a message handler is available.
+	if(myMessageHandler != NULL) myMessageHandler->handleMessage(this, header, myBuffer, dataSize);
+
+	// On a server, send the message to the server to be handled.
+	if(myServer != NULL) myServer->handleMessage(header, myBuffer, dataSize, this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlConnection::handleClosed()
+{
+    ofmsg("Mission control connection closed (id=%1%)", %getConnectionInfo().id);
+	if(myServer != NULL) myServer->closeConnection(this);
+}
+        
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlConnection::handleConnected()
+{
+	TcpConnection::handleConnected();
+    ofmsg("Mission control connection open (id=%1%)", %getConnectionInfo().id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlConnection::handleError(const ConnectionError& err)
+{
+	TcpConnection::handleError(err);
+	if(myServer != NULL) myServer->closeConnection(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlConnection::sendMessage(const char* header, void* data, int size)
+{
+	write((void*)header, 4);
+	write(&size, sizeof(int));
+	write(data, size);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+void MissionControlConnection::goodbyeServer()
+{
+	sendMessage(MissionControlMessageIds::Bye, NULL, 0);
+	waitClose();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+void MissionControlServer::initialize() 
+{
+	TcpServer::initialize();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+void MissionControlServer::dispose() 
+{
+	TcpServer::dispose();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+TcpConnection* MissionControlServer::createConnection(const ConnectionInfo& ci)
+{
+	MissionControlConnection* conn = new MissionControlConnection(ci, myMessageHandler, this);
+	myConnections.push_back(conn);
+
+	// NOTE: the connection has no name (yet) so we wait notifying clients 
+	// about the new connection until we get its name.
+	// (see MissionControlServer::handleMessage)
+
+	return conn;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+void MissionControlServer::closeConnection(MissionControlConnection* conn)
+{
+	myConnections.remove(conn);
+
+	// Tell clients about the closed connection
+	handleMessage(
+		MissionControlMessageIds::ClientDisconnected, 
+		(void*)conn->getName().c_str(), conn->getName().size());
+
+	// Send an updated client name list to all connected clients.
+	String namelist = "";
+	foreach(MissionControlConnection* conn, myConnections)
+	{
+		namelist += conn->getName() + " ";
+	}
+
+	// Tell connected clients about the updated client list.
+	handleMessage(
+		MissionControlMessageIds::ClientList, 
+		(void*)namelist.c_str(), namelist.size());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+MissionControlConnection* MissionControlServer::findConnection(const String& name)
+{
+	foreach(MissionControlConnection* conn, myConnections)
+	{
+		if(conn->getName() == name) return conn;
+	}
+	return NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlServer::handleMessage(const char* header, void* data, int size, MissionControlConnection* sender)
+{
+	if(!strncmp(header, MissionControlMessageIds::MyNameIs, 4)) 
+	{
+		// If this connection currently has no name, it is a new connection:
+		// handle it differently.
+		bool isNewConnection = sender->getName() == "";
+
+		//name string
+		String name((char*)data);
+		sender->setName(name);
+		ofmsg("Connection %1% name changed to %2%", 
+			%sender->getConnectionInfo().id
+			%name);
+
+		// Send an updated client name list to all connected clients.
+		String namelist = "";
+		foreach(MissionControlConnection* conn, myConnections)
+		{
+			namelist += conn->getName() + " ";
+		}
+
+		// If this is a new connection, notify all clients of it.
+		if(isNewConnection)
+		{
+			handleMessage(
+				MissionControlMessageIds::ClientConnected, 
+				(void*)name.c_str(), name.size());
+		}
+
+
+		// Tell connected clients about the updated client list.
+		handleMessage(
+			MissionControlMessageIds::ClientList, 
+			(void*)namelist.c_str(), namelist.size());
+	}
+	else
+	{
+		// If the message is a script command and the command begins with '@',
+		// the message first word is a client id: send a message only to that
+		// client.
+		if(!strncmp(header, MissionControlMessageIds::ScriptCommand, 4) 
+			&& ((char*)data)[0] == '@')
+		{
+			char* str = (char*)data;
+			char* sp = strchr(&str[1], ' ');
+			if(sp != NULL)
+			{
+				*sp = '\0';
+				String clientId = &str[1];
+				String cmd = (sp + 1);
+				foreach(MissionControlConnection* conn, myConnections)
+				{
+					if(conn->getState() == TcpConnection::ConnectionOpen 
+						&& conn != sender
+						&& conn->getName() == clientId)
+					{
+						conn->sendMessage(
+							header, 
+							(void*)cmd.c_str(), cmd.size());
+					}
+				}
+			}
+		}
+		else
+		{
+			// By default, broadcast the message to all other connected clients.
+			foreach(MissionControlConnection* conn, myConnections)
+			{
+				if(conn->getState() == TcpConnection::ConnectionOpen && conn != sender)
+				{
+					conn->sendMessage(header, data, size);
+				}
+			}
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlServer::addLine(const String& line)
+{
+	handleMessage(MissionControlMessageIds::LogMessage, (void*)line.c_str(), line.size());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+MissionControlClient* MissionControlClient::create()
+{
+	MissionControlClient* missionControlClient = new MissionControlClient();
+	ModuleServices::addModule(missionControlClient);
+	return missionControlClient;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::initialize()
+{
+	if(myConnection == NULL)
+	{
+		myConnection = new MissionControlConnection(
+			ConnectionInfo(myIoService), this, NULL);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::dispose()
+{
+	if(myConnection != NULL)
+	{
+		if(myConnection->getState() == TcpConnection::ConnectionOpen)
+		{
+			myConnection->goodbyeServer();
+		}
+		myConnection = NULL;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::update(const UpdateContext& context)
+{
+	myConnection->poll();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::handleEvent(const UpdateContext& context)
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::connect(const String& host, int port)
+{
+	if(myConnection == NULL)
+	{
+		initialize();
+	}
+	myConnection->open(host, port);
+	if(isConnected())
+	{
+		myConnection->sendMessage(
+			MissionControlMessageIds::MyNameIs, 
+			(void*)myName.c_str(), myName.size());
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool MissionControlClient::handleCommand(const String& command)
+{
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::postCommand(const String& cmd)
+{
+	if(myConnection->getState() == TcpConnection::ConnectionOpen)
+	{
+		myConnection->sendMessage(
+			MissionControlMessageIds::ScriptCommand, 
+			(void*)cmd.c_str(), cmd.size());
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool MissionControlClient::isConnected()
+{
+	return myConnection != NULL && 
+		myConnection->getState() == TcpConnection::ConnectionOpen;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::closeConnection()
+{
+	if(isConnected())
+	{
+		myConnection->goodbyeServer();
+		myConnection = NULL;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void MissionControlClient::setName(const String& name)
+{
+	myConnection->setName(name);
+	myName = name;
+	if(isConnected())
+	{
+		myConnection->sendMessage(
+			MissionControlMessageIds::MyNameIs, 
+			(void*)name.c_str(), name.size());
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+String MissionControlClient::getName()
+{
+	myConnection->getName();
+	return myName;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+vector<String>& MissionControlClient::listConnectedClients()
+{
+	return myConnectedClients;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool MissionControlClient::handleMessage(
+	MissionControlConnection* sender, const char* header, char* data, int size)
 {
 	bool handled = true;
+
+	PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
 
 	if(!strncmp(header, MissionControlMessageIds::ScriptCommand, 4)) 
 	{
 		//script command message
 		String command(data);
-		PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
 		if(interp != NULL)
 		{
 			interp->queueCommand(command);
+		}
+	}
+	else if(!strncmp(header, MissionControlMessageIds::ClientList, 4)) 
+	{
+		String list(data);
+		// Split string into client names.
+		myConnectedClients = StringUtils::split(list, " ");
+		if(interp != NULL && !myClientListUpdatedCommand.empty())
+		{
+			interp->queueCommand(myClientListUpdatedCommand);
+		}
+	}
+	else if(!strncmp(header, MissionControlMessageIds::ClientConnected, 4))
+	{
+		String clid(data);
+
+		// If WE are the client that just connected, avoid notifications.
+		if(clid != myName)
+		{
+			ofmsg("Mission control client connected: %1%", %clid);
+		}
+		if(interp != NULL && !myClientConnectedCommand.empty())
+		{
+			String cmd = StringUtils::replaceAll(
+				myClientConnectedCommand,
+				"%clientId%",
+				clid);
+			interp->queueCommand(cmd);
+		}
+	}
+	else if(!strncmp(header, MissionControlMessageIds::ClientDisconnected, 4))
+	{
+		String clid(data);
+		
+		ofmsg("Mission control client disconnected: %1%", %clid);
+		if(interp != NULL && !myClientDisconnectedCommand.empty())
+		{
+			String cmd = StringUtils::replaceAll(
+				myClientDisconnectedCommand,
+				"%clientId%",
+				clid);
+			interp->queueCommand(cmd);
 		}
 	}
 
@@ -130,223 +520,4 @@ bool MissionControlMessageHandler::handleMessage(MissionControlConnection* sende
 		}
 	}
 	return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-MissionControlConnection::MissionControlConnection(ConnectionInfo ci, IMissionControlMessageHandler* msgHandler, MissionControlServer* server): 
-	TcpConnection(ci),
-	myServer(server),
-	myMessageHandler(msgHandler),
-	myRecipient(NULL)
-{
-}
-        
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlConnection::setName(const String& name)
-{
-	myName = name;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlConnection::handleData()
-{
-    // Read message header.
-	char header[4];
-    read(myBuffer, 4);
-	memcpy(header, myBuffer, 4);
-
-    // Read data length.
-	int dataSize;
-    read(myBuffer, 4);
-	memcpy(&dataSize, myBuffer, 4);
-
-    // Read data.
-    read(myBuffer, dataSize);
-	myBuffer[dataSize] = '\0';
-
-	// Handle message locally, if a message handler is available.
-	if(myMessageHandler != NULL) myMessageHandler->handleMessage(this, header, myBuffer, dataSize);
-
-	// Broadcast the message to other connected nodes
-	if(myServer != NULL) myServer->broadcastMessage(header, myBuffer, dataSize, this);
-
-	// 'bye!' message closes the connection
-	if(!strncmp(header, MissionControlMessageIds::Bye, 4)) close();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlConnection::handleClosed()
-{
-    ofmsg("Mission control connection closed (id=%1%)", %getConnectionInfo().id);
-	if(myServer != NULL) myServer->closeConnection(this);
-}
-        
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlConnection::handleConnected()
-{
-	TcpConnection::handleConnected();
-    ofmsg("Mission control connection open (id=%1%)", %getConnectionInfo().id);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlConnection::sendMessage(const char* header, void* data, int size)
-{
-	write((void*)header, 4);
-	write(&size, sizeof(int));
-	write(data, size);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-void MissionControlConnection::goodbyeServer()
-{
-	sendMessage(MissionControlMessageIds::Bye, NULL, 0);
-	waitClose();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-void MissionControlServer::initialize() 
-{
-	omsg("MissionControlServer: adding log listener");
-	// Register the mission control server as a log listener
-	ologaddlistener(this);
-
-	TcpServer::initialize();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-void MissionControlServer::dispose() 
-{
-	omsg("MissionControlServer: removing log listener");
-	ologremlistener(this);
-
-	TcpServer::dispose();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-TcpConnection* MissionControlServer::createConnection(const ConnectionInfo& ci)
-{
-	MissionControlConnection* conn = new MissionControlConnection(ci, myMessageHandler, this);
-	myConnections.push_back(conn);
-	return conn;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-void MissionControlServer::closeConnection(MissionControlConnection* conn)
-{
-	myConnections.remove(conn);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-MissionControlConnection* MissionControlServer::findConnection(const String& name)
-{
-	foreach(MissionControlConnection* conn, myConnections)
-	{
-		if(conn->getName() == name) return conn;
-	}
-	return NULL;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlServer::broadcastMessage(const char* header, void* data, int size, MissionControlConnection* sender)
-{
-	foreach(MissionControlConnection* conn, myConnections)
-	{
-		if(conn->getState() == TcpConnection::ConnectionOpen && conn != sender)
-		{
-			conn->sendMessage(header, data, size);
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlServer::addLine(const String& line)
-{
-	broadcastMessage(MissionControlMessageIds::LogMessage, (void*)line.c_str(), line.size());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-MissionControlClient* MissionControlClient::create()
-{
-	MissionControlClient* missionControlClient = new MissionControlClient();
-	ModuleServices::addModule(missionControlClient);
-	return missionControlClient;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlClient::initialize()
-{
-	if(myConnection == NULL)
-	{
-		myMessageHandler = new MissionControlMessageHandler();
-		myConnection = new MissionControlConnection(ConnectionInfo(myIoService), myMessageHandler, NULL);
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlClient::dispose()
-{
-	if(myConnection != NULL)
-	{
-		if(myConnection->getState() == TcpConnection::ConnectionOpen)
-		{
-			myConnection->goodbyeServer();
-		}
-		myConnection = NULL;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlClient::update(const UpdateContext& context)
-{
-	myConnection->poll();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlClient::handleEvent(const UpdateContext& context)
-{
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlClient::connect(const String& host, int port)
-{
-	if(myConnection == NULL)
-	{
-		initialize();
-	}
-	myConnection->open(host, port);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-bool MissionControlClient::handleCommand(const String& command)
-{
-	return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlClient::postCommand(const String& cmd)
-{
-	if(myConnection->getState() == TcpConnection::ConnectionOpen)
-	{
-		myConnection->sendMessage(
-			MissionControlMessageIds::ScriptCommand, 
-			(void*)cmd.c_str(), cmd.size());
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-bool MissionControlClient::isConnected()
-{
-	return myConnection != NULL && 
-		myConnection->getState() == TcpConnection::ConnectionOpen;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void MissionControlClient::closeConnection()
-{
-	if(isConnected())
-	{
-		myConnection->goodbyeServer();
-		myConnection = NULL;
-	}
 }
