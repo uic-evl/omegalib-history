@@ -54,6 +54,95 @@ using namespace omegaOsg;
 #define START_POS_Y -5
 #define START_POS_Z -3
 
+osg:: ref_ptr<osg::Node> createAxes( void ) {
+
+        // This method should be made more succinct by using arrays.
+
+        const osg::Vec4f red( 1.0, 0.0, 0.0, 1.0 ), green( 0.0, 1.0, 0.0, 1.0 ), blue ( 0.0, 0.0, 1.0, 1.0 );
+        osg::Matrix mR, mT;
+
+        osg::ref_ptr< osg::Group > root = new osg::Group;
+        osg::ref_ptr< osg::MatrixTransform > mt = NULL;
+        osg::ref_ptr< osg::Geode > geode = NULL;
+
+        osg::ref_ptr< osg::Cylinder > axis = new osg::Cylinder( osg::Vec3f( 0.0, 0.0, 0.0 ), 2.0, 500.0 );
+        osg::ref_ptr< osg::Cone > arrow = new osg::Cone( osg::Vec3f( 0.0, 0.0, 0.0 ), 10.0, 20.0 );
+
+        // Draw the X axis in Red
+
+        osg::ref_ptr< osg::ShapeDrawable > xAxis = new osg::ShapeDrawable( axis );
+        xAxis->setColor( red );
+        geode = new osg::Geode;
+        geode->addDrawable( xAxis.get( ) );
+        mT.makeTranslate( 250.0, 0.0, 0.0 );
+        mR.makeRotate( 3.14159 / 2.0, osg::Vec3f( 0.0, 1.0, 0.0 ) );
+        mt = new osg::MatrixTransform;
+        mt->setMatrix( mR * mT );
+        mt->addChild( geode.get( ) );
+        root->addChild( mt.get( ) );
+
+        osg::ref_ptr< osg::ShapeDrawable > xArrow= new osg::ShapeDrawable( arrow );
+        xArrow->setColor( red );
+        geode = new osg::Geode;
+        geode->addDrawable( xArrow.get( ) );
+        mT.makeTranslate( 500.0, 0.0, 0.0 );
+        mR.makeRotate( 3.14159 / 2.0, osg::Vec3f( 0.0, 1.0, 0.0 ) );
+        mt = new osg::MatrixTransform;
+        mt->setMatrix( mR * mT );
+        root->addChild( mt.get( ) );
+        mt->addChild( geode.get( ) );
+
+        // Then the Y axis in green
+        osg::ref_ptr< osg::ShapeDrawable > yAxis = new osg::ShapeDrawable( axis );
+        yAxis->setColor( green );
+        geode = new osg::Geode;
+        geode->addDrawable( yAxis.get( ) );
+        mT.makeTranslate( 0.0, 250.0, 0.0 );
+        mR.makeRotate( 3.14159 / 2.0, osg::Vec3f( 1.0, 0.0, 0.0 ) );
+        mt = new osg::MatrixTransform;
+        mt->setMatrix( mR * mT );
+        mt->addChild( geode.get( ) );
+        root->addChild( mt.get( ) );
+
+        osg::ref_ptr< osg::ShapeDrawable > yArrow= new osg::ShapeDrawable( arrow );
+        yArrow->setColor( green );
+        geode = new osg::Geode;
+        geode->addDrawable( yArrow.get( ) );
+        mT.makeTranslate( 0.0, 500.0, 0.0 );
+        mR.makeRotate( 3.14159 / 2.0, osg::Vec3f( -1.0, 0.0, 0.0 ) );
+        mt = new osg::MatrixTransform;
+        mt->setMatrix( mR * mT );
+        root->addChild( mt.get( ) );
+        mt->addChild( geode.get( ) );
+
+        // And the Z axis in blue
+
+        osg::ref_ptr< osg::ShapeDrawable > zAxis = new osg::ShapeDrawable( axis );
+        zAxis->setColor( blue );
+        geode = new osg::Geode;
+        geode->addDrawable( zAxis.get( ) );
+        mT.makeTranslate( 0.0, 0.0, 250.0 );
+        //mR.makeRotate( 3.14159 / 2.0, osg::Vec3f( 0.0, 1.0, 0.0 ) );
+        mt = new osg::MatrixTransform;
+        mt->setMatrix( mT );
+        mt->addChild( geode.get( ) );
+        root->addChild( mt.get( ) );
+
+        osg::ref_ptr< osg::ShapeDrawable > zArrow= new osg::ShapeDrawable( arrow );
+        zArrow->setColor( blue );
+        geode = new osg::Geode;
+        geode->addDrawable( zArrow.get( ) );
+        mT.makeTranslate( 0.0, 0.0, 500.0 );
+        //mR.makeRotate( 3.14159 / 2.0, osg::Vec3f( 0.0, 1.0, 0.0 ) );
+        mt = new osg::MatrixTransform;
+        mt->setMatrix(mT );
+        root->addChild( mt.get( ) );
+        mt->addChild( geode.get( ) );
+
+        return root.get( );
+
+} // createAxes
+
 // create a box
 // 100% osg stuff
 osg::Geode* osgBox( const osg::Vec3& center, const osg::Vec3& halfLengths )
@@ -246,9 +335,14 @@ void OsgbBasicDemo::initialize()
     //mySceneNode->setBoundingBoxVisible(true);
     //mySceneNode->setBoundingBoxVisible(false);
     //getEngine()->getScene()->addChild(mySceneNode);
-	getEngine()->getDefaultCamera()->setPosition(0,20,80);
-	//getEngine()->getDefaultCamera()->lookAt(omicron::Vector3f(0,0,0), omicron::Vector3f(1,1,0)); 
-	//getEngine()->getDefaultCamera()->setOrientation(1, 1, 1, 0);
+	getEngine()->getDefaultCamera()->setPosition(0,20,100);
+	getEngine()->getDefaultCamera()->lookAt(omicron::Vector3f(0,-1,0), omicron::Vector3f(0,0,-1));
+	printf("camera position: %f, %f, %f\n",
+		getEngine()->getDefaultCamera()->getHeadOffset().x(),
+		getEngine()->getDefaultCamera()->getHeadOffset().y(),
+		getEngine()->getDefaultCamera()->getHeadOffset().z());
+	
+		
 
     // Set the interactor style used to manipulate meshes.
     /*if(SystemManager::settingExists("config/interactor"))
@@ -304,6 +398,8 @@ void OsgbBasicDemo::initialize()
 	ls->setStateSetModes(*root->getOrCreateStateSet(), osg::StateAttribute::ON);
 
 	root->addChild(ls);
+
+	root->addChild( createAxes( ).get( ) );
 }
 
 void OsgbBasicDemo::update(const UpdateContext& context)
