@@ -31,10 +31,8 @@
       <li><font face="Helvetica, Arial, sans-serif"><a
             href="http://processing.org">Processing<br>
           </a></font></li>
-      <li><font face="Helvetica, Arial, sans-serif"><a
-href="file:///C:/Users/Jason%20Leigh/Desktop/omegalib-windows-master/examples/cavevoc/CAVEVOC-Processing.zip">CAVEVOC
-
-            Client</a> - The client already bundles together the <a
+      <li><font face="Helvetica, Arial, sans-serif">
+            CAVEVOC-Processing.zip - The client already bundles together the <a
             href="http://stt.getflourish.com/">STT </a>(Speech To Text)
           translation library and the <a
             href="http://ubaa.net/shared/processing/udp/">UDP </a>(networking)
