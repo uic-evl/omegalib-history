@@ -57,7 +57,7 @@
       5&nbsp; in the location where you normally install your CAVE
       applications.</font></li>
   <li><font face="Helvetica, Arial, sans-serif">First launch the
-      CAVE Demo application: e.g. orun -s demo.py<br>
+      CAVE Demo application: e.g. <code>orun -s demo.py</code><br>
       The environment should just be gray and blank until recognized
       text is received. The picture below is taken from a desktop
       simulation.<br>
@@ -69,7 +69,7 @@
         hspace="1" vspace="1" width="447"><br>
     </font></li>
   <li><font face="Helvetica, Arial, sans-serif">Launch Processing
-      and open CAVEVOC-PTT.py.</font></li>
+      and open CAVEVOC-PTT.pde.</font></li>
   <li><font face="Helvetica, Arial, sans-serif">You will first need
       to edit the ip address in the code to reflect the ip address
       of the CAVE (e.g. lyra.evl.uic.edu).</font></li>
