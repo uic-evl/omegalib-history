@@ -1,4 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <body>
     <h1><font face="Helvetica, Arial, sans-serif">CAVEVOC</font></h1>
