@@ -133,9 +133,7 @@
         </font></li>
       <li><font face="Helvetica, Arial, sans-serif">If you have
           experience with <a
-            href="http://nlp.stanford.edu/software/lex-parser.shtml">Natural
-
-            Language Parsers</a>, try to use one. This will help your
+            href="http://nlp.stanford.edu/software/lex-parser.shtml">Natural Language Parsers</a>, try to use one. This will help your
           CAVE program understand phrases that are similar but not
           exactly the same. This alleviates the user having to remember
           a fixed grammar. But if you don't have much experience in NLP,
