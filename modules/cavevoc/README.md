@@ -1,10 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-  <head>
-    <meta content="text/html; charset=windows-1252"
-      http-equiv="Content-Type">
-    <title>CAVEVOC</title>
-  </head>
   <body>
     <h1><font face="Helvetica, Arial, sans-serif">CAVEVOC</font></h1>
     <font face="Helvetica, Arial, sans-serif"> (C) 2013 by <a
@@ -56,7 +51,7 @@ href="file:///C:/Users/Jason%20Leigh/Desktop/omegalib-windows-master/examples/ca
         </font></li>
       <li><font face="Helvetica, Arial, sans-serif">CAVEVOC CAVE Demo
           Application - demo.py - This is a simple CAVE application to
-          show you how to use the <a href="html/namespacecavevoc.html">CAVEVOC
+          show you how to use the <a href="http://febret.github.io/omegalib/cavevoc/html/namespacecavevoc.html">CAVEVOC
             Python API</a>.<br>
         </font></li>
     </ol>
@@ -76,7 +71,7 @@ href="file:///C:/Users/Jason%20Leigh/Desktop/omegalib-windows-master/examples/ca
           display its confidence level (reported by Google) and the
           text, in a random position on the screen in front of you,
           hence the picture below.<br>
-          <img alt="" src="cavevoc-cave.png" border="1" height="299"
+          <img alt="" src="http://febret.github.io/omegalib/cavevoc/cavevoc-cave.png" border="1" height="299"
             hspace="1" vspace="1" width="447"><br>
         </font></li>
       <li><font face="Helvetica, Arial, sans-serif">Launch Processing
@@ -86,7 +81,7 @@ href="file:///C:/Users/Jason%20Leigh/Desktop/omegalib-windows-master/examples/ca
           of the CAVE (e.g. lyra.evl.uic.edu).</font></li>
       <li><font face="Helvetica, Arial, sans-serif">Now RUN the
           CAVEVOC-PTT.pde application.<br>
-          <img alt="" src="cavevoc-processing.png" border="1"
+          <img alt="" src="http://febret.github.io/omegalib/cavevoc/cavevoc-processing.png" border="1"
             height="166" hspace="1" vspace="1" width="445"><br>
         </font></li>
       <li><font face="Helvetica, Arial, sans-serif">Hold down any key on
