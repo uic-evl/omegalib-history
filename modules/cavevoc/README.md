@@ -36,7 +36,6 @@
             href="http://stt.getflourish.com/">STT </a>(Speech To Text)
           translation library and the <a
             href="http://ubaa.net/shared/processing/udp/">UDP </a>(networking)
-
           library in the zip file. But you can download them separately
           from their original source by clicking the respective links.
           These library folders need to be installed in your Processing
