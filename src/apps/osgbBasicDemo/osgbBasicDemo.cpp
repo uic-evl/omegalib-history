@@ -338,10 +338,10 @@ void OsgbBasicDemo::initialize()
     mySceneNode->setBoundingBoxVisible(true);
     //mySceneNode->setBoundingBoxVisible(false);
     getEngine()->getScene()->addChild(mySceneNode);
-	getEngine()->getDefaultCamera()->setPosition(0,20,80);
 	//getEngine()->getDefaultCamera()->lookAt(omicron::Vector3f(0,-1,-100), omicron::Vector3f(0,0,-1));
-	omicron::Vector3f v (getEngine()->getDefaultCamera()->getHeadOffset());
-	printf("camera position: %f, %f, %f\n", v.x(), v.y(), v.z() ); // (0 2 0) why?
+	getEngine()->getDefaultCamera()->setProjection(90, 1, 1, 200);
+	getEngine()->getDefaultCamera()->setPosition(0,20,80);
+	getEngine()->getDefaultCamera()->setOrientation(0.993938, -0.109776, -0.005964, -0.000659);
 	
     // Set the interactor style used to manipulate meshes.
     if(SystemManager::settingExists("config/interactor"))
@@ -409,6 +409,15 @@ void OsgbBasicDemo::update(const UpdateContext& context)
 {
 	double elapsed = 1./30.;
 	myWorld->stepSimulation( elapsed, 4, elapsed/2. );
+
+	omicron::Vector3f dv (getEngine()->getDefaultCamera()->getDerivedPosition());
+	printf("camera position: %f, %f, %f derived\n", dv.x(), dv.y(), dv.z() );
+	omicron::Vector3f v (getEngine()->getDefaultCamera()->getPosition());
+	printf("camera position: %f, %f, %f\n", v.x(), v.y(), v.z() );
+	omicron::Quaternion de (getEngine()->getDefaultCamera()->getDerivedOrientation());
+	printf("camera orientation: %f, %f, %f, %f derived\n", de.w(), de.x(), de.y(), de.z());
+	omicron::Quaternion e (getEngine()->getDefaultCamera()->getOrientation());
+	printf("camera orientation: %f, %f, %f, %f\n", e.w(), e.x(), e.y(), e.z());
 
 	/*/
 	printf("bullet:\n");
