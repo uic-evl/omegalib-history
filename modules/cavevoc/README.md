@@ -1,5 +1,3 @@
-<html>
-  <body>
     <h1><font face="Helvetica, Arial, sans-serif">CAVEVOC</font></h1>
     <font face="Helvetica, Arial, sans-serif"> (C) 2013 by <a
         href="http://jasonleigh.me">Jason Leigh</a>, <a
@@ -170,5 +168,3 @@
     </ul>
     <p><br>
     </p>
-  </body>
-</html>
