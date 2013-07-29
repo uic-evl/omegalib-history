@@ -221,6 +221,7 @@ if(OMEGA_BUILD_OSG_LIB)
 		add_subdirectory(apps/osgbCollisionWithoutOmega)
 		add_subdirectory(apps/osgbBasicDemo)
 		add_subdirectory(apps/osgbDice)
+		add_subdirectory(apps/osgbSlider)
 	endif()
 	# Yin
 	if(OMEGA_USE_PORTHOLE)
