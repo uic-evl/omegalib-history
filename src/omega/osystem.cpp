@@ -111,6 +111,8 @@ namespace omega
 		}
 
 		ds->killCluster();
+		
+		osleep(2000);
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -141,7 +143,6 @@ namespace omega
 	{
 		// register the abort handler.
 		signal(SIGABRT, &abortHandler);
-		signal(SIGINT, sigproc);
 
 #ifdef OMEGA_ENABLE_VLD
 		// Mark everything before this point as already reported to avoid 
@@ -164,6 +165,7 @@ namespace omega
 
 			bool kill = false;
 			bool help = false;
+			bool disableSIGINTHandler = false;
 
 			bool logRemoteNodes = false;
 
@@ -215,6 +217,12 @@ namespace omega
 				"Sets mission control mode. (default, server, disable) ", "In default mode, the application opens a mission control server if enabled in the configuration file. ",
 				mcmode);
 
+			sArgs.newFlag(
+				'd',
+				"disable-sigint",
+				"disables the Control+C handler (useful when debugging with gdb)",
+				disableSIGINTHandler);
+				
 			sArgs.setName("omegalib");
 			sArgs.setAuthor("The Electronic Visualization Lab, UIC");
 			String appName;
@@ -229,6 +237,12 @@ namespace omega
 			if(!sArgs.process(argc, argv))
 			{
 				return -1;
+			}
+			
+			if(!disableSIGINTHandler)
+			{
+				omsg("Registering Control-C SIGINT handler");
+				signal(SIGINT, sigproc);
 			}
 
 			if(help)
@@ -360,24 +374,6 @@ namespace omega
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-	#ifndef OMEGA_OS_WIN
-	// the signal handler for SIGCHILD
-	static void sigChildHandler( int /*signal*/ )
-	{
-		// Get exit status to avoid zombies
-		int status;
-		::wait( &status );
-
-		// DO NOT USE cout/cerr: signal handler might be called while another cout
-		//            is in progress, which will cause a deadlock due to a double
-		//            flockfile() 
-    
-		// Re-install signal handler
-		signal( SIGCHLD, sigChildHandler );
-	}
-	#endif
-
-	///////////////////////////////////////////////////////////////////////////
 	bool olaunch(const String& command)
 	{
 		if( command.empty( )) return false;
@@ -410,7 +406,14 @@ namespace omega
 #else
 		std::vector<std::string> commandLine = StringUtils::split(command, " ");
 
-		signal( SIGCHLD, sigChildHandler );
+		// NOTE 28Jul13: This has been changed to SIG_IGN instead of a custom 
+		// handler to avoid a weird deadlock with glXCreateContext on SUSE 12.3
+		// glXCreateContext invoked (thorugh the nvidia driver) a waitpid that apparently
+		// waits for the same child process generated here. Note that the child 
+		// handler just waits for the process to exit cleanly to avoid 
+		// creating zombies, which can be done just by specifying SIG_IGN as
+		// the handler.
+		signal( SIGCHLD, SIG_IGN );
 		const int result = fork();
 		switch( result )
 		{
