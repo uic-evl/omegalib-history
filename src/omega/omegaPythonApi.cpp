@@ -1069,6 +1069,11 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(Event, getOrientation)
 		;
 
+	PYAPI_ENUM(Node::TransformSpace, Space)
+		.value("Local", Node::TransformLocal)
+		.value("Parent", Node::TransformParent)
+		.value("World", Node::TransformWorld);
+
 	// Node
 	void (Node::*setPosition1)(const Vector3f&) = &Node::setPosition;
 	void (Node::*setPosition2)(float x, float y, float z) = &Node::setPosition;
@@ -1084,6 +1089,10 @@ BOOST_PYTHON_MODULE(omega)
 	void (Node::*removeChildByName)(const String&) = &Node::removeChild;
 	void (Node::*removeChildByIndex)(unsigned short) = &Node::removeChild;
 
+	void (Node::*rotate1)(const Vector3f& axis, const float& angle, Node::TransformSpace relativeTo) = &Node::rotate;
+	void (Node::*translate1)(const Vector3f&, Node::TransformSpace relativeTo) = &Node::translate;
+	void (Node::*translate2)(float, float, float, Node::TransformSpace relativeTo) = &Node::translate;
+
 	class_<Node, Ref<Node>, boost::noncopyable >("Node", no_init)
 		.def("getPosition", &Node::getPosition, PYAPI_RETURN_VALUE)
 		.def("setPosition", setPosition1)
@@ -1096,6 +1105,9 @@ BOOST_PYTHON_MODULE(omega)
 		.def("yaw", &Node::yaw, NodeYawOverloads())
 		.def("pitch", &Node::pitch, NodePitchOverloads())
 		.def("roll", &Node::roll, NodeRollOverloads())
+		.def("rotate", rotate1)
+		.def("translate", translate1)
+		.def("translate", translate2)
 
 		PYAPI_METHOD(Node, lookAt)
 		PYAPI_METHOD(Node, numChildren)
@@ -1110,6 +1122,10 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(Node, getName)
 		PYAPI_METHOD(Node, setName)
 		PYAPI_REF_GETTER(Node, getParent)
+		PYAPI_GETTER(Node, convertLocalToWorldPosition)
+		PYAPI_GETTER(Node, convertLocalToWorldOrientation)
+		PYAPI_GETTER(Node, convertWorldToLocalPosition)
+		PYAPI_GETTER(Node, convertWorldToLocalOrientation)
 		//.def("getChildren", &Node::getChildren, PYAPI_RETURN_REF)
 		;
 

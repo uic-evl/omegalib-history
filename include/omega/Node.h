@@ -1,31 +1,38 @@
-/********************************************************************************************************************** 
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *---------------------------------------------------------------------------------------------------------------------
- * Copyright 2010								Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
- *  Alessandro Febretti							febret@gmail.com
- *---------------------------------------------------------------------------------------------------------------------
- * Copyright (c) 2010, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *  Alessandro Febretti		febret@gmail.com
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
- * following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
- * disclaimer. Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
- * and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
- * INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
- * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------------------------------------------------
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
  * Original code taken from OGRE
  * Copyright (c) 2000-2009 Torus Knot Software Ltd
  *  For the latest info, see http://www.ogre3d.org/
- *********************************************************************************************************************/
+ ******************************************************************************/
 #ifndef _Node_H__
 #define _Node_H__
 
@@ -34,16 +41,13 @@
 
 
 namespace omega {
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	/** PYAPI Class representing a general-purpose node in an articulated scene graph.
+	///////////////////////////////////////////////////////////////////////////
+	/** Class representing a general-purpose node in an articulated scene graph.
         @remarks
             A node in the scene graph is a node in a structured tree. A node contains
-            information about the transformation which will apply to
-            it and all of it's children. Child nodes can have transforms of their own, which
+            information about the transformation which will apply to it and all 
+			of it's children. Child nodes can have transforms of their own, which
             are combined with their parent's transformations.
-        @par
-            This is an abstract class - concrete classes are based on this for specific purposes,
-            e.g. SceneNode, Bone
     */
     class OMEGA_API Node: public ReferenceType 
     {
@@ -61,9 +65,6 @@ namespace omega {
         };
 
         typedef Dictionary<String, Ref<Node> > ChildNodeMap;
-		//typedef ChildNode<Node> Child;
-		//typedef std::pair< ChildNodeMap::iterator, ChildNodeMap::iterator> ChildNodeRange;
-		//typedef std::pair< ChildNodeMap::const_iterator, ChildNodeMap::const_iterator> ConstChildNodeRange;
 
     public:
         /** Constructor, should only be called by parent, not directly.
@@ -79,10 +80,10 @@ namespace omega {
 
         virtual ~Node();  
 
-        /** PYAPI Returns the name of the node. */
+        /** Returns the name of the node. */
         const String& getName(void) const;
 
-        /** PYAPI Gets this node's parent (NULL if this is the root).
+        /** Gets this node's parent (NULL if this is the root).
         */
         virtual Node* getParent(void) const;
 
@@ -120,7 +121,7 @@ namespace omega {
         */
         virtual void setOrientation( float w, float x, float y, float z);
 
-        /** PYAPI Resets the nodes orientation (local axes as world axes, no rotation).
+        /** Resets the nodes orientation (local axes as world axes, no rotation).
         @remarks
             Orientations, unlike other transforms, are not always inherited by child nodes.
             Whether or not orientations affect the orientation of the child nodes depends on
@@ -135,7 +136,7 @@ namespace omega {
         */
         virtual void resetOrientation(void);
 
-        /** PYAPI Sets the position of the node relative to it's parent.
+        /** Sets the position of the node relative to it's parent.
         */
         virtual void setPosition(const Vector3f& pos);
 
@@ -143,11 +144,11 @@ namespace omega {
         */
         virtual void setPosition(float x, float y, float z);
 
-        /** PYAPI Gets the position of the node relative to it's parent.
+        /** Gets the position of the node relative to it's parent.
         */
         virtual const Vector3f & getPosition(void) const;
 
-        /** PYAPI Sets the scaling factor applied to this node.
+        /** Sets the scaling factor applied to this node.
         @remarks
             Scaling factors, unlike other transforms, are not always inherited by child nodes.
             Whether or not scalings affect the size of the child nodes depends on the setInheritScale
