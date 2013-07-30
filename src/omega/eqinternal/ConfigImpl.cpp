@@ -222,6 +222,8 @@ bool ConfigImpl::handleEvent(const eq::ConfigEvent* event)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t ConfigImpl::startFrame( const uint128_t& version )
 {
+	bool sf = eq::Config::startFrame( version );
+
 	static float lt = 0.0f;
 	static float tt = 0.0f;
 	// Compute dt.
@@ -273,8 +275,7 @@ uint32_t ConfigImpl::startFrame( const uint128_t& version )
 	mySharedData.commit();
 
 	myServer->update(uc);
-
-	return eq::Config::startFrame( version );
+	return sf;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,6 +305,7 @@ const UpdateContext& ConfigImpl::getUpdateContext()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t ConfigImpl::finishFrame()
 {
+    bool res =  eq::Config::finishFrame();
     EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem();
 
 	Engine* engine = Engine::instance();
@@ -378,7 +380,7 @@ uint32_t ConfigImpl::finishFrame()
 			eqo->setHeadMatrix(om);
 		}
 	}
-    return eq::Config::finishFrame();
+	return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

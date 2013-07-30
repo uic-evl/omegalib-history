@@ -84,6 +84,7 @@ bool NodeImpl::configExit()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void NodeImpl::frameStart( const eq::uint128_t& frameID, const uint32_t frameNumber )
 {
+	Node::frameStart(frameID, frameNumber);
 	DEBUG_EQ_FLOW("NodeImpl::frameStart %1% %2%", %frameID %frameNumber);
 
 	// If server is not NULL (only on slave nodes) call update here
@@ -98,7 +99,5 @@ void NodeImpl::frameStart( const eq::uint128_t& frameID, const uint32_t frameNum
 	}
 
 	if(!getClient()->isConnected()) getClient()->exitLocal();
-
-	Node::frameStart(frameID, frameNumber);
 }
 
