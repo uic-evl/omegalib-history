@@ -96,6 +96,8 @@ namespace omega {
 		void setPitchYawRoll(const Vector3f& yawPitchRoll);
 				
 		const AffineTransform3& getViewTransform();
+		Transform3 computeOffAxisProjection(DrawContext::Eye eye, 
+			const Vector3f& pa, const Vector3f& pb, const Vector3f& pc);
 
 		void setProjection(float fov, float aspect, float nearZ, float farZ);
 

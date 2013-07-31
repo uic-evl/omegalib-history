@@ -61,7 +61,9 @@ Camera::Camera(Engine* e, uint flags):
 	myHeadOffset(Vector3f::Zero()),
 	myMask(0),
 	myEyeSeparation(0.06f),
-	myListener(NULL)
+	myListener(NULL),
+	myNearZ(0.1),
+	myFarZ(1000)
 {
 	//myProjectionOffset = -Vector3f::UnitZ();
 
@@ -151,7 +153,9 @@ void Camera::updateTraversal(const UpdateContext& context)
 	//if(isUpdateNeeded())
 	{
 		// Update view transform.
-		myViewTransform = Math::makeViewMatrix(getDerivedPosition(), getDerivedOrientation());
+		myViewTransform = Math::makeViewMatrix(
+			getDerivedPosition() + myHeadOffset, 
+			getDerivedOrientation());
 	}
 	
 	SceneNode::updateTraversal(context);
@@ -354,4 +358,75 @@ void Camera::setController(CameraController* value)
 		myController->setCamera(this);
 		ModuleServices::addModule(myController);
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Transform3 Camera::computeOffAxisProjection(DrawContext::Eye eye, 
+	const Vector3f& pa, const Vector3f& pb, const Vector3f& pc)
+{
+	// half eye separation
+	float hes = myEyeSeparation / 2;
+	Vector3f pe = Vector3f::Zero();
+	switch(eye)
+	{
+	case DrawContext::EyeLeft:
+		pe[0] = -hes;
+		break;
+	case DrawContext::EyeRight:
+		pe[0] = hes;
+		break;
+	}
+
+	// Transform eye with head position / orientation. After this, eye position
+	// and tile coordinates are all in the same reference frame.
+	pe = myHeadTransform * pe;
+
+	Vector3f vr = pb - pa;
+	Vector3f vu = pc - pa;
+	vr.normalize();
+	vu.normalize();
+	Vector3f vn = vr.cross(vu);
+	vn.normalize();
+
+	// Compute the screen corner vectors.
+	Vector3f va = pa - pe;
+	Vector3f vb = pb - pe;
+	Vector3f vc = pc - pe;
+
+	// Find distance from eye to screen plane.
+	//Vector3f tm = pe - pa;
+	float d = -(vn.dot(va));
+
+	// Find the extent of the perpendicular projection.
+	float l = vr.dot(va) * myNearZ / d;
+	float r = vr.dot(vb) * myNearZ / d;
+	float b = vu.dot(va) * myNearZ / d;
+	float t = vu.dot(vc) * myNearZ / d;
+
+	Transform3 oax;
+	oax.setIdentity();
+	oax(0,0) = 2 * myNearZ / (r - l);
+	oax(0,2) = (r + l) / (r - l);
+	oax(1,1) = 2 * myNearZ / (t - b);
+	oax(1,2) = (t + b) / (t - b);
+	oax(2,2) = - (myFarZ + myNearZ) / (myFarZ - myNearZ);
+	oax(2,3) = - (2 * myFarZ * myNearZ) / (myFarZ - myNearZ);
+	oax(3,2) = - 1;
+
+	Transform3 newBasis;
+	newBasis.setIdentity();
+	newBasis.data()[0] = vr[0];
+	newBasis.data()[1] = vu[0];
+	newBasis.data()[2] = vn[0];
+
+	newBasis.data()[4] = vr[1];
+	newBasis.data()[5] = vu[1];
+	newBasis.data()[6] = vn[1];
+
+	newBasis.data()[8] = vr[2];
+	newBasis.data()[9] = vu[2];
+	newBasis.data()[10] = vn[2];
+
+	oax = oax * newBasis;
+	return oax;
 }
