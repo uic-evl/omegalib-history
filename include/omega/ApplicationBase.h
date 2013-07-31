@@ -31,6 +31,7 @@
 //#include "SystemManager.h"
 #include "DisplayConfig.h"
 #include "GpuResource.h"
+#include "DrawContext.h"
 
 namespace omega
 {
@@ -60,29 +61,6 @@ namespace omega
 		FrameInfo(uint64 frame, GpuContext* context): frameNum(frame), gpuContext(context) {}
 		uint64 frameNum;
 		GpuContext* gpuContext;
-	};
-
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	//! Contains information about the context in which a drawing operation is taking place
-	struct DrawContext
-	{
-		enum Eye { EyeLeft , EyeRight, EyeCyclop };
-		enum Task { SceneDrawTask, OverlayDrawTask };
-		uint64 frameNum; // TODO: Substitute with frameinfo
-		AffineTransform3 modelview;
-		Transform3 projection;
-		//! The pixel viewport coordinates of this context with respect to the owner window of the context.
-		Rect viewport;
-		//! The eye being rendered for this context.
-		Eye eye;
-		//! The current draw task.
-		Task task;
-		//! Information about the drawing channel associated with this context.
-		//ChannelInfo* channel;
-		const DisplayTileConfig* tile;
-		RenderTarget* drawBuffer;
-		GpuContext* gpuContext;
-		Renderer* renderer;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////

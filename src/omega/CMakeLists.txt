@@ -44,6 +44,7 @@ SET( srcs
 		DisplayConfig.cpp
 		Camera.cpp
 		CameraController.cpp
+		DrawContext.cpp
 		KeyboardMouseCameraController.cpp
 		GamepadCameraController.cpp
 		MouseCameraController.cpp
