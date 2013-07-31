@@ -82,6 +82,7 @@ void UiRenderPass::render(Renderer* client, const DrawContext& context)
 		Vector2i displaySize = ds->getCanvasSize();
 
 		client->getRenderer()->beginDraw2D(context);
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 		ui::Container* ui = myUiRoot;
 		const Rect& vp = Rect(0, 0, displaySize[0], displaySize[1]);
@@ -108,6 +109,7 @@ void UiRenderPass::render(Renderer* client, const DrawContext& context)
 			uiRenderable->draw(context);
 		}
 
+		glPopAttrib();
 		client->getRenderer()->endDraw();
 	}
 

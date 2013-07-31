@@ -63,6 +63,7 @@ void UiScriptCommand::handleEvent(const Event& evt)
 			{
 				String expr = StringUtils::replaceAll(myCommand, "%value%", ostr("%1%", %btn->isChecked()));
 				myInterpreter->evalEventCommand(expr, evt);
+				evt.setProcessed();
 			}
 		}
 		else if(evt.getType() == Event::ChangeValue)
@@ -73,13 +74,14 @@ void UiScriptCommand::handleEvent(const Event& evt)
 				int value = sld->getValue();
 				String expr = StringUtils::replaceAll(myCommand, "%value%", ostr("%1%", %value));
 				myInterpreter->evalEventCommand(expr, evt);
+				evt.setProcessed();
 			}
 		}
 		else if(evt.getType() == Event::Click)
 		{
 			myInterpreter->evalEventCommand(myCommand, evt);
+			evt.setProcessed();
 		}
-		evt.setProcessed();
 	}
 }
 
