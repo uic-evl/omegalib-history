@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(OMEGA_USE_EXTERNAL_OSG false CACHE BOOL "Enable to use an external osg build instead of the built-in one.")
+set(OMEGA_USE_EXTERNAL_OSG true CACHE BOOL "Enable to use an external osg build instead of the built-in one.")
 if(OMEGA_USE_EXTERNAL_OSG)
 	# When using external osg builds, for now you need to make sure manually the OSG binary
 	# include dir is in the compiler include search, paths otherwise osgWorks won't compile.
@@ -46,20 +46,17 @@ endif(OMEGA_USE_EXTERNAL_OSG)
 # Uncomment this line to make omegalib use an external openscenegraph binary build
 # set(EXTLIB_DIR D:/Workspace/3rdparty/OpenSceneGraph-3.0.1-VS10.0.30319-x86-debug-12741)
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/${EXTLIB_NAME}.tar.gz)
-  message(STATUS "Downloading OpenSceneGraph binary archive...")
-  file(DOWNLOAD http://omegalib.googlecode.com/files/${EXTLIB_NAME}.tar.gz ${EXTLIB_TGZ} SHOW_PROGRESS)
-endif(NOT EXISTS ${CMAKE_BINARY_DIR}/${EXTLIB_NAME}.tar.gz)
-
-if(NOT EXISTS ${EXTLIB_DIR})
-  message(STATUS "Extracting OpenSceneGraph...")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzfh
-    ${EXTLIB_TGZ} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-endif(NOT EXISTS ${EXTLIB_DIR})
-
 if(OMEGA_USE_EXTERNAL_OSG)
-    set(OSG_INCLUDES ${OMEGA_EXTERNAL_OSG_SOURCE_PATH}/include)
+	set(OSG_INCLUDES ${OMEGA_EXTERNAL_OSG_SOURCE_PATH}/include)
 else()
+	if(NOT EXISTS ${CMAKE_BINARY_DIR}/${EXTLIB_NAME}.tar.gz)
+		message(STATUS "Downloading OpenSceneGraph binary archive...")
+		file(DOWNLOAD http://omegalib.googlecode.com/files/${EXTLIB_NAME}.tar.gz ${EXTLIB_TGZ} SHOW_PROGRESS)
+	endif(NOT EXISTS ${CMAKE_BINARY_DIR}/${EXTLIB_NAME}.tar.gz)
+	if(NOT EXISTS ${EXTLIB_DIR})
+		message(STATUS "Extracting OpenSceneGraph...")
+		execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzfh ${EXTLIB_TGZ} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+	endif(NOT EXISTS ${EXTLIB_DIR})
 	set(OSG_INCLUDES ${EXTLIB_DIR}/include)
 endif()
 
