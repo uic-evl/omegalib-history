@@ -510,7 +510,7 @@ struct Quaternion_to_python
 
 		// Create a new euclid.Quaternion instance using the omega::Quaternion components
 		// as arguments.
-		boost::python::tuple vec = boost::python::make_tuple(value.x(), value.y(), value.z(), value.w());
+		boost::python::tuple vec = boost::python::make_tuple(value.w(), value.x(), value.y(), value.z());
 		PyObject* quatobj = PyObject_CallObject(sQuaternionClass, vec.ptr());
 		return incref(quatobj);
 	}
