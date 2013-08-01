@@ -1,15 +1,3 @@
-/********************************************************************************************************************** 
- * THE OMEGA LIB PROJECT
- *---------------------------------------------------------------------------------------------------------------------
- * Copyright 2010								Electronic Visualization Laboratory, University of Illinois at Chicago
- * Authors:										
- *  Alessandro Febretti							febret@gmail.com
- *  [PLACE YOUR NAME AND MAIL HERE IF YOU CONTRIBUTED TO WRITE THIS SOURCE FILE]
- *---------------------------------------------------------------------------------------------------------------------
- * [LICENSE NOTE]
- *---------------------------------------------------------------------------------------------------------------------
- * DrawContext
- *********************************************************************************************************************/
 /******************************************************************************
  * THE OMEGA LIB PROJECT
  *-----------------------------------------------------------------------------
@@ -53,9 +41,19 @@
 
 namespace omega
 {
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//! Contains information about the current frame.
+	struct FrameInfo
+	{
+		FrameInfo(uint64 frame, GpuContext* context): frameNum(frame), gpuContext(context) {}
+		uint64 frameNum;
+		GpuContext* gpuContext;
+	};
+
 	///////////////////////////////////////////////////////////////////////////
 	//! Contains information about the context in which drawing operations 
-	//! take place
+	//! take place. DrawContext is a fully self-contained description of 
+	//! rendering operations that make up a full frame. 
 	struct DrawContext
 	{
 		DrawContext();
@@ -79,11 +77,22 @@ namespace omega
 		GpuContext* gpuContext;
 		Renderer* renderer;
 
+		//! The drawFrame method is the 'entry point' called by the display 
+		//! system to render a full frame. drawFrame does all required setup
+		//! operations (viewport, stereo mode etc), and calls the Renderer draw 
+		//! method mltiple times to draw active eyes for the scene and overlay
+		//! layers. The renderer draw method in turn renders secondary cameras
+		//! and performs drawing with all the active render passes.
+		void drawFrame(uint64 frameNum);
+
 		//! Updates the pixel viewport of this context, based on the actual tile
 		//! viewport, active eye and stereo settings.
 		void updateViewport();
 		void setupInterleaver();
 		void initializeStencilInterleaver(int gliWindowWidth, int gliWindowHeight);
+		DisplayTileConfig::StereoMode getCurrentStereoMode();
+		// Clears the frame buffer.
+		void clear();
 		bool stencilInitialized;
 	};
 }; // namespace omega

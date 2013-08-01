@@ -107,25 +107,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-//! @internal Keeps observer per-tile data
-struct ObserverTileData
-{
-	ObserverTileData(): observer(NULL)
-	{}
-
-	eq::Observer* observer;
-	int x;
-	int y;
-
-	// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
-	float yaw;
-	
-	Vector3f tileCenter;
-
-	omega::Camera* camera;
-};
-
-///////////////////////////////////////////////////////////////////////////////
 //! @internal
 class ConfigImpl: public eq::Config
 {
@@ -142,10 +123,7 @@ public:
 	void updateSharedData();
     virtual bool handleEvent(const eq::ConfigEvent* event);
     virtual uint32_t startFrame( const uint128_t& version );
-    virtual uint32_t finishFrame();
 	const UpdateContext& getUpdateContext();
-	// Refresh information for all observers. Used when camera attachments change.
-	void updateObserverCameras();
 
 private:
     void processMousePosition(eq::Window* source, int x, int y, Vector2i& outPosition, Ray& ray);
@@ -156,8 +134,6 @@ private:
 	Timer myGlobalTimer;
 	//! Global fps counter.
 	Stat* myFpsStat;
-
-	ObserverTileData myObserverTileData[MaxTiles];
 
     omicron::Ref<Engine> myServer;
 };
@@ -221,7 +197,6 @@ public:
 protected:
     virtual bool configInit(const uint128_t& initID);
     virtual void frameStart( const uint128_t& frameID, const uint32_t frameNumber );
-    virtual void frameFinish( const uint128_t& frameID, const uint32_t frameNumber );
 	bool processEvent(const eq::Event& event);
 
 private:
@@ -246,17 +221,12 @@ public:
 	DrawContext& getDrawContext() { return myDC; }
 
 protected:
-    void setupDrawContext(DrawContext* context, const uint128_t& spin, eq::fabric::Eye eye);
-
 	void drawStats();
     virtual bool configInit(const uint128_t& initID);
     virtual void frameDraw( const uint128_t& spin );
     virtual void frameViewFinish(const uint128_t& spin);
-	//virtual void frameViewStart( const co::base::uint128_t& frameID );
 
     omega::Renderer* getRenderer();
-
-	void setupStencil(int gliWindowWidth, int gliWindowHeight);
 
 private:
     eq::Window* myWindow;
@@ -282,8 +252,6 @@ public:
         { return new ConfigImpl( parent ); }
     virtual eq::Channel* createChannel(eq::Window* parent)
         { return new ChannelImpl( parent ); }
-    //virtual eq::View* createView(eq::Layout* parent)
-    //    { return new ViewImpl(parent); }
     virtual eq::Window* createWindow(eq::Pipe* parent)
         { return new WindowImpl(parent); }
     virtual eq::Pipe* createPipe(eq::Node* parent)

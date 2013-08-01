@@ -55,15 +55,6 @@ namespace omega
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	//! Contains information about the current frame.
-	struct FrameInfo
-	{
-		FrameInfo(uint64 frame, GpuContext* context): frameNum(frame), gpuContext(context) {}
-		uint64 frameNum;
-		GpuContext* gpuContext;
-	};
-
-	///////////////////////////////////////////////////////////////////////////////////////////////
 	class OMEGA_API ApplicationBase
 	{
 	public:

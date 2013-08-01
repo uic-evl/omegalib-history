@@ -754,22 +754,22 @@ void setTileCamera(const String& tilename, const String& cameraName)
 ///////////////////////////////////////////////////////////////////////////////
 void setNearFarZ(float nearZ, float farZ)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	ds->setNearFarZ(nearZ, farZ);
+	Camera* cam = getDefaultCamera();
+	cam->setNearFarZ(nearZ, farZ);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 float getNearZ(float near)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	return ds->getNearZ();
+	Camera* cam = getDefaultCamera();
+	return cam->getNearZ();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 float getFarZ(float near)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	return ds->getFarZ();
+	Camera* cam = getDefaultCamera();
+	return cam->getFarZ();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

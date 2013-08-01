@@ -150,16 +150,8 @@ void EqualizerDisplaySystem::generateEqConfig()
 			DisplayTileConfig& tc = *nc.tiles[i];
 			if(tc.enabled)
 			{
-				//if(eqcfg.autoOffsetWindows)
-				//{
-				//	winX = tc.index[0] * eqcfg.tileResolution[0] + eqcfg.windowOffset[0];
-				//	winY = tc.index[1] * eqcfg.tileResolution[1] + eqcfg.windowOffset[1];
-				//}
-				//else
-				//{
-					winX = tc.position[0] + eqcfg.windowOffset[0];
-					winY = tc.position[1] + eqcfg.windowOffset[1];
-				//}
+				winX = tc.position[0] + eqcfg.windowOffset[0];
+				winY = tc.position[1] + eqcfg.windowOffset[1];
 			
 				String tileName = tc.name;
 				String tileCfg = buildTileConfig(indent, tileName, winX, winY, tc.pixelSize[0], tc.pixelSize[1], tc.device, curDevice, eqcfg.fullscreen, tc.borderless);
@@ -187,132 +179,6 @@ void EqualizerDisplaySystem::generateEqConfig()
 
 	typedef pair<String, DisplayTileConfig*> TileIterator;
 
-	// Create observers (one per tile)
-	// observers
-	foreach(TileIterator p, eqcfg.tiles)
-	{
-		DisplayTileConfig* t = p.second;
-		// observer
-		result += 
-			L(ostr("observer { name \"%1%\" }", %t->name));
-	}
-
-	// Always create the default observer
-	//result += 
-	//	L("observer { name \"observer0\" }");
-
-	// layout
-	//START_BLOCK(result, "layout");
-	//result += 
-	//	L("name \"layout\"");
-
-	// Create one view per tile, and link it to the relative observer.
-	foreach(TileIterator p, eqcfg.tiles)
-	{
-		DisplayTileConfig* t = p.second;
-		if(t->enabled)
-		{
-		START_BLOCK(result, "layout");
-		result += 
-			L(ostr("name \"layout-%1%\"", %t->name));
-		
-		START_BLOCK(result, "view");
-		// observer
-		result += 
-			L(ostr("name \"view-%1%\"", %t->name)) +
-			L(ostr("observer \"%1%\"", %t->name)) +
-			//L(ostr("viewport [%1% %2% %3% %4%]", %t->viewport[0] %t->viewport[1] %t->viewport[2] %t->viewport[3]) );
-			L("viewport [0 0 1 1]");
-		END_BLOCK(result);
-		END_BLOCK(result)
-	}
-	}
-	//END_BLOCK(result)
-	// ------------------------------------------ END layout
-
-	// Simple layout for extra tiles
-	START_BLOCK(result, "layout");
-	result += 
-		L("name \"simpleLayout\"");
-
-	START_BLOCK(result, "view");
-
-	result += 
-		L("name \"main\"") +
-		//L("observer \"observer0\"") +
-		L("viewport [0 0 1 1]");
-	
-	END_BLOCK(result)
-	END_BLOCK(result)
-	// ------------------------------------------ END simple layout
-
-	// Main canvas
-	//START_BLOCK(result, "canvas");
-	//result += 
-	//	L("name \"mainCanvas\"") +
-	//	L("layout \"layout\"");
-
-	foreach(TileIterator p, eqcfg.tiles)
-	{
-		DisplayTileConfig* t = p.second;
-		if(t->enabled)
-		{
-		START_BLOCK(result, "canvas");
-		result += 
-			L(ostr("name \"canvas-%1%\"", %t->name)) +
-			L(ostr("layout \"layout-%1%\"", %t->name));
-			
-		String segmentName = ostr("segment-%1%", %t->name);
-		//String viewport = ostr("viewport [%1% %2% %3% %4%]", %t->viewport[0] %t->viewport[1] %t->viewport[2] %t->viewport[3]);
-		String viewport = "viewport [0 0 1 1]";
-
-		String tileCfg = "";
-		START_BLOCK(tileCfg, "segment");
-		tileCfg +=
-				L("name \"" + segmentName + "\"") +
-				L("channel \"" + t->name + "\"") +
-				L(viewport);
-		START_BLOCK(tileCfg, "wall");
-		tileCfg +=
-			L("bottom_left " + ostr("[ %1% %2% %3% ]", %t->bottomLeft[0] %t->bottomLeft[1] %t->bottomLeft[2])) +
-			L("bottom_right " + ostr("[ %1% %2% %3% ]", %t->bottomRight[0] %t->bottomRight[1] %t->bottomRight[2])) +
-			L("top_left " + ostr("[ %1% %2% %3% ]", %t->topLeft[0] %t->topLeft[1] %t->topLeft[2])) +
-			L("type " + (t->isHMD ? "HMD" : "fixed") );
-		END_BLOCK(tileCfg)
-		END_BLOCK(tileCfg)
-		result += tileCfg;
-		
-		END_BLOCK(result);
-	}
-	}
-	// ------------------------------------------ END main canvas
-
-	// stats canvas
-	if(eqcfg.displayStatsOnMaster)
-	{
-		START_BLOCK(result, "canvas");
-		result += 
-			L("name \"statsCanvas\"") +
-			L("layout \"simpleLayout\"");
-		String tileCfg = "";
-
-		START_BLOCK(tileCfg, "segment");
-		tileCfg +=
-				L("name \"stats\"") +
-				L("channel \"stats\"") +
-				L("viewport [0 0 1 1]");
-		START_BLOCK(tileCfg, "wall");
-		tileCfg +=
-			L("bottom_left [ -1 -0.5 0 ]") +
-			L("bottom_right [ 1 -0.5 0 ]") +
-			L("top_left [ -1 0.5 0 ]");
-		END_BLOCK(tileCfg)
-		END_BLOCK(tileCfg)
-		result += tileCfg;
-		END_BLOCK(result);
-	}
-	// ------------------------------------------ END stats canvas
-
 	// compounds
 	START_BLOCK(result, "compound")
 	foreach(TileIterator p, eqcfg.tiles)
@@ -320,47 +186,30 @@ void EqualizerDisplaySystem::generateEqConfig()
 		DisplayTileConfig* tc = p.second;
 		if(tc->enabled)
 		{
-		//String segmentName = ostr("segment-%1%", %tc->name);
-		//String viewName = "main";
-
-		//viewName = ostr("view-%1%", %tc->name);
-
-		if(tc->stereoMode == DisplayTileConfig::LineInterleaved || 
-			tc->stereoMode == DisplayTileConfig::SideBySide ||
-			(tc->stereoMode == DisplayTileConfig::Default && eqcfg.stereoMode == DisplayTileConfig::LineInterleaved) ||
-			(tc->stereoMode == DisplayTileConfig::Default && eqcfg.stereoMode == DisplayTileConfig::SideBySide))
-		{
-			String tileCfg = "";
-			START_BLOCK(tileCfg, "compound");
 			if(eqcfg.enableSwapSync)
 			{
-				tileCfg += L("swapbarrier { name \"defaultbarrier\" }");
-			}
-			tileCfg += 
-				L(ostr("channel ( canvas \"canvas-%1%\" segment \"segment-%2%\" layout \"layout-%3%\" view \"view-%4%\" )",
-					%tc->name %tc->name %tc->name %tc->name)) +
-				L("eye [LEFT RIGHT]") +
-				L("task [DRAW]") +
-				L("attributes { stereo_mode PASSIVE }");
-			END_BLOCK(tileCfg);
-			result += tileCfg;
-		}
-		else
-		{
-			if(eqcfg.enableSwapSync)
-			{
-				String tileCfg = ostr("\t\tcompound { swapbarrier { name \"defaultbarrier\" } channel ( canvas \"canvas-%1%\" segment \"segment-%2%\" layout \"layout-%3%\" view \"view-%4%\" ) }\n",
-					%tc->name %tc->name %tc->name %tc->name);
-				result += tileCfg;
+				//String tileCfg = ostr("\t\tcompound { swapbarrier { name \"defaultbarrier\" } channel ( canvas \"canvas-%1%\" segment \"segment-%2%\" layout \"layout-%3%\" view \"view-%4%\" ) }\n",
+				String tileCfg = ostr("\t\tcompound { swapbarrier { name \"defaultbarrier\" } channel \"%1%\"\n",	%tc->name);
+				START_BLOCK(tileCfg, "wall");
+				tileCfg +=
+					L("bottom_left [ -1 -0.5 0 ]") +
+					L("bottom_right [ 1 -0.5 0 ]") +
+					L("top_left [ -1 0.5 0 ]");
+				END_BLOCK(tileCfg)
+				result += tileCfg + "}\n";
 			}
 			else
 			{
-				String tileCfg = ostr("\t\tchannel ( canvas \"canvas-%1%\" segment \"segment-%2%\" layout \"layout-%3%\" view \"view-%4%\" )\n",
-					%tc->name %tc->name %tc->name %tc->name);
+				String tileCfg = ostr("\t\tchannel \"%1%\"\n", %tc->name);
+				START_BLOCK(tileCfg, "wall");
+				tileCfg +=
+					L("bottom_left [ -1 -0.5 0 ]") +
+					L("bottom_right [ 1 -0.5 0 ]") +
+					L("top_left [ -1 0.5 0 ]");
+				END_BLOCK(tileCfg)
 				result += tileCfg;
 			}
 		}
-	}
 	}
 
 	if(eqcfg.displayStatsOnMaster)
@@ -634,7 +483,7 @@ void EqualizerDisplaySystem::cleanup()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void EqualizerDisplaySystem::refreshSettings() 
 {
-	myConfig->updateObserverCameras();
+	//myConfig->updateObserverCameras();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -88,53 +88,12 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
 		}
 	}
 
-    return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128_t& spin, eq::fabric::Eye eye)
-{
-    WindowImpl* window = static_cast<WindowImpl*>(getWindow());
+	WindowImpl* window = static_cast<WindowImpl*>(getWindow());
     Renderer* client = window->getRenderer();
+    myDC.gpuContext = client->getGpuContext();
+	myDC.renderer = client;
 
-	EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem();
-	const DisplayConfig& dcfg = ds->getDisplayConfig();
-
-	float nearz = ds->getNearZ();
-	float farz = ds->getFarZ();
-	if(nearz != 0 && farz != 0) setNearFar(nearz, farz);
-
-    context->gpuContext = client->getGpuContext();
-	context->renderer = (Renderer*)client;
-
-    // setup the context viewport.
-    // (spin is 128 bits, gets truncated to 64... do we really need 128 bits anyways!?)
-    context->frameNum = spin.low();
-
-	switch( eye )
-    {
-        case eq::fabric::EYE_LEFT:
-            context->eye = DrawContext::EyeLeft;
-            break;
-        case eq::fabric::EYE_RIGHT:
-            context->eye = DrawContext::EyeRight;
-            break;
-        case eq::fabric::EYE_CYCLOP:
-            context->eye = DrawContext::EyeCyclop;
-            break;
-    }
-
-	context->updateViewport();
-        
-	//vmml::matrix<4, 4, float> proj = getPerspective().compute_matrix();
-	//const eq::fabric::Matrix4f& eqmw = getPerspectiveTransform();
-
-	//for(int i = 0; i < 16; i++)
-	//{
-	//	context->projection.data()[i] = proj.array[i];
-	//}
-	
-	context->setupInterleaver();
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,31 +104,9 @@ void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 	// If local tiles are hidden, we are done.
 	if(!sLocalTilesVisible) return;
 
-	DisplaySystem* ds = myDC.renderer->getDisplaySystem();
-	DisplayConfig& dcfg = ds->getDisplayConfig();
-	if(getEye() == eq::fabric::EYE_LEFT || getEye() == eq::fabric::EYE_CYCLOP) 
-	{
-		// This is the first eye being drawn: clear the depth and color buffers.
-		const Color& b = ds->getBackgroundColor();
-		glClearColor(b[0], b[1], b[2], b[3]);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-
-	if(dcfg.forceMono && getEye() != eq::fabric::EYE_LAST) return;
-
-    setupDrawContext(&myDC, frameID, getEye());
-
-	// Draw scene
-	myDC.task = DrawContext::SceneDrawTask;
-	myDC.renderer->draw(myDC);
-
-	// Draw overlay when drawing stereo, otherwise we will do a single overlay drawing pass in
-	// frameViewFinish
-    if(getEye() != eq::fabric::EYE_CYCLOP)
-    {
-        myDC.task = DrawContext::OverlayDrawTask;
-        myDC.renderer->draw(myDC);
-    }
+	// (spin is 128 bits, gets truncated to 64... 
+	// do we really need 128 bits anyways!?)
+	myDC.drawFrame(frameID.low());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,18 +117,9 @@ void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
 	// If local tiles are hidden, we are done.
 	if(!sLocalTilesVisible) return;
 
-	// Overlay always renders in a single pass eve when stereo is enabled.
-	// So, if we are in stereo mode skip one eye.
-	if(getEye() != eq::fabric::EYE_LAST && getEye() != eq::fabric::EYE_CYCLOP) return;
-
-	setupDrawContext(&myDC, frameID, eq::fabric::EYE_CYCLOP);
-    myDC.task = DrawContext::OverlayDrawTask;
-
     EQ_GL_CALL( applyBuffer( ));
     EQ_GL_CALL( applyViewport( ));
     EQ_GL_CALL( setupAssemblyState( ));
-
-    myDC.renderer->draw(myDC);
 
 	EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)myDC.renderer->getDisplaySystem();
 

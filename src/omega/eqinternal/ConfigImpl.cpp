@@ -166,7 +166,6 @@ uint ConfigImpl::processMouseButtons(uint btns)
     return buttons;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool ConfigImpl::handleEvent(const eq::ConfigEvent* event)
 {
@@ -219,21 +218,10 @@ bool ConfigImpl::handleEvent(const eq::ConfigEvent* event)
     return Config::handleEvent(event);
 }
 
-// Temporary hack to add an update timer statistic.
-Stat* sfs = NULL;
-Stat* efs = NULL;
-Timer sst;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t ConfigImpl::startFrame( const uint128_t& version )
 {
-	if(!sfs) sfs = SystemManager::instance()->getStatsManager()->createStat("startFrame");
-	sst.start();
-
 	bool res = eq::Config::startFrame( version );
-	
-	sst.stop();
-	sfs->addSample(sst.getElapsedTimeInMilliSec());
 	
 	static float lt = 0.0f;
 	static float tt = 0.0f;
@@ -312,147 +300,4 @@ void ConfigImpl::updateSharedData( )
 const UpdateContext& ConfigImpl::getUpdateContext()
 {
 	return mySharedData.getUpdateContext();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t ConfigImpl::finishFrame()
-{
-	if(!efs) efs = SystemManager::instance()->getStatsManager()->createStat("finishFrame");
-	sst.start();
-	
-    bool res = eq::Config::finishFrame();
-	
-    EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem();
-	Engine* engine = Engine::instance();
-	
-	// Update observers
-	int numObservers = getObservers().size();
-	for(int i = 0; i < numObservers; i++)
-	{
-		eq::Observer* eqo = getObservers().at(i);
-		ObserverTileData& otd = myObserverTileData[i];
-		// If the observer data has not been initialized yet, do it now.
-		if(otd.observer == NULL)
-		{
-			otd.observer = eqo;
-			// Get the tile name from the observer name.
-			String tileName = eqo->getName();
-			DisplayConfig dc = ds->getDisplayConfig();
-			if(dc.tiles.find(tileName) == dc.tiles.end())
-			{
-				oferror("ConfigImpl::finishFrame: could not find tile %1%", %tileName);
-			}
-			else
-			{
-				DisplayTileConfig* dtc = dc.tiles[tileName];
-
-				// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
-				otd.yaw = dtc->yaw;
-				
-				otd.tileCenter = dtc->center;
-
-				if(dtc->cameraName == "")
-				{
-					// Use default camera for this tile
-					otd.camera = engine->getDefaultCamera();
-				}
-				else
-				{
-					// Use a custom camera for this tile (create it here if necessary)
-					Camera* customCamera = engine->getCamera(dtc->cameraName);
-					if(customCamera == NULL)
-					{
-						customCamera = engine->createCamera(dtc->cameraName);
-					}
-					ofmsg("Tile %1% camera set to %2%", %dtc->name %dtc->cameraName);
-					otd.camera = customCamera;
-				}
-			}
-		}
-
-		Camera* cam = otd.camera;
-		// Update the tile-observer head matrix, using the observer position and the per-tile orientation.
-		const Vector3f& pos = cam->getHeadOffset();
-		// Update the eye separation.
-		otd.observer->setEyeBase(cam->getEyeSeparation());
-			
-		if(!ds->getDisplayConfig().panopticStereoEnabled)
-		{
-			//Camera* cam = Engine::instance()->getDefaultCamera();
-			eq::fabric::Matrix4f om;
-			const AffineTransform3& ht = cam->getHeadTransform();
-			Eigen::Transform<float, 3, 2> floatxform = ht.cast<float>();
-			om.set(floatxform.data(), floatxform.data() + 16 * sizeof(float), false);
-			eqo->setHeadMatrix(om);
-		}
-		else
-		{
-			eq::fabric::Matrix4f om = eq::fabric::Matrix4f::IDENTITY;
-			om.set_translation(pos[0], pos[1], pos[2]);
-			// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
-			om.rotate_y(-otd.yaw * Math::DegToRad);
-			//eqo->setHeadMatrix(om);
-		}
-	}
-	
-	sst.stop();
-	efs->addSample(sst.getElapsedTimeInMilliSec());
-	
-	return res;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void ConfigImpl::updateObserverCameras()
-{
-	// NOTE: There is a lot of repeated code between this function and finishFrame, but there
-	// are also some fundamental differences (i.e. this function checks for an observer to be
-	// already attached to the tile, to update its camera). See if you can simplify the logic
-	// but beware of the differences.
-	// NOTE2: this function is used only to allow for runtime switching of a tile camera.
-    EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem();
-	Engine* engine = Engine::instance();
-
-	// Update observers
-	int numObservers = getObservers().size();
-	for(int i = 0; i < numObservers; i++)
-	{
-		ObserverTileData& otd = myObserverTileData[i];
-		if(otd.observer != NULL)
-		{
-			// Get the tile name from the observer name.
-			String tileName = otd.observer->getName();
-			DisplayConfig dc = ds->getDisplayConfig();
-			if(dc.tiles.find(tileName) == dc.tiles.end())
-			{
-				oferror("ConfigImpl::finishFrame: could not find tile %1%", %tileName);
-			}
-			else
-			{
-				DisplayTileConfig* dtc = dc.tiles[tileName];
-
-				// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
-				otd.yaw = dtc->yaw;
-				
-				otd.tileCenter = dtc->center;
-
-				if(dtc->cameraName == "")
-				{
-					// Use default camera for this tile
-					otd.camera = engine->getDefaultCamera();
-				}
-				else
-				{
-					// Use a custom camera for this tile (create it here if necessary)
-					Camera* customCamera = engine->getCamera(dtc->cameraName);
-					if(customCamera == NULL)
-					{
-						customCamera = engine->createCamera(dtc->cameraName);
-					}
-					ofmsg("Tile %1% camera set to %2%", %dtc->name %dtc->cameraName);
-					otd.camera = customCamera;
-				}
-				dtc->camera = otd.camera;
-			}
-		}
-	}
 }

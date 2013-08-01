@@ -46,6 +46,83 @@ DrawContext::DrawContext():
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+DisplayTileConfig::StereoMode DrawContext::getCurrentStereoMode()
+{
+	DisplaySystem* ds = renderer->getDisplaySystem();
+	DisplayConfig& dcfg = ds->getDisplayConfig();
+	if(dcfg.forceMono) return DisplayTileConfig::Mono;
+	return tile->stereoMode;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void DrawContext::drawFrame(uint64 frameNum)
+{
+	this->frameNum = frameNum;
+
+	FrameInfo curFrame(frameNum, gpuContext);
+
+	// Signal the start of a new frame
+	renderer->startFrame(curFrame);
+
+	// Clear the active main frame buffer.
+	clear();
+
+	if(getCurrentStereoMode() == DisplayTileConfig::Mono)
+	{
+		eye = DrawContext::EyeCyclop;
+		updateViewport();
+		setupInterleaver();
+		// Draw scene
+		task = DrawContext::SceneDrawTask;
+		renderer->draw(*this);
+		// Draw overlay
+		task = DrawContext::OverlayDrawTask;
+		renderer->draw(*this);
+	}
+	else
+	{
+		// Draw left eye scene and overlay
+		eye = DrawContext::EyeLeft;
+		updateViewport();
+		setupInterleaver();
+		task = DrawContext::SceneDrawTask;
+		renderer->draw(*this);
+		task = DrawContext::OverlayDrawTask;
+		renderer->draw(*this);
+
+		// Draw right eye scene and overlay
+		eye = DrawContext::EyeRight;
+		updateViewport();
+		setupInterleaver();
+		task = DrawContext::SceneDrawTask;
+		renderer->draw(*this);
+		task = DrawContext::OverlayDrawTask;
+		renderer->draw(*this);
+
+		// Draw mono overlay
+		eye = DrawContext::EyeCyclop;
+		updateViewport();
+		setupInterleaver();
+		task = DrawContext::OverlayDrawTask;
+		renderer->draw(*this);
+	}
+
+	// Signal the end of this frame.
+	renderer->finishFrame(curFrame);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void DrawContext::clear()
+{
+	DisplaySystem* ds = renderer->getDisplaySystem();
+
+	// clear the depth and color buffers.
+	const Color& b = ds->getBackgroundColor();
+	glClearColor(b[0], b[1], b[2], b[3]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void DrawContext::updateViewport()
 {
 	DisplaySystem* ds = renderer->getDisplaySystem();
@@ -129,7 +206,7 @@ void DrawContext::setupInterleaver()
 	// Configure stencil test when rendering interleaved with stencil is enabled.
 	if(stencilInitialized)
 	{
-		if(dcfg.forceMono)
+		if(dcfg.forceMono || eye == DrawContext::EyeCyclop)
 		{
 			// Disable stencil
 			glStencilFunc(GL_ALWAYS,1,1); // to avoid interaction with stencil content

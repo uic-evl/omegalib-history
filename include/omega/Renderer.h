@@ -55,7 +55,6 @@ namespace omega {
 	class OMEGA_API Renderer: public ReferenceType
 	{
 	friend class DisplaySystem;
-	//friend class ServerBase;
 	public:
 		Renderer(Engine* server);
 
@@ -79,9 +78,6 @@ namespace omega {
 		GpuContext* getGpuContext() { return myGpuContext; } 
 		void setGpuContext(GpuContext* ctx) { myGpuContext = ctx; } 
 
-		//ServerBase* getEngine() { return myServer; }
-		//SystemManager*  getSystemManager()  { return SystemManager::instance(); }
-		//ServiceManager*   getServiceManager()   { return SystemManager::instance()->getServiceManager(); }
 		DisplaySystem*  getDisplaySystem();
 
 		//! Resource management

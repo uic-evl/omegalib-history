@@ -139,10 +139,6 @@ void Renderer::queueCommand(IRendererCommand* cmd)
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::startFrame(const FrameInfo& frame)
 {
-#ifdef OMEGA_DEBUG_FLOW
-	ofmsg("Renderer::startFrame %1%", %frame.frameNum);
-#endif
-
 	foreach(Ref<Camera> cam, myServer->getCameras())
 	{
 		cam->startFrame(frame);
@@ -152,10 +148,6 @@ void Renderer::startFrame(const FrameInfo& frame)
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::finishFrame(const FrameInfo& frame)
 {
-#ifdef OMEGA_DEBUG_FLOW
-	ofmsg("Renderer::finishFrame %1%", %frame.frameNum);
-#endif
-
 	foreach(Ref<Camera> cam, myServer->getCameras())
 	{
 		cam->finishFrame(frame);
