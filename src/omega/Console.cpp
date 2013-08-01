@@ -29,6 +29,7 @@
 #include "omega/SystemManager.h"
 #include "omega/DisplaySystem.h"
 #include "omega/glheaders.h"
+#include "omega/StatsManager.h"
 
 using namespace omega;
 
@@ -125,4 +126,8 @@ void ConsoleRenderable::draw(const DrawContext& context)
 			y += lineHeight;
 		}
 	}
+
+	y += 10;
+	StatsManager* sm = SystemManager::instance()->getStatsManager();
+	sm->drawStats(Vector2i(x, y), Vector2i(lineWidth, 100));
 }
