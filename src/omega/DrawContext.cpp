@@ -51,6 +51,7 @@ DisplayTileConfig::StereoMode DrawContext::getCurrentStereoMode()
 	DisplaySystem* ds = renderer->getDisplaySystem();
 	DisplayConfig& dcfg = ds->getDisplayConfig();
 	if(dcfg.forceMono) return DisplayTileConfig::Mono;
+	if(tile->stereoMode == DisplayTileConfig::Default) return dcfg.stereoMode;
 	return tile->stereoMode;
 }
 
