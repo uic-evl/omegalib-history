@@ -219,9 +219,22 @@ bool ConfigImpl::handleEvent(const eq::ConfigEvent* event)
     return Config::handleEvent(event);
 }
 
+// Temporary hack to add an update timer statistic.
+Stat* sfs = NULL;
+Stat* efs = NULL;
+Timer sst;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t ConfigImpl::startFrame( const uint128_t& version )
 {
+	if(!sfs) sfs = SystemManager::instance()->getStatsManager()->createStat("startFrame");
+	sst.start();
+
+	bool res = eq::Config::startFrame( version );
+	
+	sst.stop();
+	sfs->addSample(sst.getElapsedTimeInMilliSec());
+	
 	static float lt = 0.0f;
 	static float tt = 0.0f;
 	// Compute dt.
@@ -274,7 +287,7 @@ uint32_t ConfigImpl::startFrame( const uint128_t& version )
 
 	myServer->update(uc);
 
-	return eq::Config::startFrame( version );
+	return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,9 +317,14 @@ const UpdateContext& ConfigImpl::getUpdateContext()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t ConfigImpl::finishFrame()
 {
+	if(!efs) efs = SystemManager::instance()->getStatsManager()->createStat("finishFrame");
+	sst.start();
+	
+    bool res = eq::Config::finishFrame();
+	
     EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem();
-
 	Engine* engine = Engine::instance();
+	
 	// Update observers
 	int numObservers = getObservers().size();
 	for(int i = 0; i < numObservers; i++)
@@ -319,7 +337,6 @@ uint32_t ConfigImpl::finishFrame()
 			otd.observer = eqo;
 			// Get the tile name from the observer name.
 			String tileName = eqo->getName();
-			//sscanf(eqo->getName().c_str(), "observer-%dx%d", &otd.x, &otd.y);
 			DisplayConfig dc = ds->getDisplayConfig();
 			if(dc.tiles.find(tileName) == dc.tiles.end())
 			{
@@ -347,9 +364,8 @@ uint32_t ConfigImpl::finishFrame()
 					{
 						customCamera = engine->createCamera(dtc->cameraName);
 					}
+					ofmsg("Tile %1% camera set to %2%", %dtc->name %dtc->cameraName);
 					otd.camera = customCamera;
-					// Make sure the camera is enabled for the specified tile.
-					//otd.camera->getOutput(dtc.device)->setEnabled(true);
 				}
 			}
 		}
@@ -375,15 +391,24 @@ uint32_t ConfigImpl::finishFrame()
 			om.set_translation(pos[0], pos[1], pos[2]);
 			// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
 			om.rotate_y(-otd.yaw * Math::DegToRad);
-			eqo->setHeadMatrix(om);
+			//eqo->setHeadMatrix(om);
 		}
 	}
-    return eq::Config::finishFrame();
+	
+	sst.stop();
+	efs->addSample(sst.getElapsedTimeInMilliSec());
+	
+	return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void ConfigImpl::updateObserverCameras()
 {
+	// NOTE: There is a lot of repeated code between this function and finishFrame, but there
+	// are also some fundamental differences (i.e. this function checks for an observer to be
+	// already attached to the tile, to update its camera). See if you can simplify the logic
+	// but beware of the differences.
+	// NOTE2: this function is used only to allow for runtime switching of a tile camera.
     EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem();
 	Engine* engine = Engine::instance();
 
@@ -392,7 +417,6 @@ void ConfigImpl::updateObserverCameras()
 	for(int i = 0; i < numObservers; i++)
 	{
 		ObserverTileData& otd = myObserverTileData[i];
-		// If the observer data has not been initialized yet, do it now.
 		if(otd.observer != NULL)
 		{
 			// Get the tile name from the observer name.

@@ -104,8 +104,6 @@ void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128
 	float farz = ds->getFarZ();
 	if(nearz != 0 && farz != 0) setNearFar(nearz, farz);
 
-    //eq::PixelViewport pvp = getPixelViewport();
-
     context->gpuContext = client->getGpuContext();
 	context->renderer = (Renderer*)client;
 
@@ -135,23 +133,7 @@ void ChannelImpl::setupDrawContext(DrawContext* context, const co::base::uint128
 	//{
 	//	context->projection.data()[i] = proj.array[i];
 	//}
-
-	Camera* cam = client->getEngine()->getDefaultCamera();
-	if(myDC.tile->camera != NULL)
-	{
-		Camera* cam = myDC.tile->camera; 
-	}
 	
-	// Can move these to camera.beginDraw?
-	const DisplayTileConfig* dtc = context->tile;
-	context->projection = cam->computeOffAxisProjection(
-		context->eye,
-		dtc->bottomLeft,
-		dtc->bottomRight,
-		dtc->topLeft);
-
-	context->modelview = cam->getViewTransform();
-
 	context->setupInterleaver();
 }
 

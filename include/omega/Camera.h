@@ -96,8 +96,6 @@ namespace omega {
 		void setPitchYawRoll(const Vector3f& yawPitchRoll);
 				
 		const AffineTransform3& getViewTransform();
-		Transform3 computeOffAxisProjection(DrawContext::Eye eye, 
-			const Vector3f& pa, const Vector3f& pb, const Vector3f& pc);
 
 		void setProjection(float fov, float aspect, float nearZ, float farZ);
 
@@ -163,6 +161,10 @@ namespace omega {
 
 	protected:
 		void updateTraversal(const UpdateContext& context);
+		//! Updates the specified draw context, computing an 
+		//! off-axis projection based on the tile and active eye 
+		//! in the draw context. Used by beginDraw.
+		void updateOffAxisProjection(DrawContext& ctx);
 	
 	private:
 		//! View transform

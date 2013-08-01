@@ -35,6 +35,7 @@
 #include "omega/DrawContext.h"
 #include "omega/Renderer.h"
 #include "omega/DisplaySystem.h"
+#include "omega/glheaders.h"
 
 using namespace omega;
 
