@@ -44,11 +44,11 @@ StatsManager::StatsManager()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Stat* StatsManager::createStat(const String& name)
+Stat* StatsManager::createStat(const String& name, Stat::Type type)
 {
 	if(findStat(name) == NULL)
 	{
-		Stat* s = new Stat(name);
+		Stat* s = new Stat(name, type);
 		myStatDictionary[name] = s;
 		myStatList.push_back(s);
 	}
@@ -69,12 +69,6 @@ Stat* StatsManager::findStat(const String& name)
 List<Stat*>::Range StatsManager::getStats()
 {
 	return List<Stat*>::Range(myStatList.begin(), myStatList.end());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void drawStats(Vector2i pos, Vector2i size, DrawInterface* di)
-{
-	di->drawRect(pos, size, Color(0,0,0,0.8));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

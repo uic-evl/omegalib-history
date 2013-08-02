@@ -38,20 +38,6 @@
 
 #include "omega/osystem.h"
 
-//! Mark beginning of timed code block.
-#define OMEGA_STAT_BEGIN(name) \
-	static Stat* __##name##Stat = NULL; \
-	Timer __##name##Timer; \
-	__##name##Timer.start();
-
-//! Mark end of timed code block.
-#define OMEGA_STAT_END(name) \
-	__##name##Timer.stop(); \
-	if(__##name##Stat == NULL) { \
-		StatsManager* sm = SystemManager::instance()->getStatsManager(); \
-		__##name##Stat = sm->createStat(#name); } \
-	__##name##Stat->addSample(__##name##Timer.getElapsedTime() * 1000);
-
 namespace omega
 {
 	class DrawInterface;
@@ -60,11 +46,21 @@ namespace omega
 	{
 	friend class StatsManager;
 	public:
-		enum Type { Time, Memory, Primitive, Count1, Count2, Count3, Count4 };
+		enum Type { Time, Memory, Primitive, Fps, Count1, Count2, Count3, Count4 };
 	public:
 		const String& getName();
 		bool isValid();
-		void addSample(float sample);
+		
+		//! Starts timing this statistic. Valid only for Time type stats.
+		void startTiming();
+		//! Stops timing this statistic and adds a sample of the elapsed time
+		//! (since startTiming was called) in milliseconds. Valid only for 
+		//! Time type stats.
+		void stopTiming();
+		void addSample(double sample);
+
+		Type getType() { return myType; }
+		
 		int getNumSamples();
 		float getCur();
 		float getMin();
@@ -79,13 +75,15 @@ namespace omega
 	private:
 		bool myValid;
 		String myName;
-		float myCur;
-		float myMin;
-		float myMax;
-		float myAvg;
+		double myCur;
+		double myMin;
+		double myMax;
+		double myAvg;
 		int myNumSamples;
-		float myAccumulator;
+		double myAccumulator;
 		Type myType;
+
+		Timer myTimer;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -98,7 +96,6 @@ namespace omega
 		Stat* findStat(const String& name);
 		List<Stat*>::Range getStats();
 		void printStats();
-		void drawStats(Vector2i pos, Vector2i size, DrawInterface* di);
 
 	private:
 		Dictionary<String, Stat*> myStatDictionary;
@@ -106,7 +103,26 @@ namespace omega
 	};
 
 	///////////////////////////////////////////////////////////////////////////
-	inline void Stat::addSample(float sample)
+	inline void Stat::startTiming()
+	{
+		if(myType == Time)
+		{
+			myTimer.start();
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Stat::stopTiming()
+	{
+		if(myType == Time)
+		{
+			myTimer.stop();
+			addSample(myTimer.getElapsedTimeInMilliSec());
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Stat::addSample(double sample)
 	{
 		if(!myValid)
 		{

@@ -276,6 +276,11 @@ void Engine::initialize()
 
 	ModuleServices::setNonCoreMode();
 
+	// Setup stats
+	StatsManager* sm = getSystemManager()->getStatsManager();
+	myHandleEventTimeStat = sm->createStat("Engine handleEvent", Stat::Time);
+	myUpdateTimeStat = sm->createStat("Engine update", Stat::Time);
+
 	myLock.unlock();
 }
 
@@ -402,6 +407,8 @@ void Engine::handleEvent(const Event& evt)
 	// If event dispatch is disabled, ignore all events.
 	if(!myEventDispatchEnabled) return;
 
+	myHandleEventTimeStat->startTiming();
+
 	if(myDebugWand)
 	{
 		if(evt.getServiceType() == Event::ServiceTypeWand)
@@ -444,11 +451,15 @@ void Engine::handleEvent(const Event& evt)
 	{
 		myDefaultCamera->handleEvent(evt);
 	}
+
+	myHandleEventTimeStat->stopTiming();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void Engine::update(const UpdateContext& context)
 {
+	myUpdateTimeStat->startTiming();
+
 	// Create the death switch thread if it does not exist yet
 	/*if(sDeathSwitchThread == NULL)
 	{
@@ -491,6 +502,8 @@ void Engine::update(const UpdateContext& context)
 		// Update the user position with the head tracker's position
 		soundEnv->setUserPosition( getDefaultCamera()->getHeadOffset() );
 	}
+
+	myUpdateTimeStat->stopTiming();
 }
 
 void Engine::initializeSound()

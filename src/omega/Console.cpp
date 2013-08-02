@@ -128,6 +128,33 @@ void ConsoleRenderable::draw(const DrawContext& context)
 	}
 
 	y += 10;
+	drawStats(Vector2f(x, y), Vector2f(lineWidth, 100), getRenderer());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void ConsoleRenderable::drawStats(Vector2f pos, Vector2f size, DrawInterface* di)
+{
 	StatsManager* sm = SystemManager::instance()->getStatsManager();
-	sm->drawStats(Vector2i(x, y), Vector2i(lineWidth, 100));
+
+	di->drawRect(pos, size, Color(0,0,0,0.8));
+
+	pos += Vector2f(0, 10);
+
+	foreach(Stat* s, sm->getStats())
+	{
+		if(s->getType() == Stat::Time && s->isValid())
+		{
+			di->drawRect(
+				pos + Vector2f(5, 0),
+				Vector2f(s->getCur(), 16),
+				Color(0.6f, 0.1f, 0.1f));
+
+			di->drawText(s->getName(), 
+				myFont, 
+				pos + Vector2f(5, 0), 
+				Font::HALeft | Font::VAMiddle, Color::White);
+			
+			pos += Vector2f(0, 20);
+		}
+	}
 }

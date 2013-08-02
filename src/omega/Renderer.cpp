@@ -41,9 +41,6 @@
 #include "omega/PythonInterpreter.h"
 #include "omega/glheaders.h"
 
-// Uncomment to print debug messages about client flow.
-//#define OMEGA_DEBUG_FLOW
-
 using namespace omega;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,7 +122,8 @@ void Renderer::initialize()
 		myRenderer->setDefaultFont(fnt);
 	}
 
-	//myServer->clientInitialize(this);
+	StatsManager* sm = getEngine()->getSystemManager()->getStatsManager();
+	myFrameTimeStat = sm->createStat(ostr("ctx%1% frame", %getGpuContext()->getId()), Stat::Time);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,6 +137,7 @@ void Renderer::queueCommand(IRendererCommand* cmd)
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::startFrame(const FrameInfo& frame)
 {
+	myFrameTimeStat->startTiming();
 	foreach(Ref<Camera> cam, myServer->getCameras())
 	{
 		cam->startFrame(frame);
@@ -166,6 +165,7 @@ void Renderer::finishFrame(const FrameInfo& frame)
 		}
 	}
 	foreach(GpuResource* gr, txlist) myResources.remove(gr);
+	myFrameTimeStat->stopTiming();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

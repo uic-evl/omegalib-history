@@ -67,30 +67,24 @@ void OsgRenderPass::initialize()
 
 	myModule = (OsgModule*)getUserData();
 
+	uint ctxid = getClient()->getGpuContext()->getId();
+
 	// Initialize standard scene view
 	mySceneView = new SceneView(myModule->getDatabasePager());
     mySceneView->initialize();
-	mySceneView->getState()->setContextID(getClient()->getGpuContext()->getId());
+	mySceneView->getState()->setContextID(ctxid);
 
 	// Initialize far scene view (for depth partitioning) 
 	myFarSceneView = new SceneView(myModule->getDatabasePager());
     myFarSceneView->initialize();
-	myFarSceneView->getState()->setContextID(getClient()->getGpuContext()->getId());
+	myFarSceneView->getState()->setContextID(ctxid);
+
+	StatsManager* sm = SystemManager::instance()->getStatsManager();
+	myTriangleCountStat = sm->createStat(ostr("osg tris %1%", %ctxid), Stat::Primitive);
+	myCullTimeStat = sm->createStat(ostr("osg cull %1%", %ctxid), Stat::Time);
+	myDrawTimeStat = sm->createStat(ostr("osg draw %1%", %ctxid), Stat::Time);
 
 	sInitLock.unlock();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void OsgRenderPass::collectStat(Stat*& stat, const char* name, float value)
-{
-	myTimer.stop();
-	if(stat == NULL)
-	{
-		StatsManager* sm = SystemManager::instance()->getStatsManager();
-		unsigned int pipeId = getClient()->getGpuContext()->getId();
-		stat = sm->createStat(ostr(name, %pipeId));
-	}
-	stat->addSample(value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,23 +138,19 @@ void OsgRenderPass::drawView(SceneView* view, const DrawContext& context, bool g
 	view->setFrameStamp(myModule->getFrameStamp());
 
 	// Cull
-	if(getstats) myTimer.start();
-
+	myCullTimeStat->startTiming();
 	view->cull(context.eye);
-
-	if(getstats) collectStat(myCullTimeStat, "osgCullP%1%", myTimer.getElapsedTimeInMilliSec());
+	myCullTimeStat->stopTiming();
 
 	// Draw
-	if(getstats) myTimer.start();
-
+	myDrawTimeStat->startTiming();
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	view->draw();
 	glPopAttrib();
-
-	if(getstats) collectStat(myDrawTimeStat, "osgDrawP%1%", myTimer.getElapsedTimeInMilliSec());
+	myDrawTimeStat->stopTiming();
 
 	// Collect triangle count statistics (every 10 frames)
-	if(getstats) collectStat(myTriangleCountStat, "osgTrisP%1%", (float)view->getTriangleCount());
+	myTriangleCountStat->addSample(view->getTriangleCount());
 
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();

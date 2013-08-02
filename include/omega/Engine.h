@@ -52,24 +52,6 @@ namespace omega {
 	typedef List< Ref<Renderer> > RendererList;
 
 	///////////////////////////////////////////////////////////////////////////
-	/*template<typename T> class RendererObject
-	{
-	public:
-		//typedef typename Dictionary<Renderer*, T>::Item Item;
-		//typedef typename Dictionary<Renderer*, T>::Range Range;
-
-	public:
-		T& operator[](Renderer* c) { return myObjs[c]; }
-
-		//Range getItems() { return Range(myObjs.begin(), myObjs.end()); }
-		//int numItems() { return myObjs.size(); }
-		//bool isEmpty() { return myObjs.empty(); }
-
-	private:
-		Dictionary<Renderer*, T> myObjs;
-	};*/
-		
-	///////////////////////////////////////////////////////////////////////////
 	//! The omegalib Engine is the core runtime component of omegalib. It runs on 
 	//! each node of a cluster system and handles the abstract scene graph, 
 	//! cameras, distribution of events and frame updates. 
@@ -244,6 +226,10 @@ namespace omega {
 
 		// Input mapping
 		Event::Flags myPrimaryButton;
+
+		// Stats
+		Stat* myHandleEventTimeStat;
+		Stat* myUpdateTimeStat;
 	};
 
 	///////////////////////////////////////////////////////////////////////////

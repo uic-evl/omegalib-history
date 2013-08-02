@@ -103,6 +103,9 @@ namespace omega {
 		Queue< Ref<IRendererCommand> > myRenderableCommands;
 
 		List< Ref<GpuResource> > myResources;
+
+		// Stats
+		Stat* myFrameTimeStat;
 	};
 
 	///////////////////////////////////////////////////////////////////////////

@@ -44,7 +44,7 @@ namespace omega {
 		void setFont(const FontInfo& font);
 
 		//! Draw the console. Assume the 
-		void draw(const DrawContext& context);
+		//void draw(const DrawContext& context);
 
 		virtual void addLine(const String& line);
 
@@ -70,6 +70,7 @@ namespace omega {
 		  myOwner(owner), myFont(NULL)
 		{}
 		void draw(const DrawContext& context);
+		void drawStats(Vector2f pos, Vector2f size, DrawInterface* di);
 
 	private:
 		Console* myOwner;
