@@ -108,6 +108,15 @@ void DrawContext::drawFrame(uint64 frameNum)
 		renderer->draw(*this);
 	}
 
+	// If SAGE support is enabled, notify frame finish
+#ifdef OMEGA_USE_SAGE
+	SageManager* sage = renderer->getSystemManager()->getSageManager();
+	if(sage != NULL)
+	{
+		sage->finishFrame(myDC);
+	}
+#endif
+
 	// Signal the end of this frame.
 	renderer->finishFrame(curFrame);
 }

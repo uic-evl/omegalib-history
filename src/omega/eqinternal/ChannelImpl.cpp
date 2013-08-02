@@ -56,7 +56,7 @@ extern bool sLocalTilesVisible;
 
 ///////////////////////////////////////////////////////////////////////////////
 ChannelImpl::ChannelImpl( eq::Window* parent ) 
-    :eq::Channel( parent ), myWindow(parent), myDrawBuffer(NULL), myStencilInitialized(false)
+    :eq::Channel( parent ), myWindow(parent), myDrawBuffer(NULL)
 {
 }
 
@@ -72,20 +72,13 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
     EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)SystemManager::instance()->getDisplaySystem();
     String name = getName();
 
-	if(name == "stats")
+	if(ds->getDisplayConfig().tiles.find(name) == ds->getDisplayConfig().tiles.end())
 	{
-		myDC.tile = &ds->getDisplayConfig().statsTile;
+		oferror("ChannelImpl::configInit: could not find tile %1%", %name);
 	}
 	else
 	{
-		if(ds->getDisplayConfig().tiles.find(name) == ds->getDisplayConfig().tiles.end())
-		{
-			oferror("ChannelImpl::configInit: could not find tile %1%", %name);
-		}
-		else
-		{
-			myDC.tile = ds->getDisplayConfig().tiles[name];
-		}
+		myDC.tile = ds->getDisplayConfig().tiles[name];
 	}
 
 	WindowImpl* window = static_cast<WindowImpl*>(getWindow());
@@ -110,78 +103,8 @@ void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void ChannelImpl::frameViewFinish( const co::base::uint128_t& frameID )
-{
-    eq::Channel::frameViewFinish( frameID );
-
-	// If local tiles are hidden, we are done.
-	if(!sLocalTilesVisible) return;
-
-    EQ_GL_CALL( applyBuffer( ));
-    EQ_GL_CALL( applyViewport( ));
-    EQ_GL_CALL( setupAssemblyState( ));
-
-	EqualizerDisplaySystem* ds = (EqualizerDisplaySystem*)myDC.renderer->getDisplaySystem();
-
-	if(myDC.tile->drawStats)
-    {
-		if(frameID.low() % 10 == 0)
-		{
-			if(myStatsBuffer == NULL)
-			{
-				myStatsTexture = myDC.renderer->createTexture();
-				myStatsTexture->initialize(myDC.tile->pixelSize[0], myDC.tile->pixelSize[1]);
-				myStatsBuffer = myDC.renderer->createRenderTarget(RenderTarget::RenderToTexture);
-				myStatsBuffer->setTextureTarget(myStatsTexture);
-			}
-			myStatsBuffer->bind();
-			glClearColor(0,0,0,0);
-			myStatsBuffer->clear();
-			drawStats();
-			myStatsBuffer->unbind();
-		}
-		//else
-		{
-			if(myStatsTexture != NULL)
-			{
-				Renderer* r = myDC.renderer;
-				DrawInterface* di = r->getRenderer();
-				di->beginDraw2D(myDC);
-				di->drawRectTexture(myStatsTexture, omicron::Vector2f::Zero(), omicron::Vector2f(myDC.tile->pixelSize[0], myDC.tile->pixelSize[1]));
-				di->endDraw();
-			}
-		}
-    }
-	else if(ds->isDrawFpsEnabled())
-    {
-        glMatrixMode( GL_PROJECTION );
-        glLoadIdentity();
-        applyScreenFrustum();
-
-        glMatrixMode( GL_MODELVIEW );
-        glDisable( GL_LIGHTING );
-
-        getWindow()->drawFPS();
-    }
-
-	// If SAGE support is enabled, notify frame finish
-#ifdef OMEGA_USE_SAGE
-	SageManager* sage = getRenderer()->getSystemManager()->getSageManager();
-	if(sage != NULL)
-	{
-		sage->finishFrame(myDC);
-	}
-#endif
-
-    EQ_GL_CALL( resetAssemblyState( ));
-}
-
-///////////////////////////////////////////////////////////////////////////////
 omega::Renderer* ChannelImpl::getRenderer()
 {
     WindowImpl* window = static_cast<WindowImpl*>(getWindow());
     return window->getRenderer();
 }
-
-///////////////////////////////////////////////////////////////////////////////
-

@@ -253,14 +253,14 @@ bool OmegaViewer::handleCommand(const String& cmd)
 		SystemManager::instance()->getStatsManager()->printStats();
 		return true;
 	}
-	else if(args[0] == "f")
-	{
-		// f: toggle raw fps
-		DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-		bool dfps = ds->isDrawFpsEnabled();
-		ds->drawFps(!dfps);
-		return true;
-	}
+	//else if(args[0] == "f")
+	//{
+	//	// f: toggle raw fps
+	//	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
+	//	bool dfps = ds->isDrawFpsEnabled();
+	//	ds->drawFps(!dfps);
+	//	return true;
+	//}
 	else if(args[0] == "porthole")
 	{
 	

@@ -89,9 +89,6 @@ public:
 	const Color& getBackgroundColor() { return myBackgroundColor; }
 	void setBackgroundColor(const Color& value) { myBackgroundColor = value; }
 
-	void drawFps(bool value) { myDrawFps = value; }
-	bool isDrawFpsEnabled() { return myDrawFps; }
-
 	//! Hides all the tiles running on the machine where this method is executed.
 	virtual void hideLocalTiles() {}
 
@@ -99,13 +96,12 @@ public:
 	virtual void showLocalTiles() {}
 
 protected:
-	DisplaySystem(): myBackgroundColor(0.2f, 0.2f, 0.2f), myDrawFps(false) {}
+	DisplaySystem(): myBackgroundColor(0.2f, 0.2f, 0.2f) {}
 
 	DisplayConfig myDisplayConfig;
 
 private:
 	Color myBackgroundColor;
-	bool myDrawFps;
 };
 
 }; // namespace omega

@@ -136,7 +136,7 @@ void ConsoleRenderable::drawStats(Vector2f pos, Vector2f size, DrawInterface* di
 {
 	StatsManager* sm = SystemManager::instance()->getStatsManager();
 
-	di->drawRect(pos, size, Color(0,0,0,0.8));
+	di->drawRect(pos, size, Color(0,0,0,0.8f));
 
 	pos += Vector2f(0, 10);
 

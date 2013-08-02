@@ -221,10 +221,8 @@ public:
 	DrawContext& getDrawContext() { return myDC; }
 
 protected:
-	void drawStats();
     virtual bool configInit(const uint128_t& initID);
     virtual void frameDraw( const uint128_t& spin );
-    virtual void frameViewFinish(const uint128_t& spin);
 
     omega::Renderer* getRenderer();
 
@@ -234,11 +232,6 @@ private:
     DrawContext myDC;
     uint128_t myLastFrame;
     omicron::Ref<RenderTarget> myDrawBuffer;
-
-	bool myStencilInitialized;
-
-	omicron::Ref<Texture> myStatsTexture;
-    omicron::Ref<RenderTarget> myStatsBuffer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

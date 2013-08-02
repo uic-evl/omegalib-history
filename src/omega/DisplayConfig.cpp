@@ -94,14 +94,6 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 	cfg.numNodes = 0;
 	cfg.numTiles = 0;
 
-	cfg.displayStatsOnMaster = Config::getBoolValue("displayStatsOnMaster", scfg, false);
-	if(cfg.displayStatsOnMaster)
-	{
-		cfg.statsTile.offset = Vector2i(0, 0);
-		cfg.statsTile.pixelSize = Vector2i(480, 860);
-		cfg.statsTile.drawStats = true;
-	}
-
 	cfg.enableVSync= Config::getBoolValue("enableVSync", scfg, false);
 	cfg.enableSwapSync = Config::getBoolValue("enableSwapSync", scfg, true);
 

@@ -63,8 +63,8 @@ Camera::Camera(Engine* e, uint flags):
 	myMask(0),
 	myEyeSeparation(0.06f),
 	myListener(NULL),
-	myNearZ(0.1),
-	myFarZ(1000.0)
+	myNearZ(0.1f),
+	myFarZ(1000.0f)
 {
 	//myProjectionOffset = -Vector3f::UnitZ();
 

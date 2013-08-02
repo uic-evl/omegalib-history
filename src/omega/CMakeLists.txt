@@ -193,7 +193,6 @@ if(OMEGA_USE_DISPLAY_EQUALIZER)
 	set( srcs ${srcs} 
 		EqualizerDisplaySystem.cpp
 		eqinternal/ChannelImpl.cpp
-		eqinternal/ChannelStats.cpp
 		eqinternal/ConfigImpl.cpp
 		eqinternal/WindowImpl.cpp
 		eqinternal/NodeImpl.cpp

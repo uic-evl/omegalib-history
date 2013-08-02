@@ -161,13 +161,6 @@ void EqualizerDisplaySystem::generateEqConfig()
 			}
 		}
 
-		// If enabled, create stats window on master node.
-		if(eqcfg.displayStatsOnMaster && !nc.isRemote)
-		{
-			String tileCfg = buildTileConfig(indent, "stats", 20, 20, eqcfg.statsTile.pixelSize[0], eqcfg.statsTile.pixelSize[1], 0, curDevice, false, false);
-			result += tileCfg;
-		}
-
 		if(curDevice != -1)
 		{		
 			END_BLOCK(result); // End last open pipe section
@@ -210,12 +203,6 @@ void EqualizerDisplaySystem::generateEqConfig()
 				result += tileCfg;
 			}
 		}
-	}
-
-	if(eqcfg.displayStatsOnMaster)
-	{
-		String tileCfg = "\t\tcompound { channel ( canvas \"statsCanvas\" segment \"stats\" layout \"simpleLayout\" view \"main\" ) }\n";
-		result += tileCfg;
 	}
 
 	END_BLOCK(result)
@@ -624,30 +611,6 @@ bool EqualizerDisplaySystem::getViewRayFromEvent(const Event& evt, Ray& ray, boo
 		return true;
 	}
 	return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void EqualizerDisplaySystem::toggleStats(const String& statList)
-{
-	Vector<String> stats = StringUtils::split(statList, " ");
-	foreach(String stat, stats)
-	{
-		if(myEnabledStats.find(stat) == myEnabledStats.end())
-		{
-			myEnabledStats[stat] = true;
-		}
-		else
-		{
-			myEnabledStats[stat] = !myEnabledStats[stat];
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-bool EqualizerDisplaySystem::isStatEnabled(const String& stat)
-{
-	if(myEnabledStats.find(stat) == myEnabledStats.end()) return false;
-	return myEnabledStats[stat];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

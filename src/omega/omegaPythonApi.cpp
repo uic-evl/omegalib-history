@@ -689,29 +689,6 @@ MissionControlClient* getMissionControlClient()
 {
 	return SystemManager::instance()->getMissionControlClient();
 }
-	
-///////////////////////////////////////////////////////////////////////////////
-void toggleStats(const String& stats)
-{
-	SystemManager* sm = SystemManager::instance();
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
-	if(eqds != NULL)
-	{
-		eqds->toggleStats(stats);
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void drawStats(bool value)
-{
-	DisplayConfig& dc = SystemManager::instance()->getDisplaySystem()->getDisplayConfig();
-	// find host node.
-	typedef KeyValue<String, DisplayTileConfig*> TileItem;
-	foreach(TileItem tile, dc.tiles)
-	{
-		tile->drawStats = value;
-	}
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 void overridePanopticStereo(bool value)
@@ -969,7 +946,7 @@ public:
 				return f(cmd);
 			return Actor::onCommand(cmd);
 		}
-		catch(const boost::python::error_already_set& e)
+		catch(const boost::python::error_already_set&)
 		{
 			PyErr_Print();
 			return false;
@@ -1337,8 +1314,6 @@ BOOST_PYTHON_MODULE(omega)
 	def("getBoolSetting", &getBoolSetting);
 	def("getStringSetting", &getStringSetting);
 	def("getButtonSetting", &getButtonSetting);
-	def("toggleStats", &toggleStats);
-	def("drawStats", &drawStats);
 	def("overridePanopticStereo", overridePanopticStereo);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);
 	def("setTileCamera", setTileCamera);
