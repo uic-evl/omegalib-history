@@ -60,7 +60,7 @@ namespace omega {
 
 		Engine* getEngine();
 
-		void addRenderPass(RenderPass* pass, bool addToFront);
+		void addRenderPass(RenderPass* pass);
 		void removeRenderPass(RenderPass* pass);
 		RenderPass* getRenderPass(const String& name);
 		void removeAllRenderPasses();

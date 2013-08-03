@@ -51,7 +51,6 @@ namespace omegaVtk
 	friend class VtkRenderable;
 	public:
 		enum QueueType { QueueOpaque, QueueTransparent, QueueVolume, QueueOverlay, NumQueues };
-		enum RenderFlags { RenderVtk = RenderPass::RenderCustom << 1 };
 		static const int MaxQueuedProps = 128;
 		static RenderPass* createInstance(Renderer* client) { return new VtkRenderPass(client, "VtkRenderPass"); }
 

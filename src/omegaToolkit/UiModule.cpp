@@ -124,7 +124,7 @@ UiModule::~UiModule()
 void UiModule::initializeRenderer(Renderer* r)
 {
 	UiRenderPass* uirp = new UiRenderPass(r, "UiRenderPass");
-	r->addRenderPass(uirp, false);
+	r->addRenderPass(uirp);
 	uirp->setUiRoot(myUi);
 }
 
@@ -216,7 +216,7 @@ ui::Container* UiModule::createExtendedUi(const String& name, uint mask, int ren
 	}
 
 	euid->renderPass = new UiRenderPass(euid->renderer, name);
-	euid->renderer->addRenderPass(euid->renderPass, false);
+	euid->renderer->addRenderPass(euid->renderPass);
 	euid->renderPass->setUiRoot(euid->container);
 
 	myExtendedUiList.push_back(euid);

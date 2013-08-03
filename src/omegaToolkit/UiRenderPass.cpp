@@ -47,7 +47,7 @@ RenderPass* UiRenderPass::createInstance(Renderer* client)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 UiRenderPass::UiRenderPass(Renderer* client, const String& name): 
-	RenderPass(client, name), 
+	RenderPass(client, name, 10), 
 	myUiRoot(NULL) 
 {}
 

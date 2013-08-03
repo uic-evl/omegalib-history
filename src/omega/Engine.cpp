@@ -44,6 +44,7 @@
 #include "omega/PythonInterpreter.h"
 #include "omega/CameraController.h"
 #include "omega/SageManager.h"
+#include "omega/Console.h"
 
 using namespace omega;
 
@@ -81,7 +82,6 @@ public:
 Engine::Engine(ApplicationBase* app):
     //myActivePointerTimeout(2.0f),
     myDefaultCamera(NULL),
-    myConsoleEnabled(false),
 	//myPointerMode(PointerModeWand)
 	myDrawPointers(false),
 	myDebugWand(false),
@@ -109,32 +109,13 @@ void Engine::initialize()
     myScene = new SceneNode(this, "root");
 
     // Create console.
-    myConsole = new Console();
-    myConsole->initialize(this);
+	myConsole = Console::createAndInitialize();
 
-	// Then in the system config
 	Config* syscfg = getSystemManager()->getSystemConfig();
-    // Setup the console default font
     Config* cfg = getSystemManager()->getAppConfig();
 
 	Setting& syscfgroot = syscfg->lookup("config");
 
-    if(syscfg->exists("config/console/font"))
-    {
-        Setting& fontSetting = syscfg->lookup("config/console/font");
-        myConsole->setFont(FontInfo("console", fontSetting["filename"], fontSetting["size"]));
-    }
-    else
-    {
-        myConsole->setFont(FontInfo("console", "fonts/arial.ttf", 12));
-    }
-
-    if(syscfg->exists("config/console/lines"))
-    {
-        Setting& linesSetting = syscfg->lookup("config/console");
-        myConsole->setNumLines(linesSetting["lines"]);
-    }
-	
     // Setup the system font.
 	// Look in the app config first
     if(cfg->exists("config/defaultFont"))
@@ -430,15 +411,6 @@ void Engine::handleEvent(const Event& evt)
 	ModuleServices::handleEvent(evt, EngineModule::PriorityLow);
 	ModuleServices::handleEvent(evt, EngineModule::PriorityLowest);
 
-	if( evt.getServiceType() == Service::Keyboard )
-	{
-		// Tab = toggle on-screen console.
-		if(evt.getSourceId() == 259 && evt.getType() == Event::Down) 
-		{
-			setConsoleEnabled(!isConsoleEnabled());
-		}
-	}
-
 	// Update pointers.
 	if(myDrawPointers)
 	{
@@ -461,12 +433,12 @@ void Engine::update(const UpdateContext& context)
 	myUpdateTimeStat->startTiming();
 
 	// Create the death switch thread if it does not exist yet
-	/*if(sDeathSwitchThread == NULL)
+	if(sDeathSwitchThread == NULL)
 	{
 		omsg("Creating death switch thread");
 		sDeathSwitchThread = new DeathSwitchThread();
 		sDeathSwitchThread->start();
-	}*/
+	}
 	
 	// Set the update received flag to true, so the death switch thread will
 	// not kill us.
@@ -477,14 +449,6 @@ void Engine::update(const UpdateContext& context)
 
 	// Then run update on modules
     ModuleServices::update(this, context);
-	
-	// Update cameras after modules, to make sure the camera view transform keeps into account 
-	// changes applied during script or module execution.
-	//myDefaultCamera->updateCamera(context);
-	//foreach(Camera* c, myCameras)
-	//{
-	//	c->updateCamera(context);
-	//}
 	
 	// Run update on the scene graph.
 	myScene->update(context);
@@ -506,6 +470,7 @@ void Engine::update(const UpdateContext& context)
 	myUpdateTimeStat->stopTiming();
 }
 
+///////////////////////////////////////////////////////////////////////////////
 void Engine::initializeSound()
 {
 	if( soundManager->isSoundServerRunning() )
@@ -538,7 +503,7 @@ void Engine::initializeSound()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const SceneQueryResultList& Engine::querySceneRay(const Ray& ray, uint flags)
 {
     myRaySceneQuery.clearResults();

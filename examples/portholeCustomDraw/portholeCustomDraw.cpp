@@ -99,7 +99,7 @@ void PortholeCustomDrawApplication::initializeRenderer(Renderer* r)
 { 
 	RenderPass* rp = new PortholeRenderPass(r, this);
 	rp->setCameraMask(PORTHOLE_CAMERA_MASK);
-	r->addRenderPass(rp, true);
+	r->addRenderPass(rp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
