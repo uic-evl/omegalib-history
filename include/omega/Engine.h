@@ -45,30 +45,14 @@
 #include "SceneQuery.h"
 #include "Camera.h"
 #include "Font.h"
-#include "Console.h"
 #include "omicron/SoundManager.h"
 
 namespace omega {
 	typedef List< Ref<Renderer> > RendererList;
 
-	///////////////////////////////////////////////////////////////////////////
-	/*template<typename T> class RendererObject
-	{
-	public:
-		//typedef typename Dictionary<Renderer*, T>::Item Item;
-		//typedef typename Dictionary<Renderer*, T>::Range Range;
+	// Forward decl, cannot include COnsole.h to avoid circular dependency.
+	class Console;
 
-	public:
-		T& operator[](Renderer* c) { return myObjs[c]; }
-
-		//Range getItems() { return Range(myObjs.begin(), myObjs.end()); }
-		//int numItems() { return myObjs.size(); }
-		//bool isEmpty() { return myObjs.empty(); }
-
-	private:
-		Dictionary<Renderer*, T> myObjs;
-	};*/
-		
 	///////////////////////////////////////////////////////////////////////////
 	//! The omegalib Engine is the core runtime component of omegalib. It runs on 
 	//! each node of a cluster system and handles the abstract scene graph, 
@@ -146,8 +130,6 @@ namespace omega {
  		//! Console management
 		//@{
 		Console* getConsole();
-		bool isConsoleEnabled();
-		void setConsoleEnabled(bool value);
 		//@}
 
 		//! Sound management
@@ -213,8 +195,7 @@ namespace omega {
 		RaySceneQuery myRaySceneQuery;
 
 		// Console
-		Ref<Console> myConsole;
-		bool myConsoleEnabled;
+		Console* myConsole;
 
 		//! Configuration value, set to true by default.
 		//! When set to true, events will be broadcast from the master node 
@@ -244,6 +225,10 @@ namespace omega {
 
 		// Input mapping
 		Event::Flags myPrimaryButton;
+
+		// Stats
+		Stat* myHandleEventTimeStat;
+		Stat* myUpdateTimeStat;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -268,15 +253,7 @@ namespace omega {
 
 	///////////////////////////////////////////////////////////////////////////
 	inline Console* Engine::getConsole()
-	{ return myConsole.get();	}
-
-	///////////////////////////////////////////////////////////////////////////
-	inline bool Engine::isConsoleEnabled()
-	{ return myConsoleEnabled; }
-
-	///////////////////////////////////////////////////////////////////////////
-	inline void Engine::setConsoleEnabled(bool value)
-	{ myConsoleEnabled = value; }
+	{ return myConsole;	}
 
 	///////////////////////////////////////////////////////////////////////////
 	inline SoundManager* Engine::getSoundManager()

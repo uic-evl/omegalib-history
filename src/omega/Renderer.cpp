@@ -41,9 +41,6 @@
 #include "omega/PythonInterpreter.h"
 #include "omega/glheaders.h"
 
-// Uncomment to print debug messages about client flow.
-//#define OMEGA_DEBUG_FLOW
-
 using namespace omega;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,18 +68,18 @@ RenderTarget* Renderer::createRenderTarget(RenderTarget::Type type)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Renderer::addRenderPass(RenderPass* pass, bool addToFront)
+bool RenderPassSortOp(RenderPass* p1, RenderPass* r2)
+{ return p1->getPriority() < r2->getPriority(); }
+
+///////////////////////////////////////////////////////////////////////////////
+void Renderer::addRenderPass(RenderPass* pass)
 {
 	myRenderPassLock.lock();
 	ofmsg("Renderer(%1%): adding render pass %2%", %getGpuContext()->getId() %pass->getName());
-	if(addToFront)
-	{
-		myRenderPassList.push_front(pass);
-	}
-	else
-	{
-		myRenderPassList.push_back(pass);
-	}
+	myRenderPassList.push_back(pass);
+	// Re-sort the render pass list. Render passes implement a comparison 
+	// operator to perform the sorting based on their priority.
+	myRenderPassList.sort(RenderPassSortOp);
 	myRenderPassLock.unlock();
 }
 
@@ -125,7 +122,8 @@ void Renderer::initialize()
 		myRenderer->setDefaultFont(fnt);
 	}
 
-	//myServer->clientInitialize(this);
+	StatsManager* sm = getEngine()->getSystemManager()->getStatsManager();
+	myFrameTimeStat = sm->createStat(ostr("ctx%1% frame", %getGpuContext()->getId()), Stat::Time);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,10 +137,7 @@ void Renderer::queueCommand(IRendererCommand* cmd)
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::startFrame(const FrameInfo& frame)
 {
-#ifdef OMEGA_DEBUG_FLOW
-	ofmsg("Renderer::startFrame %1%", %frame.frameNum);
-#endif
-
+	myFrameTimeStat->startTiming();
 	foreach(Ref<Camera> cam, myServer->getCameras())
 	{
 		cam->startFrame(frame);
@@ -152,10 +147,6 @@ void Renderer::startFrame(const FrameInfo& frame)
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::finishFrame(const FrameInfo& frame)
 {
-#ifdef OMEGA_DEBUG_FLOW
-	ofmsg("Renderer::finishFrame %1%", %frame.frameNum);
-#endif
-
 	foreach(Ref<Camera> cam, myServer->getCameras())
 	{
 		cam->finishFrame(frame);
@@ -174,20 +165,12 @@ void Renderer::finishFrame(const FrameInfo& frame)
 		}
 	}
 	foreach(GpuResource* gr, txlist) myResources.remove(gr);
+	myFrameTimeStat->stopTiming();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::draw(DrawContext& context)
 {
-#ifdef OMEGA_DEBUG_FLOW
-	String eyeName = "Cyclops";
-	if(context.eye == DrawContext::EyeLeft) eyeName = "EyeLeft";
-	else if(context.eye == DrawContext::EyeRight) eyeName = "EyeRight";
-	String task = "Scene";
-	if(context.task == DrawContext::OverlayDrawTask) task = "Overlay";
-	ofmsg("Renderer::draw frame=%1% task=%2% eye=%3%", %context.frameNum %task %eyeName);
-#endif
-
 	// First of all make sure all render passes are initialized.
 	foreach(RenderPass* rp, myRenderPassList)
 	{
@@ -272,8 +255,8 @@ void Renderer::innerDraw(const DrawContext& context, Camera* cam)
 	}
 	myRenderPassLock.unlock();
 
-	// Draw the pointers and console
-	// NOTE: Pointer and console drawing only runs for cameras that do not have a mask specified
+	// Draw the pointers
+	// NOTE: Pointer only run for cameras that do not have a mask specified
 	if(cam->getMask() == 0 && context.task == DrawContext::OverlayDrawTask && 
 		context.eye == DrawContext::EyeCyclop)
 	{
@@ -282,10 +265,6 @@ void Renderer::innerDraw(const DrawContext& context, Camera* cam)
 		PythonInterpreter* pi = SystemManager::instance()->getScriptInterpreter();
 		pi->draw(context, cam);
 		
-		if(myServer->isConsoleEnabled())
-		{
-			myServer->getConsole()->getRenderable(this)->draw(context);
-		}
 		myServer->drawPointers(this, context);
 	
 		getRenderer()->endDraw();

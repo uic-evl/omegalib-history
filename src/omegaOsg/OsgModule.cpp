@@ -154,7 +154,7 @@ void OsgModule::initializeRenderer(Renderer* r)
 {
 	OsgRenderPass* osgrp = new OsgRenderPass(r, "OsgRenderPass");
 	osgrp->setUserData(this);
-	r->addRenderPass(osgrp, true);
+	r->addRenderPass(osgrp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

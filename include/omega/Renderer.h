@@ -55,13 +55,12 @@ namespace omega {
 	class OMEGA_API Renderer: public ReferenceType
 	{
 	friend class DisplaySystem;
-	//friend class ServerBase;
 	public:
 		Renderer(Engine* server);
 
 		Engine* getEngine();
 
-		void addRenderPass(RenderPass* pass, bool addToFront);
+		void addRenderPass(RenderPass* pass);
 		void removeRenderPass(RenderPass* pass);
 		RenderPass* getRenderPass(const String& name);
 		void removeAllRenderPasses();
@@ -79,9 +78,6 @@ namespace omega {
 		GpuContext* getGpuContext() { return myGpuContext; } 
 		void setGpuContext(GpuContext* ctx) { myGpuContext = ctx; } 
 
-		//ServerBase* getEngine() { return myServer; }
-		//SystemManager*  getSystemManager()  { return SystemManager::instance(); }
-		//ServiceManager*   getServiceManager()   { return SystemManager::instance()->getServiceManager(); }
 		DisplaySystem*  getDisplaySystem();
 
 		//! Resource management
@@ -107,6 +103,9 @@ namespace omega {
 		Queue< Ref<IRendererCommand> > myRenderableCommands;
 
 		List< Ref<GpuResource> > myResources;
+
+		// Stats
+		Stat* myFrameTimeStat;
 	};
 
 	///////////////////////////////////////////////////////////////////////////

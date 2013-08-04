@@ -198,10 +198,8 @@ bool OmegaViewer::handleCommand(const String& cmd)
 			omsg("\t lo          - list live objects");
 			omsg("\t ln          - print the scene node tree");
 			omsg("\t u           - unload all running applications");
-			omsg("\t c           - toggle console");
 			omsg("\t s		     - print statistics");
 			omsg("\t w		     - toggle wand");
-			omsg("\t f		     - toggle draw fps");
 			omsg("\t porthole    - (experimental) enable porthole");
 			omsg("\t check_update - (windows only) checks for omegalib updates online");
 		}
@@ -240,25 +238,10 @@ bool OmegaViewer::handleCommand(const String& cmd)
 		interp->eval("printChildren(getScene(), 10)");
 		return true;
 	}
-	else if(args[0] == "c")
-	{
-		// c: toggle console
-		bool isConsoleEnabled = getEngine()->isConsoleEnabled();
-		getEngine()->setConsoleEnabled(!isConsoleEnabled);
-		return true;
-	}
 	else if(args[0] == "s")
 	{
 		// s: print statistics
 		SystemManager::instance()->getStatsManager()->printStats();
-		return true;
-	}
-	else if(args[0] == "f")
-	{
-		// f: toggle raw fps
-		DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-		bool dfps = ds->isDrawFpsEnabled();
-		ds->drawFps(!dfps);
 		return true;
 	}
 	else if(args[0] == "porthole")

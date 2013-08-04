@@ -79,8 +79,6 @@ namespace omega {
 		virtual void updateSharedData(SharedIStream& in) {}
 
 		virtual void initializeRenderer(Renderer*) {}
-		//virtual void preDraw(Renderer*, const DrawContext& context) {}
-		//virtual void postDraw(Renderer*, const DrawContext& context) {}
 
 		void doInitialize(Engine* server);
 		void doDispose();

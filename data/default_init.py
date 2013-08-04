@@ -37,7 +37,7 @@ def _displayWand(value):
 def _setSoundServerVolume( value ):
 	value = value - 30
 	globalVolumeLabel.setText("Global Volume: " + str(value))
-	se.setServerVolume(value)
+	soundEnv.setServerVolume(value)
 	
 def _onAppStart():
 	global mainmnu
@@ -75,8 +75,11 @@ def _onAppStart():
 	ss.getWidget().setWidth(200)
 
 	if( isSoundEnabled() ):
+		global soundEnv
 		global serverVolume
 		global globalVolumeLabel
+		
+		soundEnv = getSoundEnvironment()
 		globalVolumeLabel = sysmnu.addLabel("Global Volume: 0")
 		ss = sysmnu.addSlider(39, "_setSoundServerVolume(%value%)")
 		ss.getSlider().setValue(30)

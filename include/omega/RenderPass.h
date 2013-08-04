@@ -38,15 +38,10 @@ namespace omega {
 	class OMEGA_API RenderPass: public ReferenceType
 	{
 	public:
-		enum RenderFlags { 
-			RenderOpaque = 1 << 1, 
-			RenderTransparent = 1 << 2,
-			RenderOverlay = 1 << 3,
-			RenderCustom = 1 << 8 };
-
-	public:
-		RenderPass(Renderer* client, const String& name): 
-		  myInitialized(false), myDisposeRequested(false), myClient(client), myName(name), myCameraMask(0)
+		RenderPass(Renderer* client, const String& name, int priority = 0): 
+		  myInitialized(false), myDisposeRequested(false), 
+			  myClient(client), myName(name), myCameraMask(0),
+			  myPriority(priority)
 		  {}
 		virtual ~RenderPass()
 		{ ofmsg("~RenderPass %1%", %myName); }
@@ -69,6 +64,11 @@ namespace omega {
 		void setCameraMask(uint mask) { myCameraMask = mask; }
 		uint getCameraMask() { return myCameraMask; }
 
+		//! Returns the render pass priority. Render pass priorities are used to
+		//! order render passes. Render passes with high priority get rendered
+		//! first.
+		int getPriority() { return myPriority; }
+
 	private: 
 		bool myInitialized;
 		bool myDisposeRequested;
@@ -76,6 +76,7 @@ namespace omega {
 		String myName;
 		Renderer* myClient;
 		unsigned int myCameraMask;
+		int myPriority;
 	};
 
 }; // namespace omega

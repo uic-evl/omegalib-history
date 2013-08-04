@@ -57,7 +57,6 @@ namespace omegaOsg
 		virtual void render(Renderer* client, const DrawContext& context);
 
 	private:
-		void collectStat(Stat*& stat, const char* name, float value); 
 		void drawView(SceneView* view, const DrawContext& context, bool getstats, OsgModule::DepthPartitionMode dpm);
 
 	private:
@@ -69,7 +68,6 @@ namespace omegaOsg
 		Stat* myTriangleCountStat;
 		Stat* myCullTimeStat;
 		Stat* myDrawTimeStat;
-		Timer myTimer;
 	};
 };
 #endif

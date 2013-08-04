@@ -93,7 +93,7 @@ void VtkModule::initializeRenderer(Renderer* r)
 {
 	VtkRenderPass* vtkrp = new VtkRenderPass(r, "VtkRenderPass");
 	vtkrp->setUserData(this);
-	r->addRenderPass(vtkrp, true);
+	r->addRenderPass(vtkrp);
 	myRenderPasses.push_back(vtkrp);
 
 	typedef Dictionary<SceneNode*, VtkAttachPoint*>::Item DItem;

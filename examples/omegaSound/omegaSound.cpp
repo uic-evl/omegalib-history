@@ -93,7 +93,7 @@ public:
 
 	virtual void initializeRenderer(Renderer* r) 
 	{ 
-		r->addRenderPass(new HelloRenderPass(r, this), true);
+		r->addRenderPass(new HelloRenderPass(r, this));
 	}
 
 	float getXPos() { return xPos; }

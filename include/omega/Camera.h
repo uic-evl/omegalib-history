@@ -98,6 +98,9 @@ namespace omega {
 		const AffineTransform3& getViewTransform();
 
 		void setProjection(float fov, float aspect, float nearZ, float farZ);
+		void setNearFarZ(float near, float far);
+		float getNearZ();
+		float getFarZ();
 
 		//! Returns a view ray given an origin point in normalized coordinates.
 		//! @param normalizedPoint - the origin point for the ray in normalized ([0, 1]) coordinates
@@ -161,6 +164,10 @@ namespace omega {
 
 	protected:
 		void updateTraversal(const UpdateContext& context);
+		//! Updates the specified draw context, computing an 
+		//! off-axis projection based on the tile and active eye 
+		//! in the draw context. Used by beginDraw.
+		void updateOffAxisProjection(DrawContext& ctx);
 	
 	private:
 		//! View transform
@@ -244,6 +251,18 @@ namespace omega {
 	///////////////////////////////////////////////////////////////////////////
 	inline void Camera::removeListener(ICameraListener* listener)
 	{ myListener = NULL; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Camera::setNearFarZ(float nr, float fr)
+	{ myNearZ = nr; myFarZ = fr; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline float Camera::getNearZ()
+	{ return myNearZ; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline float Camera::getFarZ()
+	{ return myFarZ; }
 }; // namespace omega
 
 #endif

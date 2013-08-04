@@ -94,9 +94,6 @@ namespace omega
 
 		void exitConfig();
 
-		void toggleStats(const String& statList);
-		bool isStatEnabled(const String& stat);
-
 		//! Hides all the tiles running on the machine where this method is executed.
 		virtual void hideLocalTiles();
 
@@ -120,7 +117,6 @@ namespace omega
 
 		// Debug
 		bool myDebugMouse;
-		Dictionary<String, bool> myEnabledStats;
 	};
 
 }; // namespace omega

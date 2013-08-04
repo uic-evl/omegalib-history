@@ -204,10 +204,6 @@ namespace omega
 		//! Display configuration type.
 		//String configType;
 
-		//! Open a statistics window on the master node.
-		bool displayStatsOnMaster;
-		DisplayTileConfig statsTile;
-
 		//! Number of horizontal / vertical tiles in the display system
 		//Vector2i numTiles;
 		int latency;

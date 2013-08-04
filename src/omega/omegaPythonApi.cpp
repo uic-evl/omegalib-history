@@ -510,7 +510,7 @@ struct Quaternion_to_python
 
 		// Create a new euclid.Quaternion instance using the omega::Quaternion components
 		// as arguments.
-		boost::python::tuple vec = boost::python::make_tuple(value.x(), value.y(), value.z(), value.w());
+		boost::python::tuple vec = boost::python::make_tuple(value.w(), value.x(), value.y(), value.z());
 		PyObject* quatobj = PyObject_CallObject(sQuaternionClass, vec.ptr());
 		return incref(quatobj);
 	}
@@ -689,17 +689,6 @@ MissionControlClient* getMissionControlClient()
 {
 	return SystemManager::instance()->getMissionControlClient();
 }
-	
-///////////////////////////////////////////////////////////////////////////////
-void toggleStats(const String& stats)
-{
-	SystemManager* sm = SystemManager::instance();
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
-	if(eqds != NULL)
-	{
-		eqds->toggleStats(stats);
-	}
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 void overridePanopticStereo(bool value)
@@ -754,22 +743,22 @@ void setTileCamera(const String& tilename, const String& cameraName)
 ///////////////////////////////////////////////////////////////////////////////
 void setNearFarZ(float nearZ, float farZ)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	ds->setNearFarZ(nearZ, farZ);
+	Camera* cam = getDefaultCamera();
+	cam->setNearFarZ(nearZ, farZ);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 float getNearZ(float near)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	return ds->getNearZ();
+	Camera* cam = getDefaultCamera();
+	return cam->getNearZ();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 float getFarZ(float near)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	return ds->getFarZ();
+	Camera* cam = getDefaultCamera();
+	return cam->getFarZ();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -957,7 +946,7 @@ public:
 				return f(cmd);
 			return Actor::onCommand(cmd);
 		}
-		catch(const boost::python::error_already_set& e)
+		catch(const boost::python::error_already_set&)
 		{
 			PyErr_Print();
 			return false;
@@ -1325,7 +1314,6 @@ BOOST_PYTHON_MODULE(omega)
 	def("getBoolSetting", &getBoolSetting);
 	def("getStringSetting", &getStringSetting);
 	def("getButtonSetting", &getButtonSetting);
-	def("toggleStats", &toggleStats);
 	def("overridePanopticStereo", overridePanopticStereo);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);
 	def("setTileCamera", setTileCamera);
