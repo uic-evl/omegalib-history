@@ -545,7 +545,7 @@ struct Quaternion_from_python
 
 		void* storage = (
 			(converter::rvalue_from_python_storage<Quaternion>*)data)->storage.bytes;
-		new (storage) Quaternion(x, y, z, w);
+		new (storage) Quaternion(w, x, y, z);
 		data->convertible = storage;
 	}
 };
