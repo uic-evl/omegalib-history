@@ -47,16 +47,39 @@ Camera* getCameraById(int id)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+bool initialize(
+	const String& xml = "porthole/default.xml", 
+	const String& css = "porthole/default.css", 
+	int port = 4080)
+{
+	// The service gets created only on the master node.
+	if(SystemManager::instance()->isMaster())
+	{
+		PortholeService* service = new PortholeService();
+		ServiceManager* svcManager = SystemManager::instance()->getServiceManager();
+		svcManager->addService(service);
+
+		string fullPath_xml;
+		DataManager::findFile(xml, fullPath_xml);
+
+		string fullPath_css;
+		DataManager::findFile(css, fullPath_css);
+
+		service->start(port, (char*)fullPath_xml.c_str(), (char*)fullPath_css.c_str());
+
+		return true;
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Python wrapper code.
 #ifdef OMEGA_USE_PYTHON
 #include "omega/PythonInterpreterWrapper.h"
+BOOST_PYTHON_FUNCTION_OVERLOADS(initializeOverloads, initialize, 0, 3)
 BOOST_PYTHON_MODULE(porthole)
 {
-	// PortholeService
-	PYAPI_REF_BASE_CLASS(PortholeService)
-		PYAPI_STATIC_REF_GETTER(PortholeService, createAndInitialize)
-		;
-
 	def("getCameraById", getCameraById, PYAPI_RETURN_REF);
+	def("initialize", initialize, initializeOverloads());
 }
 #endif

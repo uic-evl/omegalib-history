@@ -119,12 +119,8 @@ private:
 class PortholeService: public Service
 {
 public:
-	// Wrapper for creation and start of the service
-	static PortholeService* createAndInitialize(int port, const String& xmlPath, const String& cssPath);
-
-	//! Allocator function (will be used to register the service inside SystemManager)
-	//static PortholeService* New() { return new PortholeService(); }
-
+	// Default constructor and destructor
+	PortholeService();
 	~PortholeService();
 
 	// Setup and poll
@@ -138,8 +134,6 @@ public:
 	ServerThread* portholeServer;
 
 private:
-	// Default constructor and destructor
-	PortholeService();
 	PortholeFunctionsBinder* myBinder;
 };
 
