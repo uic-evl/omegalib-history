@@ -4,4 +4,4 @@ To add a C++ module to the omegalib build, modify the `CMakeLists.txt` file in t
 
 `templateModule` is a good place to start if you want to create your own C++ module. `navigator` and `wandaid` are good examples of Python modules.
 
-FOr more information on how modules work read this wiki page: https://github.com/febret/omegalib/wiki/ExtendingOmegalib
+For more information on how modules work read this wiki page: https://github.com/febret/omegalib/wiki/ExtendingOmegalib
