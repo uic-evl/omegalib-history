@@ -53,7 +53,7 @@ namespace omega
 	class Camera;
 
 	///////////////////////////////////////////////////////////////////////////
-	struct DisplayTileConfig
+	struct DisplayTileConfig: public ReferenceType
 	{
 	public:
 		enum StereoMode { Mono, LineInterleaved, PixelInterleaved, SideBySide, Default };
@@ -70,7 +70,9 @@ namespace omega
 			invertStereo(false),
 			isInGrid(false),
 			settingData(s),
-			isHMD(false)
+			isHMD(false),
+			offset(Vector2i::Zero()),
+			position(Vector2i::Zero())
 			{
 			}
 
@@ -101,7 +103,7 @@ namespace omega
 		//! 2d offset of window content
 		Vector2i offset;
 
-		//! Window position (when autooffset is not used)
+		//! Window position
 		Vector2i position;
 
 		//! 2d position of this tile (normalized) with respect to the global canvas. 
@@ -143,6 +145,22 @@ namespace omega
 		Vector3f topLeft;
 		Vector3f bottomLeft;
 		Vector3f bottomRight;
+
+		//! Convenience method to set the tile corners.
+		void setCorners(
+			const Vector3f& topLeft, 
+			const Vector3f& bottomLeft, 
+			const Vector3f& bottomRight)
+		{
+			this->topLeft = topLeft;
+			this->bottomLeft = bottomLeft;
+			this->bottomRight = bottomRight;
+		}
+
+		//! Set the resolution in pixels of this tile. Method used instead of
+		// property because python API can't use Vector2i.
+		void setPixelSize(int width, int height)
+		{ pixelSize = Vector2i(width, height); }
 	};
 
 	///////////////////////////////////////////////////////////////////////////

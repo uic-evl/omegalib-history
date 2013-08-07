@@ -66,7 +66,7 @@ namespace omega {
 		bool myEnabled;
 
 		RenderTarget::Type myType;
-		RenderTarget* myRenderTarget;
+		Ref<RenderTarget> myRenderTarget;
 
 		PixelData* myReadbackColorTarget;
 		PixelData* myReadbackDepthTarget;

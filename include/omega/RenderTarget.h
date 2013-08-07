@@ -76,6 +76,7 @@ namespace omega
 	protected:
 		// Only renderer can allocate Render targets.
 		RenderTarget(GpuContext* context, Type type, GLuint id = 0);
+		~RenderTarget();
 
 	private:
 		GLuint myId;

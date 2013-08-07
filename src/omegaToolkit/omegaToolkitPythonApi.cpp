@@ -35,9 +35,6 @@
 #include "omegaToolkit/UiModule.h"
 #include "omegaToolkit/ui/MenuManager.h"
 #include "omegaToolkit/ToolkitUtils.h"
-#ifdef OMEGA_USE_PORTHOLE
-	#include "omegaToolkit/PortholeService.h"
-#endif
 
 #ifdef OMEGA_USE_PYTHON
 
@@ -50,18 +47,6 @@ using namespace omegaToolkit::ui;
 #define BOOST_PYTHON_NO_LIB
 #include <boost/python.hpp>
 using namespace boost::python;
-
-#ifdef OMEGA_USE_PORTHOLE
-///////////////////////////////////////////////////////////////////////////////////////////////////
-Camera* getCameraById(int id)
-{
-	if(SystemManager::instance()->isMaster())
-	{
-		return PortholeGUI::CamerasMap[id]->camera;
-	}
-	return NULL;
-}
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 BOOST_PYTHON_MODULE(omegaToolkit)
@@ -289,15 +274,6 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_METHOD(Label, setFont)
 		PYAPI_METHOD(Label, getFont)
 		;
-
-#ifdef OMEGA_USE_PORTHOLE
-	// PortholeService
-	PYAPI_REF_BASE_CLASS(PortholeService)
-		PYAPI_STATIC_REF_GETTER(PortholeService, createAndInitialize)
-		;
-
-	def("getCameraById", getCameraById, PYAPI_RETURN_REF);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

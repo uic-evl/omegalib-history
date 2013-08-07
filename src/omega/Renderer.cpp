@@ -203,8 +203,8 @@ void Renderer::draw(DrawContext& context)
 		if(cam->isEnabled(context))
 		{
 			// Begin drawing with the camera: get the camera draw context.
-			const DrawContext& cameraContext = cam->beginDraw(context);
-			innerDraw(cameraContext, cam);
+			cam->beginDraw(context);
+			innerDraw(context, cam);
 			cam->endDraw(context);
 		}
 	}
@@ -215,9 +215,12 @@ void Renderer::draw(DrawContext& context)
 	// default camera the context should stay the same as what is passed to this
 	// method.
 	Camera* cam = myServer->getDefaultCamera();
-	const DrawContext& cameraContext = cam->beginDraw(context);
-	innerDraw(cameraContext, myServer->getDefaultCamera());
-	cam->endDraw(context);
+	if(cam->isEnabled(context))
+	{
+		cam->beginDraw(context);
+		innerDraw(context, myServer->getDefaultCamera());
+		cam->endDraw(context);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

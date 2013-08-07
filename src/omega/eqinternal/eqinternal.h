@@ -227,7 +227,7 @@ protected:
     omega::Renderer* getRenderer();
 
 private:
-    eq::Window* myWindow;
+    WindowImpl* myWindow;
     omicron::Lock myLock;
     DrawContext myDC;
     uint128_t myLastFrame;

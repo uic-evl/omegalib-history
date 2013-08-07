@@ -68,9 +68,6 @@ else()
 	set(OMEGA_USE_PYTHON false)
 endif()
 
-# Enable / disable porthole support
-set(OMEGA_USE_PORTHOLE true CACHE BOOL "Enable Porthole support")
-
 ###################################################################################################
 # Options
 set(OMEGA_BUILD_OSG_LIB true CACHE BOOL "Enable build of OpenSceneGraph integration library")
@@ -112,15 +109,6 @@ include_directories(
   ${OmegaLib_BINARY_DIR}/FreeImage/Source/
 )
 
-if(OMEGA_USE_PORTHOLE)
-	# PORTHOLE Add websockets lib and zlib if on windows
-	if(OMEGA_OS_WIN)
-		add_subdirectory(3rdparty/zlib)
-	endif(OMEGA_OS_WIN)
-	add_subdirectory(3rdparty/websockets)
-	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/porthello ${CMAKE_BINARY_DIR}/examples/porthello)
-endif()
-
 if(NOT APPLE)
 	add_subdirectory(3rdparty/glew)
 endif(NOT APPLE)
@@ -148,9 +136,6 @@ if(OMEGA_BUILD_OSG_LIB)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/cyhello ${CMAKE_BINARY_DIR}/examples/cyhello)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/cyhello2 ${CMAKE_BINARY_DIR}/examples/cyhello2)
 	add_subdirectory(apps/osgviewer)
-	if(OMEGA_USE_PORTHOLE)
-		add_subdirectory(${CMAKE_SOURCE_DIR}/examples/portholeCustomDraw ${CMAKE_BINARY_DIR}/examples/portholeCustomDraw)
-	endif()
 endif()
 
 # vtk configuration, libraries and applications

@@ -63,6 +63,14 @@ namespace omega
 		uint64 frameNum; // TODO: Substitute with frameinfo
 		AffineTransform3 modelview;
 		Transform3 projection;
+		//! The viewMin and viewMax are normalized coordinates of the view bounds
+		//! on the current tile (that is, the size of the current rendered view on
+		//! the current tile). These values are computed intersecting the tile
+		//! position and size on the global canvas with the active camera view
+		//! position and size. The view minimum and maximum bounds influence the
+		//! frustum shape and pixel viewport.
+		Vector2f viewMin;
+		Vector2f viewMax;
 		//! The pixel viewport coordinates of this context with respect to the 
 		//! owner window of the context.
 		Rect viewport;
@@ -76,6 +84,17 @@ namespace omega
 		RenderTarget* drawBuffer;
 		GpuContext* gpuContext;
 		Renderer* renderer;
+
+		//! Tile stack
+		//! Lets cameras push/pop tiles, to support rendering with custom tile 
+		//! definitions
+		//@{
+		Queue<const DisplayTileConfig*> tileStack;
+		void pushTileConfig(DisplayTileConfig* newtile)
+		{ tileStack.push(tile); tile = newtile; }
+		void popTileConfig()
+		{ tile = tileStack.front(); tileStack.pop(); }
+		//@}
 
 		//! The drawFrame method is the 'entry point' called by the display 
 		//! system to render a full frame. drawFrame does all required setup

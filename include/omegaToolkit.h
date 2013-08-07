@@ -48,9 +48,6 @@
 #include "omegaToolkit/ui/Slider.h"
 #include "omegaToolkit/ui/Widget.h"
 #include "omegaToolkit/ui/WidgetFactory.h"
-#ifdef OMEGA_USE_PORTHOLE
-	#include "omegaToolkit/PortholeService.h"
-#endif
 
 OTK_API void omegaToolkitPythonApiInit();
 
