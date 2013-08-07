@@ -1,19 +1,10 @@
-# Porthole reference
-
-# Porthole development
-
-<p>**Last revision:** 8 October 2012
-<font color=#ff0000> (This is a preliminary / work in progress document and may be incomplete)</font></p>
-
 omegalib offers support for HTML5-capable browsers interactions. Specifically, the interface is multi-touchable, in order to support most of the hand helded devices, such as iPads, iPhones, Android tablets, and Android smartphones.
 
 Moreover, the interfaces are tailored on application needs and on devices specifications, without writing any Javascript or JQuery code, but only through an XML file and an, optional, CSS file. 
 
 An overview of the system implementation is given in the following figure.
 
-<p align="middle"><img src="http://omegalib.googlecode.com/svn/wiki/Porthole/porthole_overview.jpg" width="500"/></p><p align="middle">
-*^The system overview.^*
-</p>
+<p align="middle"><img src="http://febret.github.io/omegalib/Porthole/porthole_overview.jpg" width="500"/></p>
 
 Basically, the Porthole Service creates a Server in a separate thread, that handles all the incoming connections. But all the steps between the XML description and the actual management of the different devices, including camera streaming and manipulations, are transparent to the application developer.
 
@@ -35,8 +26,8 @@ In the following sections we go deeper into:
 
 The main idea of how to compose the XML file is given in the following figure.
 
-<p align="middle"><img src="http://omegalib.googlecode.com/svn/wiki/Porthole/xml_schema.jpg" width="500"/></p><p align="middle">
-*^The xml file composition.^*
+<p align="middle"><img src="http://febret.github.io/omegalib/Porthole//xml_schema.jpg" width="500"/></p><p align="middle">
+The xml file composition.
 </p>
 
 the XML is divided into two main branches. The first one specifies the number and type of GUI elements, that represent the main “blocks” of the GUI. The second branch is responsible for mapping the main blocks to the different types of devices that may want to connect to the application.
@@ -346,12 +337,12 @@ Here, you can define your style for any content of the final html file.
 
 The result of the defined interface in Porthello xlarge landscape and in Brain2 xlarge portrait is given.
 
-<p align="middle"><img src="http://omegalib.googlecode.com/svn/wiki/Porthole/porthello_porthole.jpg" width="500"/></p><p align="middle">
-*^The porthello interface.^*
+<p align="middle"><img src="http://febret.github.io/omegalib/Porthole/porthello_porthole.jpg" width="500"/></p><p align="middle">
+The porthello interface.
 </p>
 
-<p align="middle"><img src="http://omegalib.googlecode.com/svn/wiki/Porthole/brain2_porthole.jpg" width="300"/></p><p align="middle">
-*^The Brain2 interface.^*
+<p align="middle"><img src="http://febret.github.io/omegalib/Porthole/brain2_porthole.jpg" width="300"/></p><p align="middle">
+The Brain2 interface.
 </p>
 
 ## Conclusion
