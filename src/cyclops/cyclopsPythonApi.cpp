@@ -175,9 +175,6 @@ BOOST_PYTHON_MODULE(cyclops)
 
 	// Entity
 	PYAPI_REF_CLASS(Entity, SceneNode)
-		PYAPI_METHOD(Entity, followTrackable)
-		PYAPI_METHOD(Entity, setFollowOffset)
-		PYAPI_METHOD(Entity, unfollow)
 		PYAPI_METHOD(Entity, castShadow)
 		PYAPI_METHOD(Entity, doesCastShadow)
 		PYAPI_METHOD(Entity, hasEffect)

@@ -1141,6 +1141,9 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(SceneNode, getBoundMaximum)
 		PYAPI_GETTER(SceneNode, getBoundCenter)
 		PYAPI_GETTER(SceneNode, getBoundRadius)
+		PYAPI_METHOD(SceneNode, followTrackable)
+		PYAPI_METHOD(SceneNode, setFollowOffset)
+		PYAPI_METHOD(SceneNode, unfollow)
 	;
 
 	// CameraController
