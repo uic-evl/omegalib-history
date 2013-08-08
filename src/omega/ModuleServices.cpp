@@ -88,8 +88,7 @@ void EngineModule::doDispose()
 ///////////////////////////////////////////////////////////////////////////////
 void ModuleServices::addModule(EngineModule* module)
 { 
-	//ofmsg("ModuleServices::addModule: %1%", %module->getName());
-	
+	ofmsg("ModuleServices::addModule: %1%", %module->getName());
 	mysModules.push_back(module); 
 	if(!mysCoreMode) mysNonCoreModules.push_back(module);
 }
@@ -97,8 +96,7 @@ void ModuleServices::addModule(EngineModule* module)
 ///////////////////////////////////////////////////////////////////////////////
 void ModuleServices::removeModule(EngineModule* module)
 {
-	//ofmsg("ModuleServices::removeModule: %1%", %module->getName());
-	
+	ofmsg("ModuleServices::removeModule: %1%", %module->getName());
 	if(module != NULL)
 	{
 		mysModulesToRemove.push_back(module);
