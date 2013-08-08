@@ -207,6 +207,8 @@ struct PortholeFunctionsBinder: ReferenceType{
 // Xml Document
 static omega::xml::TiXmlDocument* xmlDoc;
 
+class PortholeService;
+
 ///////////////////////////////////////////////////////////////////////////////
 //! Implements the HTML GUI Manager for Porthole Service
 class PortholeGUI: public ReferenceType{
@@ -214,7 +216,7 @@ class PortholeGUI: public ReferenceType{
 public:
 
 	// Constructor
-	PortholeGUI();
+	PortholeGUI(PortholeService* owner);
 
 	// Destructor
 	~PortholeGUI();
@@ -252,6 +254,7 @@ public:
 	static std::map<int, PortholeCamera*> CamerasMap;
 
 private:
+	PortholeService* service;
 
 	// The device for which an interface will be created
 	PortholeDevice* device;

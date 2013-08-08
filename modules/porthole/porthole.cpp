@@ -36,6 +36,14 @@
 
 using namespace omega;
 
+PortholeService* sServiceInstance = NULL;
+	
+///////////////////////////////////////////////////////////////////////////////
+PortholeService* getService()
+{
+	return sServiceInstance;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 Camera* getCameraById(int id)
 {
@@ -53,11 +61,11 @@ bool initialize(
 	int port = 4080)
 {
 	// The service gets created only on the master node.
-	if(SystemManager::instance()->isMaster())
+	if(SystemManager::instance()->isMaster() && !sServiceInstance)
 	{
-		PortholeService* service = new PortholeService();
+		sServiceInstance = new PortholeService();
 		ServiceManager* svcManager = SystemManager::instance()->getServiceManager();
-		svcManager->addService(service);
+		svcManager->addService(sServiceInstance);
 
 		string fullPath_xml;
 		DataManager::findFile(xml, fullPath_xml);
@@ -65,7 +73,7 @@ bool initialize(
 		string fullPath_css;
 		DataManager::findFile(css, fullPath_css);
 
-		service->start(port, (char*)fullPath_xml.c_str(), (char*)fullPath_css.c_str());
+		sServiceInstance->start(port, (char*)fullPath_xml.c_str(), (char*)fullPath_css.c_str());
 
 		return true;
 	}
@@ -79,7 +87,11 @@ bool initialize(
 BOOST_PYTHON_FUNCTION_OVERLOADS(initializeOverloads, initialize, 0, 3)
 BOOST_PYTHON_MODULE(porthole)
 {
+	PYAPI_REF_BASE_CLASS(PortholeService)
+		;
+
 	def("getCameraById", getCameraById, PYAPI_RETURN_REF);
 	def("initialize", initialize, initializeOverloads());
+	def("getService", getService, PYAPI_RETURN_REF);
 }
 #endif

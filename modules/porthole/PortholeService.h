@@ -56,6 +56,8 @@ static String DATA_PATH;
 //! CSS path
 static String css_path;
 
+class PortholeService;
+
 ///////////////////////////////////////////////////////////////////////////////
 //! Implements, in a separate thread, the HTTP server for Porthole Service
 class ServerThread: public Thread{
@@ -63,7 +65,7 @@ class ServerThread: public Thread{
 public:
 
 	// Constructor
-	ServerThread();
+	ServerThread(PortholeService* owner);
 
 	// Destructor
 	~ServerThread();
@@ -98,6 +100,7 @@ public:
 					    void *user, void *in, size_t len);
 
 private:
+	static PortholeService* service;
 
 	// Server params
 	int port;
