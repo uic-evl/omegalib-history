@@ -266,13 +266,15 @@ void ConsoleRenderPass::drawStats(Vector2f pos, Vector2f size, const DrawContext
 	StatsManager* sm = SystemManager::instance()->getStatsManager();
 	DrawInterface* di = getClient()->getRenderer();
 
-	di->drawRect(pos, size, Color(0,0,0,0.8f));
-
 	const DisplayTileConfig* tile = context.tile;
 	float cx = tile->offset.x();
 	float cy = tile->offset.y();
-	pos += Vector2f(cx, cy + 10);
+	pos += Vector2f(cx, cy);
 
+	di->drawRect(pos, size, Color(0,0,0,0.8f));
+
+	pos[1] += 10;
+	
 	foreach(Stat* s, sm->getStats())
 	{
 		if(s->getType() == Stat::Time && s->isValid())
