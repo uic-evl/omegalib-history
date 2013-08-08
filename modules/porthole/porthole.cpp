@@ -45,16 +45,6 @@ PortholeService* getService()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Camera* getCameraById(int id)
-{
-	if(SystemManager::instance()->isMaster())
-	{
-		return PortholeGUI::CamerasMap[id]->camera;
-	}
-	return NULL;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 bool initialize(
 	const String& xml = "porthole/default.xml", 
 	const String& css = "porthole/default.css", 
@@ -92,7 +82,6 @@ BOOST_PYTHON_MODULE(porthole)
 		PYAPI_METHOD(PortholeService, setDisconnectedCommand)
 		;
 
-	def("getCameraById", getCameraById, PYAPI_RETURN_REF);
 	def("initialize", initialize, initializeOverloads());
 	def("getService", getService, PYAPI_RETURN_REF);
 }

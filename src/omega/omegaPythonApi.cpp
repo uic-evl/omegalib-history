@@ -610,6 +610,12 @@ Camera* getCamera(const String& name)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+Camera* getCameraById(int id)
+{
+	return Engine::instance()->getCameraById(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 Camera* getOrCreateCamera(const String& name)
 {
 	Camera* cam = Engine::instance()->getCamera(name);
@@ -1188,6 +1194,7 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(Camera, getViewPosition)
 		PYAPI_METHOD(Camera, setViewSize)
 		PYAPI_GETTER(Camera, getViewSize)
+		PYAPI_METHOD(Camera, getCameraId)
 		;
 
 	// Color
