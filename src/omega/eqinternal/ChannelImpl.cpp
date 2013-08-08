@@ -91,8 +91,6 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
 ///////////////////////////////////////////////////////////////////////////////
 void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 {
-    eq::Channel::frameDraw( frameID );
-
 	// If local tiles are hidden, we are done.
 	if(!sLocalTilesVisible) return;
 
@@ -103,6 +101,10 @@ void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 	// (spin is 128 bits, gets truncated to 64... 
 	// do we really need 128 bits anyways!?)
 	myDC.drawFrame(frameID.low());
+	
+	// NOTE: This call NEEDS to stay after drawFrames, or frames will not 
+	// update / display correctly.
+    eq::Channel::frameDraw( frameID );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

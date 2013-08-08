@@ -130,7 +130,6 @@ bool ConfigImpl::init()
 
 	myGlobalTimer.start();
 
-
 	return eq::Config::init(mySharedData.getID());
 }
 
@@ -221,8 +220,6 @@ bool ConfigImpl::handleEvent(const eq::ConfigEvent* event)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t ConfigImpl::startFrame( const uint128_t& version )
 {
-	bool res = eq::Config::startFrame( version );
-	
 	static float lt = 0.0f;
 	static float tt = 0.0f;
 	// Compute dt.
@@ -275,7 +272,8 @@ uint32_t ConfigImpl::startFrame( const uint128_t& version )
 
 	myServer->update(uc);
 
-	return res;
+	// NOTE: This call NEEDS to stay after Engine::update, or frames will not update / display correctly.
+	return eq::Config::startFrame( version );;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
