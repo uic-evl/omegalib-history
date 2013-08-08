@@ -268,7 +268,10 @@ void ConsoleRenderPass::drawStats(Vector2f pos, Vector2f size, const DrawContext
 
 	di->drawRect(pos, size, Color(0,0,0,0.8f));
 
-	pos += Vector2f(0, 10);
+	const DisplayTileConfig* tile = context.tile;
+	float cx = tile->offset.x();
+	float cy = tile->offset.y();
+	pos += Vector2f(cx, cy + 10);
 
 	foreach(Stat* s, sm->getStats())
 	{
