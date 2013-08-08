@@ -619,7 +619,12 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 	/* On connection estabilished */
 	case LWS_CALLBACK_ESTABLISHED:
 	{
-
+		char cliname[1024];
+		char cliip[1024];
+		int fd = libwebsocket_get_socket_fd(wsi);
+		libwebsockets_get_peer_addresses(fd, cliname, 1024, cliip, 1024);
+		String cliName = ostr("%1%:%2%:%3%", %fd %cliip %cliname);
+		service->notifyConnected(cliName);
 		// Allocate gui manager
 		data->guiManager = new PortholeGUI(service);
 		data->oldus = 0;
@@ -802,6 +807,12 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 
 	case LWS_CALLBACK_CLOSED:
 	{
+		char cliname[1024];
+		char cliip[1024];
+		int fd = libwebsocket_get_socket_fd(wsi);
+		libwebsockets_get_peer_addresses(fd, cliname, 1024, cliip, 1024);
+		String cliName = ostr("%1%:%2%:%3%", %fd %cliip %cliname);
+		service->notifyDisconnected(cliName);
 		// Call gui destructor
 		delete data->guiManager;
 		break;
@@ -1096,4 +1107,24 @@ inline std::string base64_decode(std::string const& encoded_string) {
 
   return ret;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyConnected(const String& id)
+{
+	if(!myConnectedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String cmd = StringUtils::replaceAll(myConnectedCommand, "%id%", id);
+		i->queueCommand(cmd);
+	}
+}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyDisconnected(const String& id)
+{
+	if(!myDisconnectedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String cmd = StringUtils::replaceAll(myConnectedCommand, "%id%", id);
+		i->queueCommand(cmd);
+	}
+}

@@ -88,6 +88,8 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(initializeOverloads, initialize, 0, 3)
 BOOST_PYTHON_MODULE(porthole)
 {
 	PYAPI_REF_BASE_CLASS(PortholeService)
+		PYAPI_METHOD(PortholeService, setConnectedCommand)
+		PYAPI_METHOD(PortholeService, setDisconnectedCommand)
 		;
 
 	def("getCameraById", getCameraById, PYAPI_RETURN_REF);

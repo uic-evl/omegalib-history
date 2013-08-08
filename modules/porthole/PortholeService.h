@@ -136,7 +136,18 @@ public:
 	//thread server_thread;
 	ServerThread* portholeServer;
 
+	void setConnectedCommand(const String cmd)
+	{ myConnectedCommand = cmd; }
+	void setDisconnectedCommand(const String cmd)
+	{ myDisconnectedCommand = cmd; }
+
+	// Notification functions called from the websockets thread
+	void notifyConnected(const String& id);
+	void notifyDisconnected(const String& id);
+
 private:
+	String myConnectedCommand;
+	String myDisconnectedCommand;
 	PortholeFunctionsBinder* myBinder;
 };
 
