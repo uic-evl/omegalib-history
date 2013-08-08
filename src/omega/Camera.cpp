@@ -203,6 +203,9 @@ CameraOutput* Camera::getOutput(uint contextId)
 	return myOutput[contextId].get();
 }
 
+bool valueInRange(int value, int min, int max)
+{ return (value >= min) && (value <= max); }
+
 ///////////////////////////////////////////////////////////////////////////////
 bool Camera::isEnabled(const DrawContext& context)
 {
@@ -221,18 +224,17 @@ bool Camera::isEnabled(const DrawContext& context)
 		myViewSize[0] * canvasSize[0],
 		myViewSize[1] * canvasSize[1]);
 	vmax += vmin;
-
-	// If the view minimum or maximum position are contained by the tile, the camera is enabled.
-	if(vmin[0] >= tile->offset[0] &&
-		vmin[1] >= tile->offset[1] &&
-		vmin[0] <= tile->offset[0] + tile->pixelSize[0] &&
-		vmin[1] <= tile->offset[1] + tile->pixelSize[1]) return true;
-	if(vmax[0] >= tile->offset[0] &&
-		vmax[1] >= tile->offset[1] &&
-		vmax[0] <= tile->offset[0] + tile->pixelSize[0] &&
-		vmax[1] <= tile->offset[1] + tile->pixelSize[1]) return true;
-
-	return false;
+	
+	int tx = tile->offset[0];
+	int tw = tile->offset[0] + tile->pixelSize[0];
+	int ty = tile->offset[1];
+	int th = tile->offset[1] + tile->pixelSize[1];
+	
+	// Check overlap
+	bool xOverlap = valueInRange(vmin[0], tx, tw) || valueInRange(tx, vmin[0], vmax[0]);
+	bool yOverlap = valueInRange(vmin[1], ty, th) || valueInRange(ty, vmin[1], vmax[1]);
+	
+	return xOverlap && yOverlap;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -362,7 +364,8 @@ void Camera::updateOffAxisProjection(DrawContext& context)
 	if(dcfg.panopticStereoEnabled)
 	{
 		// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
-		//om.rotate_y(-otd.yaw * Math::DegToRad);
+		myHeadTransform = AffineTransform3::Identity();
+		myHeadTransform.translate(myHeadOffset);
 		pe = myHeadTransform.rotate(
 			AngleAxis(-context.tile->yaw * Math::DegToRad, Vector3f::UnitY())) * pe;
 	}
