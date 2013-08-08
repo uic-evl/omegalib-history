@@ -248,7 +248,8 @@ void Engine::initialize()
 	Setting& scfg = cfg->lookup("config");
 	myEventSharingEnabled = Config::getBoolValue("enableEventSharing", scfg, true);
 	
-	sDeathSwitchTimeout = Config::getIntValue("deathSwitchTimeout", scfg, 60);
+	sDeathSwitchTimeout = Config::getIntValue("deathSwitchTimeout", syscfgroot, 60);
+	ofmsg("Death switch timeout: %1% seconds", %sDeathSwitchTimeout);
 
 	// Initialize the default camera using the 
 	//Observer* obs = getDisplaySystem()->getObserver(0);
