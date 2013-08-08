@@ -216,6 +216,8 @@ void SceneView::initialize()
 
     // Do not clear the frame buffer - the omegalib engine takes care of this.
 	_camera->setClearMask(0);
+	
+	_localStateSet = new osg::StateSet;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

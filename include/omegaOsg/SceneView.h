@@ -120,7 +120,7 @@ class SceneView : public osg::Object, public osg::CullSettings
         //const osg::StateSet* getSecondaryStateSet() const { return _secondaryStateSet.get(); }
 
         //void setLocalStateSet(osg::StateSet* state) { _localStateSet = state; }
-        //osg::StateSet* getLocalStateSet() { return _localStateSet.get(); }
+        osg::StateSet* getLocalStateSet() { return _localStateSet.get(); }
         //const osg::StateSet* getLocalStateSet() const { return _localStateSet.get(); }
 
 		void setAutoNearFar(bool value);
