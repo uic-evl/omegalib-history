@@ -289,7 +289,7 @@ void SceneNode::updateTraversal(const UpdateContext& context)
 void SceneNode::needUpdate(bool forceParentUpdate)
 {
 	Node::needUpdate();
-	myNeedsBoundingBoxUpdate = true;
+	requestBoundingBoxUpdate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

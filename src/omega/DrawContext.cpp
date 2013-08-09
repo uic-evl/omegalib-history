@@ -41,7 +41,9 @@ using namespace omega;
 
 ///////////////////////////////////////////////////////////////////////////////
 DrawContext::DrawContext():
-	stencilInitialized(false)
+	stencilInitialized(false),
+	viewMin(0, 0),
+	viewMax(1, 1)
 {
 }
 

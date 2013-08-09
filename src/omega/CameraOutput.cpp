@@ -44,11 +44,7 @@ CameraOutput::CameraOutput():
 void CameraOutput::reset(RenderTarget::Type type)
 {
 	myType = type;
-	if(myRenderTarget != NULL)
-	{
-		delete myRenderTarget;
-		myRenderTarget = NULL;
-	}
+	myRenderTarget = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

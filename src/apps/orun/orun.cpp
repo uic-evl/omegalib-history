@@ -244,20 +244,20 @@ bool OmegaViewer::handleCommand(const String& cmd)
 		SystemManager::instance()->getStatsManager()->printStats();
 		return true;
 	}
-	else if(args[0] == "porthole")
-	{
-	
-		// porthole: start the porthole server
-		String xmlFile = "porthole/porthello.xml";
-		String cssFile = "porthole/porthello.css";
-		if(args.size() == 3)
-		{
-			xmlFile = args[1];
-			cssFile = args[2];
-		}
-		PortholeService* service = PortholeService::createAndInitialize(4080,xmlFile, cssFile);
-		return true;
-	}
+	//else if(args[0] == "porthole")
+	//{
+	//
+	//	// porthole: start the porthole server
+	//	String xmlFile = "porthole/porthello.xml";
+	//	String cssFile = "porthole/porthello.css";
+	//	if(args.size() == 3)
+	//	{
+	//		xmlFile = args[1];
+	//		cssFile = args[2];
+	//	}
+	//	PortholeService* service = PortholeService::createAndInitialize(4080,xmlFile, cssFile);
+	//	return true;
+	//}
 	else if(args[0] == "q")
 	{
 		// q: quit

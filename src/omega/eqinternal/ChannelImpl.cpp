@@ -56,7 +56,7 @@ extern bool sLocalTilesVisible;
 
 ///////////////////////////////////////////////////////////////////////////////
 ChannelImpl::ChannelImpl( eq::Window* parent ) 
-    :eq::Channel( parent ), myWindow(parent), myDrawBuffer(NULL)
+    :eq::Channel( parent ), myWindow((WindowImpl*)parent), myDrawBuffer(NULL)
 {
 }
 
@@ -81,8 +81,7 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
 		myDC.tile = ds->getDisplayConfig().tiles[name];
 	}
 
-	WindowImpl* window = static_cast<WindowImpl*>(getWindow());
-    Renderer* client = window->getRenderer();
+    Renderer* client = myWindow->getRenderer();
     myDC.gpuContext = client->getGpuContext();
 	myDC.renderer = client;
 
@@ -92,14 +91,20 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
 ///////////////////////////////////////////////////////////////////////////////
 void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 {
-    eq::Channel::frameDraw( frameID );
-
 	// If local tiles are hidden, we are done.
 	if(!sLocalTilesVisible) return;
+
+	// Pass the current tile to the draw context. The tile contains all the 
+	// properties of the current draw surface.
+	myDC.tile = myWindow->getTileConfig();
 
 	// (spin is 128 bits, gets truncated to 64... 
 	// do we really need 128 bits anyways!?)
 	myDC.drawFrame(frameID.low());
+	
+	// NOTE: This call NEEDS to stay after drawFrames, or frames will not 
+	// update / display correctly.
+    eq::Channel::frameDraw( frameID );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

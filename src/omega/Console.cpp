@@ -130,8 +130,24 @@ bool Console::handleCommand(const String& cmd)
 	}
 	else if(args[0] == "c")
 	{
-		if(myDrawFlags == DrawNone) myDrawFlags = DrawLog;
-		else myDrawFlags = DrawNone;
+		if(args.size() == 2)
+		{
+			if(args[1].find('l') != -1)
+			{
+				if(myDrawFlags & DrawLog) myDrawFlags &= ~DrawLog;
+				else myDrawFlags |= DrawLog;
+			}
+			if(args[1].find('s') != -1)
+			{
+				if(myDrawFlags == DrawStats) myDrawFlags &= ~DrawStats;
+				else myDrawFlags |= DrawStats;
+			}
+		}
+		else
+		{
+			if(myDrawFlags == DrawNone) myDrawFlags = DrawLog;
+			else myDrawFlags = DrawNone;
+		}
 		return true;
 	}
 	return false;
@@ -197,7 +213,7 @@ void ConsoleRenderPass::render(Renderer* renderer, const DrawContext& context)
 
 		if(myOwner->getDrawFags() & Console::DrawStats)
 		{
-			y += lineHeight * myOwner->getNumLines() + 10;
+			if(myOwner->getDrawFags() & Console::DrawLog) y += lineHeight * myOwner->getNumLines() + 10;
 			drawStats(Vector2f(x, y), Vector2f(lineWidth, 100), context);
 		}
 
@@ -250,10 +266,15 @@ void ConsoleRenderPass::drawStats(Vector2f pos, Vector2f size, const DrawContext
 	StatsManager* sm = SystemManager::instance()->getStatsManager();
 	DrawInterface* di = getClient()->getRenderer();
 
+	const DisplayTileConfig* tile = context.tile;
+	float cx = tile->offset.x();
+	float cy = tile->offset.y();
+	pos += Vector2f(cx, cy);
+
 	di->drawRect(pos, size, Color(0,0,0,0.8f));
 
-	pos += Vector2f(0, 10);
-
+	pos[1] += 10;
+	
 	foreach(Stat* s, sm->getStats())
 	{
 		if(s->getType() == Stat::Time && s->isValid())

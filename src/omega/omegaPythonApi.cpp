@@ -545,7 +545,7 @@ struct Quaternion_from_python
 
 		void* storage = (
 			(converter::rvalue_from_python_storage<Quaternion>*)data)->storage.bytes;
-		new (storage) Quaternion(x, y, z, w);
+		new (storage) Quaternion(w, x, y, z);
 		data->convertible = storage;
 	}
 };
@@ -1141,6 +1141,9 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(SceneNode, getBoundMaximum)
 		PYAPI_GETTER(SceneNode, getBoundCenter)
 		PYAPI_GETTER(SceneNode, getBoundRadius)
+		PYAPI_METHOD(SceneNode, followTrackable)
+		PYAPI_METHOD(SceneNode, setFollowOffset)
+		PYAPI_METHOD(SceneNode, unfollow)
 	;
 
 	// CameraController
@@ -1150,8 +1153,19 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(CameraController, reset)
 	;
 
+	PYAPI_REF_BASE_CLASS(DisplayTileConfig)
+		.def_readwrite("enabled", &DisplayTileConfig::enabled)
+		.def_readwrite("topLeft", &DisplayTileConfig::topLeft)
+		.def_readwrite("bottomLeft", &DisplayTileConfig::bottomLeft)
+		.def_readwrite("bottomRight", &DisplayTileConfig::bottomRight)
+		PYAPI_METHOD(DisplayTileConfig, setCorners)
+		PYAPI_METHOD(DisplayTileConfig, setPixelSize)
+		;
+
+
 	// Camera
 	PYAPI_REF_CLASS(Camera, Node)
+		PYAPI_REF_GETTER(Camera, getCustomTileConfig)
 		PYAPI_REF_GETTER(Camera, getController)
 		PYAPI_METHOD(Camera, setController)
 		PYAPI_METHOD(Camera, setPitchYawRoll)
@@ -1170,6 +1184,10 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(Camera, localToWorldPosition)
 		PYAPI_METHOD(Camera, localToWorldOrientation)
 		PYAPI_METHOD(Camera, focusOn)
+		PYAPI_METHOD(Camera, setViewPosition)
+		PYAPI_GETTER(Camera, getViewPosition)
+		PYAPI_METHOD(Camera, setViewSize)
+		PYAPI_GETTER(Camera, getViewSize)
 		;
 
 	// Color

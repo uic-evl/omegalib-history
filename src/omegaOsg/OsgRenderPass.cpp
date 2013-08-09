@@ -136,6 +136,26 @@ void OsgRenderPass::drawView(SceneView* view, const DrawContext& context, bool g
 		view->setSceneData(root);
 	}
 	view->setFrameStamp(myModule->getFrameStamp());
+	
+	// Set uniforms:
+	// Pass tile reference frame as uniforms
+	osg::StateSet* ss = view->getLocalStateSet();
+	osg::Uniform* uniformTileX = ss->getOrCreateUniform("unif_TileX",osg::Uniform::FLOAT_VEC3);
+	osg::Uniform* uniformTileY = ss->getOrCreateUniform("unif_TileY",osg::Uniform::FLOAT_VEC3);
+	osg::Uniform* uniformTileZ = ss->getOrCreateUniform("unif_TileZ",osg::Uniform::FLOAT_VEC3);
+	Vector3f pa = context.tile->bottomLeft;
+	Vector3f pb = context.tile->bottomRight;
+	Vector3f pc = context.tile->topLeft;
+	Vector3f vr = pb - pa;
+	Vector3f vu = pc - pa;
+	Vector3f vn = vr.cross(vu);		
+	vr.normalize();
+	vu.normalize();
+	vn.normalize();
+	uniformTileX->set(osg::Vec3d(vr[0], vr[1], vr[2]));
+	uniformTileY->set(osg::Vec3d(vu[0], vu[1], vu[2]));
+	uniformTileZ->set(osg::Vec3d(vn[0], vn[1], vn[2]));
+	
 
 	// Cull
 	myCullTimeStat->startTiming();

@@ -84,9 +84,6 @@ bool NodeImpl::configExit()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void NodeImpl::frameStart( const eq::uint128_t& frameID, const uint32_t frameNumber )
 {
-	Node::frameStart(frameID, frameNumber);
-	DEBUG_EQ_FLOW("NodeImpl::frameStart %1% %2%", %frameID %frameNumber);
-
 	// If server is not NULL (only on slave nodes) call update here
 	// on the master node, update is invoked in ConfigImpl.
 	if(myServer != NULL)
@@ -99,5 +96,8 @@ void NodeImpl::frameStart( const eq::uint128_t& frameID, const uint32_t frameNum
 	}
 
 	if(!getClient()->isConnected()) getClient()->exitLocal();
+	
+	// NOTE: This call NEEDS to stay after Engine::update, or frames will not update / display correctly.
+	Node::frameStart(frameID, frameNumber);
 }
 

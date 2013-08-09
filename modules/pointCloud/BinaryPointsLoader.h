@@ -12,6 +12,8 @@
 #include <osgDB/ReadFile>
 #include <osgDB/FileUtils>
 
+using namespace omega;
+
 class BinaryPointsLoader : public cyclops::ModelLoader
 {
 public:

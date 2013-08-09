@@ -171,6 +171,7 @@ void Renderer::finishFrame(const FrameInfo& frame)
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::draw(DrawContext& context)
 {
+	myRenderPassLock.lock();
 	// First of all make sure all render passes are initialized.
 	foreach(RenderPass* rp, myRenderPassList)
 	{
@@ -187,6 +188,7 @@ void Renderer::draw(DrawContext& context)
 		}
 	}
 	foreach(RenderPass* rp, tbdisposed) myRenderPassList.remove(rp);
+	myRenderPassLock.unlock();
 
 	// Execute renderable commands.
 	myRenderCommandLock.lock();
@@ -203,8 +205,8 @@ void Renderer::draw(DrawContext& context)
 		if(cam->isEnabled(context))
 		{
 			// Begin drawing with the camera: get the camera draw context.
-			const DrawContext& cameraContext = cam->beginDraw(context);
-			innerDraw(cameraContext, cam);
+			cam->beginDraw(context);
+			innerDraw(context, cam);
 			cam->endDraw(context);
 		}
 	}
@@ -215,9 +217,12 @@ void Renderer::draw(DrawContext& context)
 	// default camera the context should stay the same as what is passed to this
 	// method.
 	Camera* cam = myServer->getDefaultCamera();
-	const DrawContext& cameraContext = cam->beginDraw(context);
-	innerDraw(cameraContext, myServer->getDefaultCamera());
-	cam->endDraw(context);
+	if(cam->isEnabled(context))
+	{
+		cam->beginDraw(context);
+		innerDraw(context, myServer->getDefaultCamera());
+		cam->endDraw(context);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,12 +250,15 @@ void Renderer::innerDraw(const DrawContext& context, Camera* cam)
 	// Execute all render passes in order. 
 	foreach(RenderPass* pass, myRenderPassList)
 	{
-		// Run the pass if both its mask and the camera mask are 0 (left unspecified)
-		// Alternatively, run the pass if at least one of the mask bits is set on both the camera an the pass
-		if((cam->getMask() == 0 && pass->getCameraMask() == 0) ||
-			((cam->getMask() & pass->getCameraMask()) != 0))
+		if(pass->isInitialized())
 		{
-			pass->render(this, context);
+			// Run the pass if both its mask and the camera mask are 0 (left unspecified)
+			// Alternatively, run the pass if at least one of the mask bits is set on both the camera an the pass
+			if((cam->getMask() == 0 && pass->getCameraMask() == 0) ||
+				((cam->getMask() & pass->getCameraMask()) != 0))
+			{
+				pass->render(this, context);
+			}
 		}
 	}
 	myRenderPassLock.unlock();
