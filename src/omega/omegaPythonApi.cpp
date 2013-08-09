@@ -1326,6 +1326,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getEngine", getEngine, PYAPI_RETURN_REF);
 	def("getDefaultCamera", getDefaultCamera, PYAPI_RETURN_REF);
 	def("getCamera", getCamera, PYAPI_RETURN_REF);
+	def("getCameraById", getCameraById, PYAPI_RETURN_REF);
 	def("getOrCreateCamera", getOrCreateCamera, PYAPI_RETURN_REF);
 	def("getScene", getScene, PYAPI_RETURN_REF);
 	def("getSoundEnvironment", getSoundEnvironment, PYAPI_RETURN_REF);

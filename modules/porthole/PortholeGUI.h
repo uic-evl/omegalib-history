@@ -4,6 +4,7 @@
  * Copyright 2010-2013		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
+ *  Daniele Donghi			d.donghi@gmail.com
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
  * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
@@ -216,7 +217,7 @@ class PortholeGUI: public ReferenceType{
 public:
 
 	// Constructor
-	PortholeGUI(PortholeService* owner);
+	PortholeGUI(PortholeService* owner, const String& clientId);
 
 	// Destructor
 	~PortholeGUI();
@@ -261,6 +262,8 @@ private:
 
 	// The camera of this session
 	PortholeCamera* sessionCamera;
+
+	String clientId;
 
 	// Create a Porthole custom camera and a PixelData associated
 	void createCustomCamera(bool followDefaultCamera,  float widthPercent, float heightPercent, uint cameraMask = 0); 

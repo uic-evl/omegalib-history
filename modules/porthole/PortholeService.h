@@ -4,6 +4,7 @@
  * Copyright 2010-2013		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
+ *  Daniele Donghi			d.donghi@gmail.com
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
  * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
@@ -140,14 +141,22 @@ public:
 	{ myConnectedCommand = cmd; }
 	void setDisconnectedCommand(const String cmd)
 	{ myDisconnectedCommand = cmd; }
+	void setCameraCreatedCommand(const String cmd)
+	{ myCameraCreatedCommand = cmd; }
+	void setCameraDestroyedCommand(const String cmd)
+	{ myCameraDestroyedCommand = cmd; }
 
 	// Notification functions called from the websockets thread
 	void notifyConnected(const String& id);
 	void notifyDisconnected(const String& id);
+	void notifyCameraCreated(Camera* cam);
+	void notifyCameraDestroyed(Camera* cam);
 
 private:
 	String myConnectedCommand;
 	String myDisconnectedCommand;
+	String myCameraCreatedCommand;
+	String myCameraDestroyedCommand;
 	PortholeFunctionsBinder* myBinder;
 };
 

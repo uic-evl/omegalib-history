@@ -4,6 +4,7 @@
  * Copyright 2010-2013		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
+ *  Daniele Donghi			d.donghi@gmail.com
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
  * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
@@ -30,6 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 #include "PortholeGUI.h"
+#include "PortholeService.h"
 #include <omicron/xml/tinyxml.h>
 #include <iostream>
 
@@ -48,8 +50,8 @@ inline float percentToFloat(String percent){
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-PortholeGUI::PortholeGUI(PortholeService* owner):
-	service(owner)
+PortholeGUI::PortholeGUI(PortholeService* owner, const String& cliid):
+	service(owner), clientId(cliid)
 {
 	this->sessionCamera = NULL;
 }
@@ -57,6 +59,7 @@ PortholeGUI::PortholeGUI(PortholeService* owner):
 ///////////////////////////////////////////////////////////////////////////////////////////////
 PortholeGUI::~PortholeGUI(){
 	delete device;
+	service->notifyCameraCreated(sessionCamera->camera);
 	Engine::instance()->destroyCamera(this->sessionCamera->camera);
 }
 
@@ -244,6 +247,14 @@ void PortholeGUI::createCustomCamera(bool followDefaultCamera, float widthPercen
 
 	Camera* sessionCamera = myEngine->createCamera(flags);
 	sessionCamera->setMask(cameraMask);
+	// Set the camera name using the client id and camera id
+	String cameraName = ostr("%1%-%2%", %clientId %sessionCamera->getCameraId());
+	sessionCamera->setName(cameraName);
+	service->notifyCameraCreated(sessionCamera);
+
+	// Notify camera creation
+
+
 	DisplayTileConfig* dtc = sessionCamera->getCustomTileConfig();
 	// Setup projection
 	dtc->enabled = true;

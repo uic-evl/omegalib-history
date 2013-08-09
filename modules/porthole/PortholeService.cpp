@@ -1,29 +1,35 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
- *  Donghi Daniele			d.donghi@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *  Daniele Donghi			d.donghi@gmail.com
+ *  Alessandro Febretti		febret@gmail.com
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 // Implementation of the HTML5 based interfaces
 #include "PortholeService.h"
 #include "vjson/json.h"
@@ -37,7 +43,7 @@
 using namespace omega;
 using namespace omicron;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 #ifdef PORTHOLE_TEST_DIM
 	ofstream test_dim_cout;
 #endif
@@ -54,12 +60,12 @@ using namespace omicron;
 	ofstream test_global_cout;
 #endif
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Base64 encode/decode functions
 inline string base64_encode(unsigned char const* , unsigned int len);
 inline string base64_decode(string const& s);
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 enum demo_protocols {
 	/* always first */
 	PROTOCOL_HTTP = 0,
@@ -68,7 +74,7 @@ enum demo_protocols {
 	DEMO_PROTOCOL_COUNT
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 /*
  * May be used for filtering allowing connections by the header
  * content
@@ -113,7 +119,7 @@ void ServerThread::dump_handshake_info(struct lws_tokens *lwst)
 	*/
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 /* this protocol server (always the first one) just knows how to do HTTP */
 int ServerThread::callback_http(struct libwebsocket_context *context,
 		struct libwebsocket *wsi,
@@ -294,11 +300,11 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /* websocket protocol */
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Struct of data to be passed across the entire session
 struct per_session_data {
 	PortholeGUI* guiManager;
@@ -306,7 +312,7 @@ struct per_session_data {
 	std::string test_flag;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void sendHtmlElements(bool firstTime, struct per_session_data* data, struct libwebsocket_context *context,
 		struct libwebsocket *wsi){
 
@@ -330,7 +336,7 @@ void sendHtmlElements(bool firstTime, struct per_session_data* data, struct libw
 		return;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // JSON simple print
 #define IDENT(n) for (int i = 0; i < n; ++i) printf("    ")
 inline void print(json_value *value, int ident = 0)
@@ -368,7 +374,7 @@ inline void print(json_value *value, int ident = 0)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 #define MSG_EVENT_TYPE "event_type"
 
 #define MSG_EVENT_SPEC "device_spec"
@@ -396,7 +402,7 @@ inline void print(json_value *value, int ident = 0)
 #define MSG_EVENT_CAMERA_MOD "camera_mod"
 #define MSG_CAMERA_SIZE "size"
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 struct recv_message{
     string event_type;
     float deltaX,deltaY;
@@ -413,7 +419,7 @@ struct recv_message{
 	string value;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // This is the function that handle the event received by the client,
 // that has the per_session_data structure associated
 inline void parse_json_message(json_value *value, per_session_data* data, recv_message* message){
@@ -499,7 +505,7 @@ inline void parse_json_message(json_value *value, per_session_data* data, recv_m
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 inline void handle_message(per_session_data* data, recv_message* message, 
 		struct libwebsocket_context *context, struct libwebsocket *wsi){
 
@@ -605,7 +611,7 @@ inline void handle_message(per_session_data* data, recv_message* message,
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int ServerThread::callback_websocket(struct libwebsocket_context *context,
 			struct libwebsocket *wsi,
 			enum libwebsocket_callback_reasons reason,
@@ -626,7 +632,7 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		String cliName = ostr("%1%:%2%:%3%", %fd %cliip %cliname);
 		service->notifyConnected(cliName);
 		// Allocate gui manager
-		data->guiManager = new PortholeGUI(service);
+		data->guiManager = new PortholeGUI(service, cliName);
 		data->oldus = 0;
 
 #ifdef PORTHOLE_TEST_RTT
@@ -850,7 +856,7 @@ struct libwebsocket_protocols protocols[] = {
 
 PortholeService* ServerThread::service = NULL;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ServerThread::ServerThread(PortholeService* owner):
 use_ssl(0), opts(0), n(0)
 {
@@ -876,33 +882,33 @@ use_ssl(0), opts(0), n(0)
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ServerThread::~ServerThread(){
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ServerThread::setPort(int portNumber)
 {
 	this->port = portNumber;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ServerThread::setFunctionsBinder(PortholeFunctionsBinder* binder)
 {
 	PortholeGUI::setPortholeFunctionsBinder(binder);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ServerThread::setXMLfile(char* xmlPath){
 	PortholeGUI::parseXmlFile(xmlPath);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ServerThread::setCSSPath(char* cssPath){
 	css_path = std::string(cssPath);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ServerThread::threadProc(){
 
 	// Buffer used to send/receive data using websockets
@@ -951,7 +957,7 @@ void ServerThread::threadProc(){
 	libwebsocket_context_destroy(context);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PortholeService::PortholeService()
 {
 
@@ -978,13 +984,13 @@ PortholeService::PortholeService()
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PortholeService::~PortholeService(){
 	portholeServer->stop();
 	delete portholeServer;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PortholeService::start(int port, char* xmlPath, char* cssPath)
 {
 	myBinder = new PortholeFunctionsBinder();
@@ -996,14 +1002,14 @@ void PortholeService::start(int port, char* xmlPath, char* cssPath)
 	portholeServer->start();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PortholeService::setup(Setting& settings){
 
 	cout << ">> !! Setup called" << endl;
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PortholeService::poll(){
 
 //	cout << ">> !! Poll called" << endl;
@@ -1011,9 +1017,9 @@ void PortholeService::poll(){
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //                                         BASE64 ENC/DEC                                        //
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static const std::string base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
@@ -1107,7 +1113,7 @@ inline std::string base64_decode(std::string const& encoded_string) {
 
   return ret;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PortholeService::notifyConnected(const String& id)
 {
 	if(!myConnectedCommand.empty())
@@ -1118,13 +1124,37 @@ void PortholeService::notifyConnected(const String& id)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PortholeService::notifyDisconnected(const String& id)
 {
 	if(!myDisconnectedCommand.empty())
 	{
 		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
 		String cmd = StringUtils::replaceAll(myConnectedCommand, "%id%", id);
+		i->queueCommand(cmd);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyCameraCreated(Camera* cam)
+{
+	if(!myCameraCreatedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String idstr = ostr("%1%", %cam->getCameraId());
+		String cmd = StringUtils::replaceAll(myCameraCreatedCommand, "%id%", idstr);
+		i->queueCommand(cmd);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyCameraDestroyed(Camera* cam)
+{
+	if(!myCameraDestroyedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String idstr = ostr("%1%", %cam->getCameraId());
+		String cmd = StringUtils::replaceAll(myCameraDestroyedCommand, "%id%", idstr);
 		i->queueCommand(cmd);
 	}
 }
