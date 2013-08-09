@@ -48,7 +48,8 @@ inline float percentToFloat(String percent){
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-PortholeGUI::PortholeGUI()
+PortholeGUI::PortholeGUI(PortholeService* owner):
+	service(owner)
 {
 	this->sessionCamera = NULL;
 }

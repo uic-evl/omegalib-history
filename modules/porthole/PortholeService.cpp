@@ -621,7 +621,7 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 	{
 
 		// Allocate gui manager
-		data->guiManager = new PortholeGUI();
+		data->guiManager = new PortholeGUI(service);
 		data->oldus = 0;
 
 #ifdef PORTHOLE_TEST_RTT
@@ -837,11 +837,13 @@ struct libwebsocket_protocols protocols[] = {
 	}
 };
 
+PortholeService* ServerThread::service = NULL;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-ServerThread::ServerThread():
+ServerThread::ServerThread(PortholeService* owner):
 use_ssl(0), opts(0), n(0)
 {
-
+	service = owner;
 	// Set DATA FOLDER PATH
 	string fullPath;
 	DataManager::findFile("porthole/index.html", fullPath);
@@ -975,7 +977,7 @@ PortholeService::~PortholeService(){
 void PortholeService::start(int port, char* xmlPath, char* cssPath)
 {
 	myBinder = new PortholeFunctionsBinder();
-	portholeServer = new ServerThread();
+	portholeServer = new ServerThread(this);
 	portholeServer->setPort(port);
 	portholeServer->setFunctionsBinder(myBinder);
 	portholeServer->setXMLfile(xmlPath);
