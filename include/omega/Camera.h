@@ -180,7 +180,7 @@ namespace omega {
 		//! Updates the specified draw context, computing an 
 		//! off-axis projection based on the tile and active eye 
 		//! in the draw context. Used by beginDraw.
-		void updateOffAxisProjection(DrawContext& ctx);
+		void updateTransforms(DrawContext& ctx);
 		//! Recomputed the view bounds for the current tile, updating the 
 		//! viewMin and viewMax values in the context structure.
 		void updateViewBounds(DrawContext& ctx, const Vector2i& canvasSize);

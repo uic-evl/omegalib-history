@@ -256,8 +256,7 @@ void Camera::beginDraw(DrawContext& context)
 		const DisplayConfig& dcfg = getEngine()->getDisplaySystem()->getDisplayConfig();
 		updateViewBounds(context, dcfg.canvasPixelSize);
 	}
-	updateOffAxisProjection(context);
-	context.modelview = myViewTransform;
+	updateTransforms(context);
 
 	if(myListener != NULL) myListener->beginDraw(this, context);
 }
@@ -337,7 +336,7 @@ void Camera::setController(CameraController* value)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Camera::updateOffAxisProjection(DrawContext& context)
+void Camera::updateTransforms(DrawContext& context)
 {
 	DisplaySystem* ds = context.renderer->getDisplaySystem();
 	DisplayConfig& dcfg = ds->getDisplayConfig();
@@ -404,6 +403,7 @@ void Camera::updateOffAxisProjection(DrawContext& context)
 	float b = vu.dot(va) * myNearZ / d;
 	float t = vu.dot(vc) * myNearZ / d;
 
+	// Compute the projection matrix. 
 	Transform3 oax;
 	oax.setIdentity();
 	oax(0,0) = 2 * myNearZ / (r - l);
@@ -415,7 +415,16 @@ void Camera::updateOffAxisProjection(DrawContext& context)
 	oax(3,2) = - 1;
 	oax(3,3) = 0;
 
-	Transform3 newBasis;
+	context.projection = oax; 
+	
+	// Compute the view matrix. The view matrix has two main components:
+	// - the navigational component given by myViewTransform, converts points
+	//   from world space to 'camera' space (origin is determined by camera position / orientation)
+	// - the screen plane component, given by the current tile orientation and head position.
+	//   this component converts points from camera space to screen-oriented eye space 
+	//   (that is, origin is at eye position, and orientation is determined by the screen plane,
+	//   with positive Y being screen up vector, X being screen right vector and Z being screen normal)
+	AffineTransform3 newBasis;
 	newBasis.setIdentity();
 	newBasis.data()[0] = vr[0];
 	newBasis.data()[1] = vu[0];
@@ -429,10 +438,9 @@ void Camera::updateOffAxisProjection(DrawContext& context)
 	newBasis.data()[9] = vu[2];
 	newBasis.data()[10] = vn[2];
 
-	oax = oax * newBasis;
-	
-	// Translate to apex of the frustum to the origin
-	context.projection = oax.translate(-pe);
+	newBasis = newBasis.translate(-pe);
+
+	context.modelview = newBasis * myViewTransform;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
