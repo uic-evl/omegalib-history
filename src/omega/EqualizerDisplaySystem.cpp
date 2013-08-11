@@ -30,7 +30,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *-----------------------------------------------------------------------------
  * What's in this file
- *	The wrapper code for the omegalib python API. 
+ *	The wrapper code for the omegalib / Equalizer interface.
+ * 	This file contains most of the setup code for the wrapper: equalizer
+ *      config generation, startup, shutdown, plus some utility function to 
+ * 	convert 2d points to 3d rays.
  ******************************************************************************/
 #include <omegaGl.h>
 
