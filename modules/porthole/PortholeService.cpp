@@ -44,23 +44,6 @@ using namespace omega;
 using namespace omicron;
 
 ///////////////////////////////////////////////////////////////////////////////
-#ifdef PORTHOLE_TEST_DIM
-	ofstream test_dim_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-	ofstream test_compr_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_BASE64
-	ofstream test_base64_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-	ofstream test_websocket_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_GLOBAL
-	ofstream test_global_cout;
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 // Base64 encode/decode functions
 inline string base64_encode(unsigned char const* , unsigned int len);
 inline string base64_decode(string const& s);
@@ -224,9 +207,6 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 				content.append("\""
 									"};"
 									"sendContinuous = event.target.getAttribute(\"data-continuous\");"
-#ifdef PORTHOLE_TEST_RTT
-									"RTT_start = (new Date()).getTime();"
-#endif									
 									"socket.send(JSON.stringify(JSONToSend));"
 								"};");
 			}
@@ -249,9 +229,6 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 				content.append("\""
 									"};"
 									"sendContinuous = event.target.getAttribute(\"data-continuous\");"
-#ifdef PORTHOLE_TEST_RTT
-									"RTT_start = (new Date()).getTime();"
-#endif									
 									"socket.send(JSON.stringify(JSONToSend));"
 								"};");
 			}
@@ -518,10 +495,7 @@ inline void handle_message(per_session_data* data, recv_message* message,
 		// Get the corresponding camera to be modified
 		Camera* camera;
 		PortholeCamera* sessionCamera = data->guiManager->getSessionCamera();
-		if (sessionCamera->followDefault == true)
-			camera = Engine::instance()->getDefaultCamera();
-		else
-			camera = sessionCamera->camera;
+		camera = sessionCamera->camera;
 
 		// Change pitch and yaw
 		Quaternion curOrientation = camera->getOrientation();
@@ -548,10 +522,7 @@ inline void handle_message(per_session_data* data, recv_message* message,
 		// Get the corresponding camera to be modified
 		Camera* camera;
 		PortholeCamera* sessionCamera = data->guiManager->getSessionCamera();
-		if (sessionCamera->followDefault == true)
-			camera = Engine::instance()->getDefaultCamera();
-		else
-			camera = sessionCamera->camera;
+		camera = sessionCamera->camera;
 
 		// Current position
 		Vector3f myPosition = camera->getPosition();
@@ -635,10 +606,6 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		data->guiManager = new PortholeGUI(service, cliName);
 		data->oldus = 0;
 
-#ifdef PORTHOLE_TEST_RTT
-		data->test_flag = "false";
-#endif
-
 		break;
 	}
 
@@ -668,65 +635,27 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		Camera* camera = sessionCamera->camera;
 		PixelData* canvas = sessionCamera->canvas;
 
-		// If camera need to be equal to default camera, update position
-		if (sessionCamera->followDefault){
-			Camera* defaultCamera = Engine::instance()->getDefaultCamera();
-			camera->setPosition(defaultCamera->getPosition() + defaultCamera->getHeadOffset());
-			camera->setOrientation(defaultCamera->getOrientation());
-		}
-
 		// IMAGE ENCODING
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-		gettimeofday(&tv, NULL);
-		unsigned long long compr_start =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-#endif
 		// Get camera image as JPEG/PNG and base64 encode it, because only simple strings could be sent via websockets  
 		// Multithreading stuff: Lock the camera output, to make sure the pixel data we are getting 
 		// is not coming from an unfinished frame.
 		camera->getOutput(0)->lock();
 		ByteArray* png = ImageUtils::encode(canvas, ImageUtils::FormatJpeg);
+		//FILE* pf = fopen("./test.jpg", "wb");
+		//fwrite((void*)png->getData(), 1, png->getSize(), pf);
+		//fclose(pf);
 		camera->getOutput(0)->unlock();
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-		gettimeofday(&tv, NULL);
-		unsigned long long compr_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_compr_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  (compr_end - compr_start) << std::endl; 
-#endif
 		// END IMAGE ENCODING
 
 		// BASE64 ENCODING
-#ifdef PORTHOLE_TEST_TIME_BASE64
-		gettimeofday(&tv, NULL);
-		unsigned long long base64_start =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-#endif
 		std::string base64image = base64_encode(png->getData(),png->getSize());
-#ifdef PORTHOLE_TEST_TIME_BASE64
-		gettimeofday(&tv, NULL);
-		unsigned long long base64_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_base64_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  (base64_end - base64_start) << std::endl; 
-#endif
 		// END BASE64 ENCODING
 
 		// String to be send: base64 image and camera id
 		string toSend = "{\"event_type\":\"stream\",\"base64image\":\"";
 		toSend.append(base64image.c_str());
 		toSend.append("\",\"camera_id\":" + boost::lexical_cast<string>(sessionCamera->id) +
-#ifdef PORTHOLE_TEST_RTT
-			",\"test_flag\":" + data->test_flag + "}");
-#else
 			"}");
-#endif
-
-#ifdef PORTHOLE_TEST_DIM
-		test_dim_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  toSend.length() << std::endl;
-#endif
 
 		// Send the base64 image
 		unsigned char* buf;
@@ -735,42 +664,17 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		n = sprintf((char *)p, "%s",toSend.c_str());
 
 		// WEBSOCKET WRITE
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-		gettimeofday(&tv, NULL);
-		unsigned long long websocket_start =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-#endif
 		n = libwebsocket_write(wsi, p, n, LWS_WRITE_TEXT);
 		if (n < 0) {
 			fprintf(stderr, "ERROR writing to socket");
 			return 1;
 		}
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-		gettimeofday(&tv, NULL);
-		unsigned long long websocket_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_websocket_cout << canvas->getWidth() << "," << canvas->getHeight() << "," << (websocket_end - websocket_start) << std::endl;
-#endif
-
-#ifdef PORTHOLE_TEST_TIME_GLOBAL
-		gettimeofday(&tv, NULL);
-		unsigned long long global_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_global_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  (global_end - millisecondsSinceEpoch) << std::endl; 
-#endif
 
 		// Free the buffer
 		delete[] buf;
 
 		// Save new timestamp
 		data->oldus = millisecondsSinceEpoch;
-
-#ifdef PORTHOLE_TEST_RTT
-		data->test_flag = "false";
-#endif
 
 		// Pass the token
 		libwebsocket_callback_on_writable(context, wsi);
@@ -799,9 +703,6 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 			// Handle message received
             handle_message(data, &message, context, wsi);
 
-#ifdef PORTHOLE_TEST_RTT
-			data->test_flag = "true";
-#endif
 		}
 
 		break;
@@ -934,7 +835,7 @@ void ServerThread::threadProc(){
 	//fprintf(stderr, " Using no-fork service loop\n");
 	oldus = 0;
 	n = 0;
-	while (n >= 0) {
+	while (n >= 0 && !SystemManager::instance()->isExitRequested()) {
 		struct timeval tv;
 
 		gettimeofday(&tv, NULL);

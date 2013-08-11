@@ -82,6 +82,7 @@ BOOST_PYTHON_MODULE(porthole)
 		PYAPI_METHOD(PortholeService, setConnectedCommand)
 		PYAPI_METHOD(PortholeService, setDisconnectedCommand)
 		PYAPI_METHOD(PortholeService, setCameraCreatedCommand)
+		PYAPI_METHOD(PortholeService, setCameraDestroyedCommand)
 		;
 
 	def("initialize", initialize, initializeOverloads());

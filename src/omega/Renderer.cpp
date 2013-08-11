@@ -202,7 +202,7 @@ void Renderer::draw(DrawContext& context)
 	foreach(Ref<Camera> cam, myServer->getCameras())
 	{
 		// See if camera is enabled for the current client and draw context.
-		if(cam->isEnabled(context))
+		if(cam->isEnabledInContext(context))
 		{
 			// Begin drawing with the camera: get the camera draw context.
 			cam->beginDraw(context);
@@ -217,7 +217,7 @@ void Renderer::draw(DrawContext& context)
 	// default camera the context should stay the same as what is passed to this
 	// method.
 	Camera* cam = myServer->getDefaultCamera();
-	if(cam->isEnabled(context))
+	if(cam->isEnabledInContext(context))
 	{
 		cam->beginDraw(context);
 		innerDraw(context, myServer->getDefaultCamera());

@@ -73,9 +73,8 @@ namespace omega {
 	public:
 		enum CameraFlags
 		{
-			ForceMono = 1 << 1,
-			DrawScene = 1 << 2,
-			DrawOverlay = 1 << 3,
+			DrawScene = 1 << 1,
+			DrawOverlay = 1 << 2,
 			DefaultFlags = DrawScene | DrawOverlay
 		};
 
@@ -113,6 +112,18 @@ namespace omega {
 		//bool getAutoAspect();
 		//void setAutoAspect(bool value);
 
+		//! Camera flags
+		//@{
+		//! When set to true, will draw all 3D scene render passes for 
+		//! this camera. Set to true by default.
+		void setSceneEnabled(bool value);
+		bool isSceneEnabled();
+		//! When set to true, will draw all 2D overlay render passes for 
+		//! this camera. Set to true by default.
+		void setOverlayEnabled(bool value);
+		bool isOverlayEnabled();
+		//@}
+
 		//! Navigation management
 		//@{
 		void setController(CameraController* value);
@@ -125,7 +136,12 @@ namespace omega {
 		virtual void lookAt(const Vector3f& position, const Vector3f& upVector);
 
 		//! Returns true if this camera is enabled in the specified draw context.
-		bool isEnabled(const DrawContext& context);
+		bool isEnabledInContext(const DrawContext& context);
+		//! Set the camera enabled flag. If a camera is disabled it will never
+		//! render. If it's enabled it will still be checked agains the active
+		//! draw context.
+		void setEnabled(bool value);
+		bool isEnabled();
 
 		//! Observer control
 		//@{
@@ -186,6 +202,9 @@ namespace omega {
 		void updateViewBounds(DrawContext& ctx, const Vector2i& canvasSize);
 	
 	private:
+		// Camera flags, used to set a few binary draw options.
+		uint myFlags;
+
 		//! A custom tile configuration for secondary cameras that do no use
 		//! default display tiles during rendering.
 		Ref<DisplayTileConfig> myCustomTileConfig;
@@ -218,7 +237,6 @@ namespace omega {
 		bool myAutoAspect;
 
 		// Offscren rendering stuff
-		uint myFlags;
 		Ref<CameraOutput> myOutput[GpuContext::MaxContexts];
 		//DrawContext myDrawContext[GpuContext::MaxContexts];
 
@@ -233,6 +251,8 @@ namespace omega {
 		int myCameraId;
 
 		uint myMask;
+
+		bool myEnabled;
 
 		// Camera listener. Right now only one listener is supported.
 		ICameraListener* myListener;
@@ -281,6 +301,10 @@ namespace omega {
 	{ myListener = NULL; }
 
 	///////////////////////////////////////////////////////////////////////////
+	inline void Camera::setEnabled(bool value)
+	{ myEnabled = value; }
+
+	///////////////////////////////////////////////////////////////////////////
 	inline void Camera::setNearFarZ(float nr, float fr)
 	{ myNearZ = nr; myFarZ = fr; }
 
@@ -299,6 +323,26 @@ namespace omega {
 	///////////////////////////////////////////////////////////////////////////
 	inline void Camera::setViewSize(float x, float y) 
 	{ myViewSize = Vector2f(x, y); }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline bool Camera::isEnabled()
+	{ return myEnabled; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Camera::setSceneEnabled(bool value)
+	{ if(value) myFlags |= DrawScene; else myFlags &= ~DrawScene; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline bool Camera::isSceneEnabled()
+	{ return myFlags & DrawScene; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Camera::setOverlayEnabled(bool value)
+	{ if(value) myFlags |= DrawOverlay; else myFlags &= ~DrawOverlay; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline bool Camera::isOverlayEnabled()
+	{ return myFlags & DrawOverlay; }
 }; // namespace omega
 
 #endif

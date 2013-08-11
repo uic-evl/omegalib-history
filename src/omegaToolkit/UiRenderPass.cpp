@@ -78,8 +78,18 @@ void UiRenderPass::render(Renderer* client, const DrawContext& context)
 	}
 	else if(context.task == DrawContext::OverlayDrawTask)
 	{
-		DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-		Vector2i displaySize = ds->getCanvasSize();
+		Vector2i displaySize;
+		// check if the tile is part of a canvas (a multi-tile grid). If it is,
+		// get the canvas resolution. Otherwise simply use the tile resolution.
+		if(context.tile->isInGrid)
+		{
+			DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
+			displaySize = ds->getCanvasSize();
+		}
+		else
+		{
+			displaySize = context.tile->pixelSize;
+		}
 
 		client->getRenderer()->beginDraw2D(context);
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -93,8 +103,8 @@ void UiRenderPass::render(Renderer* client, const DrawContext& context)
 		{
 			ui->setPosition(vp.min.cast<omicron::real>());
 			ui->setSize(Vector2f(vp.width(), vp.height()));
-			ofmsg("ui viewport update: position = %1% size = %2% %3%",
-				%vp.min %vp.width() %vp.height());
+			/*ofmsg("ui viewport update: position = %1% size = %2% %3%",
+				%vp.min %vp.width() %vp.height());*/
 		}
 
 		// Make sure all widget sizes are up to date (and perform autosize where necessary).

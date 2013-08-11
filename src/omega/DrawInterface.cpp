@@ -98,6 +98,10 @@ void DrawInterface::beginDraw2D(const DrawContext& context)
 
     glMatrixMode(GL_MODELVIEW);
 
+	glViewport(
+		context.viewport.x(), context.viewport.y(), 
+		context.viewport.width(), context.viewport.height());
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);

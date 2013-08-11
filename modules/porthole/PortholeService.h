@@ -33,15 +33,6 @@
 #ifndef __PORTHOLE_SERVICE_H__
 #define __PORTHOLE_SERVICE_H__
 
-///////////////////////////////////////////////////////////////////////////////
-// Testing variables
-//#define PORTHOLE_TEST_RTT
-//#define PORTHOLE_TEST_DIM
-//#define PORTHOLE_TEST_TIME_COMPRESSION
-//#define PORTHOLE_TEST_TIME_BASE64
-//#define PORTHOLE_TEST_TIME_WEBSOCKET 
-//#define PORTHOLE_TEST_TIME_GLOBAL
-
 #include <omega.h>
 #include "websockets/libwebsockets.h"
 #include "PortholeGUI.h"

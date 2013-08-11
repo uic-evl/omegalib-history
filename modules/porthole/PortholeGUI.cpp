@@ -181,7 +181,7 @@ string PortholeGUI::create(bool firstTime){
 				}
 
 				if (firstTime || this->sessionCamera == NULL){
-					createCustomCamera(false, percentToFloat(width), percentToFloat(height), camMask);
+					createCustomCamera(percentToFloat(width), percentToFloat(height), camMask);
 				}
 				else{
 					modCustomCamera(1.0, percentToFloat(width), percentToFloat(height));
@@ -226,9 +226,8 @@ string PortholeGUI::create(bool firstTime){
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /* 
 *	Camera creation function
-*	followDefaultCamera: true if camera shold reflect the default camera position and orientation
 */
-void PortholeGUI::createCustomCamera(bool followDefaultCamera, float widthPercent, float heightPercent, uint cameraMask)
+void PortholeGUI::createCustomCamera(float widthPercent, float heightPercent, uint cameraMask)
 {
 
 	// Get the global engine
@@ -243,7 +242,7 @@ void PortholeGUI::createCustomCamera(bool followDefaultCamera, float widthPercen
 
 	PixelData* sessionCanvas = new PixelData(PixelData::FormatRgb,  width,  height);
 
-	uint flags = Camera::ForceMono | Camera::DrawScene | Camera::DrawOverlay;
+	uint flags = Camera::DrawScene | Camera::DrawOverlay;
 
 	Camera* sessionCamera = myEngine->createCamera(flags);
 	sessionCamera->setMask(cameraMask);
@@ -286,7 +285,6 @@ void PortholeGUI::createCustomCamera(bool followDefaultCamera, float widthPercen
 	camera->canvasWidth = width;
 	camera->canvasHeight = height;
 	camera->size = IMAGE_QUALITY;
-	camera->followDefault = followDefaultCamera;
 
 	// Save new camera
 	PortholeGUI::CamerasMap[camera->id] = camera; // Global map

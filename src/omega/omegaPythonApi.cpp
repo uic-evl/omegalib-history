@@ -1168,9 +1168,10 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(DisplayTileConfig, setPixelSize)
 		;
 
-
 	// Camera
 	PYAPI_REF_CLASS(Camera, Node)
+		PYAPI_METHOD(Camera, setEnabled)
+		PYAPI_METHOD(Camera, isEnabled)
 		PYAPI_REF_GETTER(Camera, getCustomTileConfig)
 		PYAPI_REF_GETTER(Camera, getController)
 		PYAPI_METHOD(Camera, setController)
@@ -1195,6 +1196,12 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(Camera, setViewSize)
 		PYAPI_GETTER(Camera, getViewSize)
 		PYAPI_METHOD(Camera, getCameraId)
+		PYAPI_METHOD(Camera, setMask)
+		PYAPI_METHOD(Camera, getMask)
+		PYAPI_METHOD(Camera, isSceneEnabled)
+		PYAPI_METHOD(Camera, setSceneEnabled)
+		PYAPI_METHOD(Camera, isOverlayEnabled)
+		PYAPI_METHOD(Camera, setOverlayEnabled)
 		;
 
 	// Color

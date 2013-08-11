@@ -113,6 +113,29 @@ namespace omega
 		// Clears the frame buffer.
 		void clear();
 		bool stencilInitialized;
+
+		//! Updates the viewport based on the view size and position an the size
+		//! of the overall canvas
+		void updateViewBounds(
+			const Vector2f& viewPos, 
+			const Vector2f& viewSize, 
+			const Vector2i& canvasSize);
+
+		//! Updates the modelview and projection matrices based on head / view
+		//! transform and eye separation. Crrent eye is read from context.
+		void updateTransforms(
+			const AffineTransform3& head, 
+			const AffineTransform3& view, 
+			float eyeSeparation,
+			float nearZ,
+			float farZ);
+
+		//! Return true if this draw context is supposed to draw something for
+		//! the specified view rectangle
+		bool overlapsView(
+			const Vector2f& viewPos, 
+			const Vector2f& viewSize, 
+			const Vector2i& canvasSize) const;
 	};
 }; // namespace omega
 

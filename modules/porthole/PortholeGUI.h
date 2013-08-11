@@ -138,7 +138,6 @@ typedef struct PortholeCamera: ReferenceType{
 	int id;
 	Camera* camera;
 	PixelData* canvas;
-	bool followDefault;
 	int canvasWidth, canvasHeight;
 	float size; // 1.0 is default value = device size
 	//unsigned int oldusStreamSent; // Timestamp of last stream sent via socket
@@ -231,8 +230,8 @@ public:
 	// Return an object that contains the device specifications
 	PortholeDevice* getDevice() { return device; }
 
-	// Is camera object set?
-	bool isCameraReadyToStream() { return (sessionCamera != NULL); } 
+	bool isCameraReadyToStream() 
+	{ return (sessionCamera != NULL && sessionCamera->camera->isEnabled()); } 
 
 	// Get Porthole camera object for this client connected
 	PortholeCamera* getSessionCamera() { return sessionCamera; } 
@@ -266,7 +265,7 @@ private:
 	String clientId;
 
 	// Create a Porthole custom camera and a PixelData associated
-	void createCustomCamera(bool followDefaultCamera,  float widthPercent, float heightPercent, uint cameraMask = 0); 
+	void createCustomCamera(float widthPercent, float heightPercent, uint cameraMask = 0); 
 
 	static void searchNode(omega::xml::TiXmlElement* node);
 
