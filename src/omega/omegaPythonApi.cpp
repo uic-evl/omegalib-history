@@ -1085,6 +1085,7 @@ BOOST_PYTHON_MODULE(omega)
 	void (Node::*removeChildByIndex)(unsigned short) = &Node::removeChild;
 
 	void (Node::*rotate1)(const Vector3f& axis, const float& angle, Node::TransformSpace relativeTo) = &Node::rotate;
+	void (Node::*rotate2)(const	Quaternion& q, Node::TransformSpace relativeTo) = &Node::rotate;
 	void (Node::*translate1)(const Vector3f&, Node::TransformSpace relativeTo) = &Node::translate;
 	void (Node::*translate2)(float, float, float, Node::TransformSpace relativeTo) = &Node::translate;
 
@@ -1101,6 +1102,7 @@ BOOST_PYTHON_MODULE(omega)
 		.def("pitch", &Node::pitch, NodePitchOverloads())
 		.def("roll", &Node::roll, NodeRollOverloads())
 		.def("rotate", rotate1)
+		.def("rotate", rotate2)
 		.def("translate", translate1)
 		.def("translate", translate2)
 
