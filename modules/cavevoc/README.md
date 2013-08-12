@@ -111,7 +111,7 @@
           towards it.<br>
         </font>Launch the program using: orun -s ideation.py<br>
       </font></p>
-    <blockquote><img alt="" src="ideation.png" height="327" width="432"></blockquote>
+    <blockquote><img alt="" src="http://febret.github.io/omegalib/cavevoc/ideation.png" height="327" width="432"></blockquote>
     <p><font face="Helvetica, Arial, sans-serif">Ideation is an example
         that shows how you could use <a
           href="http://pyparsing.wikispaces.com/">Pyparsing </a>to
@@ -185,11 +185,9 @@
           implement the grammar parser. <br>
         </font></li>
       <li><font face="Helvetica, Arial, sans-serif">If you want to be
-          more advanced you can also use the <a href="http://nltk.org/">Natural
-
-            Language Toolkit</a>. The main advantage of using natural
-          language processing techniques is that you can minimize the
-          need for the user to remember a specific grammar. <br>
+          more advanced you can also use the <a href="http://nltk.org/">Natural Language Toolkit</a>. 
+          The main advantage of using natural language processing techniques is that 
+          you can minimize the need for the user to remember a specific grammar. <br>
         </font></li>
       <li><font face="Helvetica, Arial, sans-serif">But if you don't
           have much experience in NLP, try to keep the number of speech
