@@ -99,7 +99,8 @@ namespace HTML {
 		"onmouseup",  /* Script to be run when mouse button is released */
 	};
 
-	static bool isEvent(string stringToSearch){
+	static bool isEvent(string stringToSearch)
+	{
 		for(int i=0; i < eventsNumber; i++)
 			if (stringToSearch.compare(events[i]) == 0)
 				return true; // found
@@ -109,7 +110,8 @@ namespace HTML {
 };
 
 // This will old a possible interface
-typedef struct PortholeInterfaceType: ReferenceType{
+typedef struct PortholeInterfaceType: ReferenceType
+{
 	int minWidth;
 	int minHeight;
 	string id;
@@ -118,7 +120,8 @@ typedef struct PortholeInterfaceType: ReferenceType{
 } PortholeInterfaceType;
 
 // A device specifications object
-typedef struct PortholeDevice: ReferenceType{
+typedef struct PortholeDevice: ReferenceType
+{
 	int deviceWidth;
 	int deviceHeight;
 	string deviceOrientation; // Portrait or Landscape
@@ -126,35 +129,38 @@ typedef struct PortholeDevice: ReferenceType{
 } PortholeDevice;
 
 // An element object
-typedef struct PortholeElement: ReferenceType{
+struct PortholeElement: ReferenceType
+{
 	string id;
 	string type;
 	string cameraType; // Defined if type is camera stream
 	string htmlValue;
-} PortholeElement;
+};
 
 // A omega Camera wrapper for Porthole
-typedef struct PortholeCamera: ReferenceType{
+struct PortholeCamera: ReferenceType
+{
 	int id;
 	Camera* camera;
 	PixelData* canvas;
 	int canvasWidth, canvasHeight;
 	float size; // 1.0 is default value = device size
 	//unsigned int oldusStreamSent; // Timestamp of last stream sent via socket
-}PortholeCamera;
+};
 
 // An obj binded with a Javascript event
-typedef struct PortholeEvent{
+struct PortholeEvent
+{
 	std::string htmlEvent;
 	int mouseButton;
 	char key;
 	std::string value;
 	PortholeCamera* sessionCamera;
-}PortholeEvent;
+};
 
 // Porthole functions binder
-struct PortholeFunctionsBinder: ReferenceType{
-
+struct PortholeFunctionsBinder: ReferenceType
+{
 	typedef void(*memberFunction)(PortholeEvent&);
 
 	void addFunction(std::string funcName, memberFunction func)
@@ -175,7 +181,8 @@ struct PortholeFunctionsBinder: ReferenceType{
 
 		std::map<std::string, string>::const_iterator py_it;
 		py_it = pythonFunMap.find(funcName);
-		if (py_it != pythonFunMap.end()){
+		if (py_it != pythonFunMap.end())
+		{
 			PythonInterpreter* pi = SystemManager::instance()->getScriptInterpreter();
 
 			String pythonScript = omicron::StringUtils::replaceAll(py_it->second, PORTHOLE_EVENT_TOKEN_VALUE, ev.value);
@@ -211,8 +218,8 @@ class PortholeService;
 
 ///////////////////////////////////////////////////////////////////////////////
 //! Implements the HTML GUI Manager for Porthole Service
-class PortholeGUI: public ReferenceType{
-
+class PortholeGUI: public ReferenceType
+{
 public:
 
 	// Constructor
@@ -235,6 +242,8 @@ public:
 
 	// Get Porthole camera object for this client connected
 	PortholeCamera* getSessionCamera() { return sessionCamera; } 
+	PortholeService* getService()
+	{ return service; }
 
 	// Mod the camera with id cameraId 
 	// size: the ratio of camera: 1.0 is full size

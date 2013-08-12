@@ -80,9 +80,8 @@
  <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.8.23/themes/ui-lightness/jquery-ui.css" />-->
  <!--Google Maps libs END-->
 
- <script src="http://raw.github.com/EightMedia/hammer.js/master/hammer.js" type="application/javascript"></script>
- <script src="https://raw.github.com/EightMedia/hammer.js/master/jquery.specialevent.hammer.js" type="application/javascript"></script>
-
+ <script src="./hammer.js" type="application/javascript"></script>
+ 
  <!-- <script src="./recorder.js" type="application/javascript"></script> -->
 
  <div id="porthole_content"  style=" width : 100%; height : 99%; " data-theme="b">
@@ -336,8 +335,6 @@
 
     // Drag vars
     var dragging = false;
-    var dragPosX, dragPosY;
-    var dragOldX, dragOldY;
 
     // Pinch vars
     var pinching = false;
@@ -345,34 +342,6 @@
     var scalingFactor, deltaRotation;
 
     ///////////////////////////////////////////////////////////
-
-    // Drag functions
-    function watchDrag() {
-        if (dragPosX - dragOldX == 0 && dragPosY - dragOldY == 0) return;
-        var JSONEvent = {
-            "event_type": "drag",
-            "camera_id": parseInt(camera.getAttribute("data-camera_id")),
-            "deltaX": parseFloat(((dragPosX - dragOldX) / camera.width) * 90), // yaw delta
-            "deltaY": parseFloat(((dragPosY - dragOldY) / camera.height) * 90) // pitch delta
-        };
-        socket.send(JSON.stringify(JSONEvent));
-        dragOldX = dragPosX;
-        dragOldY = dragPosY;
-    }
-
-    // Pinch functions
-    function watchPinch() {
-        if (scalingFactor == 1 && deltaRotation == 0) return;
-        var JSONEvent = {
-            "event_type": "pinch",
-            "camera_id": parseInt(camera.getAttribute("data-camera_id")),
-            "scale": Math.max(0.1, Math.min(10,scalingFactor)),
-            "rotation": deltaRotation
-        };
-        socket.send(JSON.stringify(JSONEvent));
-        scalingFactor = 1;
-        deltaRotation = 0;
-    }
 
     ///////////////////////////////////////////////////////////
 
@@ -387,15 +356,15 @@
     var overSTART = 0;
     var loopId = 0;
 
-    function sendChangeResolution(change_type, size){
+/*     function sendChangeResolution(change_type, size){
          var JSONEvent = {
-            "event_type": "camera_mod",
+            "event_type": "camera_mod",o
             "camera_id": parseInt(camera.getAttribute("data-camera_id")),
             "size": size
         };
         socket.send(JSON.stringify(JSONEvent));
     }
-
+ */
     window.requestAnimFrame = (function () {
         return window.requestAnimationFrame ||
               window.webkitRequestAnimationFrame ||
@@ -412,15 +381,10 @@
     /*
     * Main camera rendering loop 
     */
-    function cameraLoop() {
-//        requestAnimFrame(cameraLoop);
-        if (looping && ctx != null){
-
-            if (pinching)
-                watchPinch(); // Update pinching
-            if (dragging)
-                watchDrag(); // Update dragging
-
+    function cameraLoop() 
+	{
+        if (looping && ctx != null)
+		{
             ctx.drawImage(img, 0, 0, camera.width, camera.height);
 
             // Button streaming value
@@ -480,89 +444,71 @@
             scale_treshold: 0,
             rotation_treshold: 1,
 
-            tap: false,
+            tap: true,
             tap_double: false,
             hold: false
         });
 
         ////////////////// MULTITOUCH ////////////////////////////
 
-        hammer.ondragstart = function (ev) {
+        hammer.on("dragstart", function (ev) 
+		{
             dragging = true;
-            dragOldX = ev.position.x;
-            dragOldY = ev.position.y;
-        };
-        hammer.ondragend = function (ev) {
+        });
+        hammer.on("dragend", function (ev) 
+		{
             dragging = false;
-        };
-        hammer.ondrag = function (ev) {
-            if (ev.touches.length > 1) return;
-            dragPosX = ev.position.x;
-            dragPosY = parseInt(ev.position.y); // y is floating by default, so cast it
-        };
+        });
+		
+        hammer.on("drag", function (ev) 
+		{
+			var JSONEvent = {
+				"event_type": "drag",
+				"camera_id": parseInt(camera.getAttribute("data-camera_id")),
+				"x": ev.gesture.center.pageX,
+				"y": ev.gesture.center.pageY
+			};
+			socket.send(JSON.stringify(JSONEvent));
+        });
 
-        hammer.onswipe = function (ev) { };
-
-        hammer.ontap = function (ev) { };
-        hammer.ondoubletap = function (ev) { };
-
-        hammer.ontransformstart = function (ev) {
+        hammer.on("tap", function (ev)
+		{ 
+			var JSONEvent = {
+				"event_type": "tap",
+				"camera_id": parseInt(camera.getAttribute("data-camera_id")),
+				"x": ev.gesture.center.pageX, 
+				"y": ev.gesture.center.pageY
+			};
+			socket.send(JSON.stringify(JSONEvent));
+		});
+		
+        hammer.on("transformstart", function (ev) {
             dragging = false;
             pinching = true;
             pinchOldRotation = 0;
             deltaRotation = 0;
             scalingFactor = 1;
-        };
-        hammer.ontransformend = function (ev) {
+        });
+        hammer.on("transformend", function (ev) {
             pinching = false;
             scalingFactor = 1;
             deltaRotation = 0;
-        };
-        hammer.ontransform = function (ev) {
+        });
+        hammer.on("transform", function (ev) {
             dragging = false; // Avoid overlapping of drag and pinch events
-            scalingFactor *= parseFloat(ev.scale);
-            deltaRotation += ( parseFloat(ev.rotation) - pinchOldRotation );
-            pinchOldRotation = parseFloat(ev.rotation);
-        };
+            scalingFactor *= parseFloat(ev.gesture.scale);
+            deltaRotation += ( parseFloat(ev.gesture.rotation) - pinchOldRotation );
+            pinchOldRotation = parseFloat(ev.gesture.rotation);
+        });
 
-        hammer.onrelease = function (ev) { };
-        hammer.onhold = function (ev) { };
-
-
-        // TEST
-//        if (navigator.getUserMedia) {
-//            navigator.getUserMedia({ audio: true }, audioCallback);
-//        }
-//        else if (navigator.webkitGetUserMedia) {
-//            navigator.webkitGetUserMedia({ audio: true }, audioCallback);
-//        }
-//        else {
-//            alert("No audio");
-//        }
+        hammer.on("release", function (ev) 
+		{ 
+		});
+		
+        hammer.on("hold", function (ev) { 
+		});
 
     }
-
-//    var rec;
-//    var intervalKey;
-
-//    function audioCallback(stream) {
-//        var context = new webkitAudioContext();
-//        var mediaStreamSource = context.createMediaStreamSource(stream);
-//        rec = new Recorder(mediaStreamSource);
-//        rec.record();
-
-//        // export a wav every second, so we can send it using websockets
-//        intervalKey = setInterval(function() {
-//            rec.exportWAV(function(blob) {
-//                rec.clear();
-////                var JSONEvent = {
-////                    "event_type": "audio",
-////                    "audio_blob": window.btoa(blob)
-//                //                };
-//                socket.send(window.btoa(blob));
-//            });
-//        }, 1000);
-//    }
 
     ///////////////////////////////////////////////////////////
     //////////////////// Google Maps  /////////////////////////

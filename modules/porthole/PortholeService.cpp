@@ -137,6 +137,13 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 			break;
 		}
 
+		else if (in && strcmp((char*)in, "/hammer.js") == 0) {
+			if (libwebsockets_serve_http_file(wsi,
+			     (DATA_PATH+"/hammer.js").c_str(), "application/javascript"))
+				fprintf(stderr, "Failed to send hammer.js\n");
+			break;
+		}
+
 		else if (in && strcmp((char*)in, "/wheel.png") == 0) {
 			if (libwebsockets_serve_http_file(wsi,
 			     (DATA_PATH+"/wheel.png").c_str(), "image/png"))
@@ -278,7 +285,6 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
 /* websocket protocol */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -360,9 +366,10 @@ inline void print(json_value *value, int ident = 0)
 #define MSG_ORIENTATION "orientation"
 #define MSG_FIRST_TIME "first_time"
 
+#define MSG_EVENT_TAP "tap"
 #define MSG_EVENT_DRAG "drag"
-#define MSG_DELTA_X "deltaX"
-#define MSG_DELTA_Y "deltaY"
+#define MSG_X "x"
+#define MSG_Y "y"
 
 #define MSG_CAMERA_ID "camera_id"
 
@@ -382,7 +389,7 @@ inline void print(json_value *value, int ident = 0)
 ///////////////////////////////////////////////////////////////////////////////
 struct recv_message{
     string event_type;
-    float deltaX,deltaY;
+    float x,y;
 	float scale; // This value ranges about {0,2;6}: >1 is zoom in, <1 is zoom out
 	float deltaRotation;
 	int width,height;
@@ -399,8 +406,8 @@ struct recv_message{
 ///////////////////////////////////////////////////////////////////////////////
 // This is the function that handle the event received by the client,
 // that has the per_session_data structure associated
-inline void parse_json_message(json_value *value, per_session_data* data, recv_message* message){
-
+inline void parse_json_message(json_value *value, per_session_data* data, recv_message* message)
+{
     switch(value->type)
     {
     case JSON_NULL:
@@ -441,7 +448,6 @@ inline void parse_json_message(json_value *value, per_session_data* data, recv_m
 
         break;
     case JSON_INT:
-
 		// Width and Height
 		if (strcmp(value->name, MSG_WIDTH) == 0)
             message->width = value->int_value;
@@ -456,17 +462,14 @@ inline void parse_json_message(json_value *value, per_session_data* data, recv_m
 		else if (strcmp(value->name, MSG_FIRST_TIME) == 0)
             message->firstTime = (value->int_value == 1 )? true : false;
 
+		else if (strcmp(value->name, MSG_X) == 0)
+            message->x = value->int_value;
+		else if (strcmp(value->name, MSG_Y) == 0)
+            message->y = value->int_value;
         break;
     case JSON_FLOAT:
-
-		// Delta X and Y
-		if (strcmp(value->name, MSG_DELTA_X) == 0)
-            message->deltaX = value->float_value;
-		else if (strcmp(value->name, MSG_DELTA_Y) == 0)
-            message->deltaY = value->float_value;
-
 		// Scale and Rotation
-		else if (strcmp(value->name, MSG_DELTA_SCALE) == 0)
+		if (strcmp(value->name, MSG_DELTA_SCALE) == 0)
 			message->scale = value->float_value;
 		else if (strcmp(value->name, MSG_DELTA_ROTATION) == 0)
 			message->deltaRotation = value->float_value;
@@ -479,84 +482,31 @@ inline void parse_json_message(json_value *value, per_session_data* data, recv_m
     case JSON_BOOL:
         break;
     }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 inline void handle_message(per_session_data* data, recv_message* message, 
-		struct libwebsocket_context *context, struct libwebsocket *wsi){
-
-	/**
-	 * DRAG -> One finger or mouse action on camera canvas
-	**/
-	if (strcmp(message->event_type.c_str(),MSG_EVENT_DRAG)==0 &&
-		  data->guiManager->isCameraReadyToStream()){
-
-		// Get the corresponding camera to be modified
-		Camera* camera;
-		PortholeCamera* sessionCamera = data->guiManager->getSessionCamera();
-		camera = sessionCamera->camera;
-
-		// Change pitch and yaw
-		Quaternion curOrientation = camera->getOrientation();
-
-		// Create the YAW and PITCH rotation quaternion
-		float yawAngle = message->deltaX * Math::DegToRad;
-		float pitchAngle = message->deltaY * Math::DegToRad;
-		Quaternion orientation = AngleAxis(yawAngle, Vector3f::UnitY()) * AngleAxis(pitchAngle, Vector3f::UnitX()) * AngleAxis(0, Vector3f::UnitZ());
-
-		// Apply rotation
-		camera->setOrientation(curOrientation * orientation);
+		struct libwebsocket_context *context, struct libwebsocket *wsi)
+{
+	if (strcmp(message->event_type.c_str(), MSG_EVENT_DRAG)==0 &&
+		  data->guiManager->isCameraReadyToStream())
+	{
+		PortholeService* svc = data->guiManager->getService();
+		int id = data->guiManager->getSessionCamera()->id;
+		svc->postEvent(Event::Move, id, message->x, message->y);
     }
 
-	/**
-	 * PINCH -> Two fingers on camera canvas
-	**/
-	else if (strcmp(message->event_type.c_str(),MSG_EVENT_PINCH)==0 &&
-		data->guiManager->isCameraReadyToStream()){
-
-		/** 
-		 * ZOOM
-		**/
-
-		// Get the corresponding camera to be modified
-		Camera* camera;
-		PortholeCamera* sessionCamera = data->guiManager->getSessionCamera();
-		camera = sessionCamera->camera;
-
-		// Current position
-		Vector3f myPosition = camera->getPosition();
-
-		// Zoom in
-		if (message->scale > 1){
-			myPosition[2] -= ZOOM_STEP*message->scale;
-		}
-		// Zoom out
-		else if (message->scale < 1)
-			myPosition[2] += ZOOM_STEP/message->scale;
-
-		// Apply zoom
-		camera->setPosition(myPosition);
-
-		/** 
-		 * ROTATION
-		**/
-
-		// Current orientation
-		Quaternion curOrientation = camera->getOrientation();
-
-		// Create the ROLL rotation quaternion
-		float rollAngle = message->deltaRotation * Math::DegToRad;
-		Quaternion orientation = AngleAxis(0, Vector3f::UnitY()) * AngleAxis(0, Vector3f::UnitX()) * AngleAxis(rollAngle, Vector3f::UnitZ());
-
-		// Apply rotation
-		camera->setOrientation(curOrientation * orientation);
-
+	if (strcmp(message->event_type.c_str(),MSG_EVENT_TAP)==0 &&
+		  data->guiManager->isCameraReadyToStream())
+	{
+		PortholeService* svc = data->guiManager->getService();
+		int id = data->guiManager->getSessionCamera()->id;
+		svc->postEvent(Event::Click, id, message->x, message->y);
     }
 
 	// First message received is a device spec message
-	else if (strcmp(message->event_type.c_str(),MSG_EVENT_SPEC)==0){
-
+	else if (strcmp(message->event_type.c_str(),MSG_EVENT_SPEC)==0)
+	{
 		// Save device specification
 		data->guiManager->setDeviceSpecifications(message->width,message->height,message->orientation);
 
@@ -586,8 +536,8 @@ inline void handle_message(per_session_data* data, recv_message* message,
 int ServerThread::callback_websocket(struct libwebsocket_context *context,
 			struct libwebsocket *wsi,
 			enum libwebsocket_callback_reasons reason,
-					       void *user, void *in, size_t len){
-
+					       void *user, void *in, size_t len)
+{
 	int n;
 	struct per_session_data *data = (per_session_data*) user;
 
@@ -695,14 +645,11 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		json_value *root = json_parse((char*)in, &errorPos, &errorDesc, &errorLine, &allocator);
 		if (root)
 		{
-            //print(root);
-
 			// Fill message object
             parse_json_message(root, data, &message);
 
 			// Handle message received
             handle_message(data, &message, context, wsi);
-
 		}
 
 		break;
@@ -733,8 +680,8 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /* list of supported protocols and callbacks */
-struct libwebsocket_protocols protocols[] = {
-
+struct libwebsocket_protocols protocols[] = 
+{
 	/* first protocol must always be HTTP handler */
 	{
 		"http-only",		/* name */
@@ -772,11 +719,13 @@ use_ssl(0), opts(0), n(0)
 
 	//setPollPriority(Service::PollLast);
 
-	if (!use_ssl){
+	if (!use_ssl)
+	{
 		cert_path = "";
 		key_path = "";
 	}
-	else{
+	else
+	{
 		cert_path = (DATA_PATH+"/server.pem").c_str();
 		key_path = (DATA_PATH+"/server.key.pem").c_str();
 	}
@@ -784,7 +733,8 @@ use_ssl(0), opts(0), n(0)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-ServerThread::~ServerThread(){
+ServerThread::~ServerThread()
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -800,18 +750,20 @@ void ServerThread::setFunctionsBinder(PortholeFunctionsBinder* binder)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void ServerThread::setXMLfile(char* xmlPath){
+void ServerThread::setXMLfile(char* xmlPath)
+{
 	PortholeGUI::parseXmlFile(xmlPath);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void ServerThread::setCSSPath(char* cssPath){
+void ServerThread::setCSSPath(char* cssPath)
+{
 	css_path = std::string(cssPath);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void ServerThread::threadProc(){
-
+void ServerThread::threadProc()
+{
 	// Buffer used to send/receive data using websockets
 	unsigned char buf[LWS_SEND_BUFFER_PRE_PADDING + 1024 +
 						  LWS_SEND_BUFFER_POST_PADDING];
@@ -835,7 +787,8 @@ void ServerThread::threadProc(){
 	//fprintf(stderr, " Using no-fork service loop\n");
 	oldus = 0;
 	n = 0;
-	while (n >= 0 && !SystemManager::instance()->isExitRequested()) {
+	while (n >= 0 && !SystemManager::instance()->isExitRequested()) 
+	{
 		struct timeval tv;
 
 		gettimeofday(&tv, NULL);
@@ -861,32 +814,11 @@ void ServerThread::threadProc(){
 ///////////////////////////////////////////////////////////////////////////////
 PortholeService::PortholeService()
 {
-
-#ifdef PORTHOLE_TEST_DIM
-	remove("Porthole_dim_log.txt");
-	test_dim_cout.open("Porthole_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-	remove("Porthole_enc_log.txt");
-	test_compr_cout.open("Porthole_enc_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_BASE64
-	remove("Porthole_base64_log.txt");
-	test_base64_cout.open("Porthole_base64_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-	remove("Porthole_websocket_log.txt");
-	test_websocket_cout.open("Porthole_websocket_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_GLOBAL
-	remove("Porthole_global_log.txt");
-	test_global_cout.open("Porthole_global_log.txt");
-#endif
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-PortholeService::~PortholeService(){
+PortholeService::~PortholeService()
+{
 	portholeServer->stop();
 	delete portholeServer;
 }
@@ -904,34 +836,32 @@ void PortholeService::start(int port, char* xmlPath, char* cssPath)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void PortholeService::setup(Setting& settings){
-
+void PortholeService::setup(Setting& settings)
+{
 	cout << ">> !! Setup called" << endl;
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void PortholeService::poll(){
-
+void PortholeService::poll()
+{
 //	cout << ">> !! Poll called" << endl;
-	
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
-//                                         BASE64 ENC/DEC                                        //
+//                                         BASE64 ENC/DEC                      
 ///////////////////////////////////////////////////////////////////////////////
 static const std::string base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
 
-
-inline bool is_base64(unsigned char c) {
+inline bool is_base64(unsigned char c) 
+{
   return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-inline std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
+inline std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) 
+{
   std::string ret;
   int i = 0;
   int j = 0;
@@ -1058,4 +988,14 @@ void PortholeService::notifyCameraDestroyed(Camera* cam)
 		String cmd = StringUtils::replaceAll(myCameraDestroyedCommand, "%id%", idstr);
 		i->queueCommand(cmd);
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::postEvent(Event::Type type, int sourceId, int x, int y)
+{
+	lockEvents();
+	Event* evt = writeHead();
+	evt->reset(type, ServiceType::Pointer, sourceId, getServiceId());
+	evt->setPosition(x, y);
+	unlockEvents();
 }

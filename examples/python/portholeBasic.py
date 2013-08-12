@@ -35,3 +35,8 @@ def onUpdate(frame, t, dt):
 	box.yaw(dt / 3)
 	
 setUpdateFunction(onUpdate)
+
+def onEvent():
+	print(getEvent().getPosition())
+setEventFunction(onEvent)
+

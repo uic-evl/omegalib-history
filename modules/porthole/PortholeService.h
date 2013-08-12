@@ -124,6 +124,8 @@ public:
 	virtual void poll();
 	PortholeFunctionsBinder* getFunctionsBinder() { return myBinder; }
 
+	void postEvent(Event::Type type, int sourceId, int x, int y);
+
 	// Server instance. It will manage the incoming connections
 	//thread server_thread;
 	ServerThread* portholeServer;
