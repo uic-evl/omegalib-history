@@ -1,29 +1,35 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
- *  Donghi Daniele			d.donghi@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *  Daniele Donghi			d.donghi@gmail.com
+ *  Alessandro Febretti		febret@gmail.com
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 // Implementation of the HTML5 based interfaces
 #include "PortholeService.h"
 #include "vjson/json.h"
@@ -37,29 +43,12 @@
 using namespace omega;
 using namespace omicron;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef PORTHOLE_TEST_DIM
-	ofstream test_dim_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-	ofstream test_compr_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_BASE64
-	ofstream test_base64_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-	ofstream test_websocket_cout;
-#endif
-#ifdef PORTHOLE_TEST_TIME_GLOBAL
-	ofstream test_global_cout;
-#endif
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Base64 encode/decode functions
 inline string base64_encode(unsigned char const* , unsigned int len);
 inline string base64_decode(string const& s);
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 enum demo_protocols {
 	/* always first */
 	PROTOCOL_HTTP = 0,
@@ -68,7 +57,7 @@ enum demo_protocols {
 	DEMO_PROTOCOL_COUNT
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 /*
  * May be used for filtering allowing connections by the header
  * content
@@ -113,7 +102,7 @@ void ServerThread::dump_handshake_info(struct lws_tokens *lwst)
 	*/
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 /* this protocol server (always the first one) just knows how to do HTTP */
 int ServerThread::callback_http(struct libwebsocket_context *context,
 		struct libwebsocket *wsi,
@@ -145,6 +134,13 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 			if (libwebsockets_serve_http_file(wsi,
 			     (DATA_PATH+"/farbtastic.js").c_str(), "application/javascript"))
 				fprintf(stderr, "Failed to send farbtastic.js\n");
+			break;
+		}
+
+		else if (in && strcmp((char*)in, "/hammer.js") == 0) {
+			if (libwebsockets_serve_http_file(wsi,
+			     (DATA_PATH+"/hammer.js").c_str(), "application/javascript"))
+				fprintf(stderr, "Failed to send hammer.js\n");
 			break;
 		}
 
@@ -218,9 +214,6 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 				content.append("\""
 									"};"
 									"sendContinuous = event.target.getAttribute(\"data-continuous\");"
-#ifdef PORTHOLE_TEST_RTT
-									"RTT_start = (new Date()).getTime();"
-#endif									
 									"socket.send(JSON.stringify(JSONToSend));"
 								"};");
 			}
@@ -243,9 +236,6 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 				content.append("\""
 									"};"
 									"sendContinuous = event.target.getAttribute(\"data-continuous\");"
-#ifdef PORTHOLE_TEST_RTT
-									"RTT_start = (new Date()).getTime();"
-#endif									
 									"socket.send(JSON.stringify(JSONToSend));"
 								"};");
 			}
@@ -294,11 +284,10 @@ int ServerThread::callback_http(struct libwebsocket_context *context,
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////////////
 /* websocket protocol */
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Struct of data to be passed across the entire session
 struct per_session_data {
 	PortholeGUI* guiManager;
@@ -306,7 +295,7 @@ struct per_session_data {
 	std::string test_flag;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void sendHtmlElements(bool firstTime, struct per_session_data* data, struct libwebsocket_context *context,
 		struct libwebsocket *wsi){
 
@@ -330,7 +319,7 @@ void sendHtmlElements(bool firstTime, struct per_session_data* data, struct libw
 		return;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // JSON simple print
 #define IDENT(n) for (int i = 0; i < n; ++i) printf("    ")
 inline void print(json_value *value, int ident = 0)
@@ -368,7 +357,7 @@ inline void print(json_value *value, int ident = 0)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 #define MSG_EVENT_TYPE "event_type"
 
 #define MSG_EVENT_SPEC "device_spec"
@@ -377,9 +366,10 @@ inline void print(json_value *value, int ident = 0)
 #define MSG_ORIENTATION "orientation"
 #define MSG_FIRST_TIME "first_time"
 
+#define MSG_EVENT_TAP "tap"
 #define MSG_EVENT_DRAG "drag"
-#define MSG_DELTA_X "deltaX"
-#define MSG_DELTA_Y "deltaY"
+#define MSG_X "x"
+#define MSG_Y "y"
 
 #define MSG_CAMERA_ID "camera_id"
 
@@ -396,10 +386,10 @@ inline void print(json_value *value, int ident = 0)
 #define MSG_EVENT_CAMERA_MOD "camera_mod"
 #define MSG_CAMERA_SIZE "size"
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 struct recv_message{
     string event_type;
-    float deltaX,deltaY;
+    float x,y;
 	float scale; // This value ranges about {0,2;6}: >1 is zoom in, <1 is zoom out
 	float deltaRotation;
 	int width,height;
@@ -413,11 +403,11 @@ struct recv_message{
 	string value;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // This is the function that handle the event received by the client,
 // that has the per_session_data structure associated
-inline void parse_json_message(json_value *value, per_session_data* data, recv_message* message){
-
+inline void parse_json_message(json_value *value, per_session_data* data, recv_message* message)
+{
     switch(value->type)
     {
     case JSON_NULL:
@@ -458,7 +448,6 @@ inline void parse_json_message(json_value *value, per_session_data* data, recv_m
 
         break;
     case JSON_INT:
-
 		// Width and Height
 		if (strcmp(value->name, MSG_WIDTH) == 0)
             message->width = value->int_value;
@@ -473,17 +462,14 @@ inline void parse_json_message(json_value *value, per_session_data* data, recv_m
 		else if (strcmp(value->name, MSG_FIRST_TIME) == 0)
             message->firstTime = (value->int_value == 1 )? true : false;
 
+		else if (strcmp(value->name, MSG_X) == 0)
+            message->x = value->int_value;
+		else if (strcmp(value->name, MSG_Y) == 0)
+            message->y = value->int_value;
         break;
     case JSON_FLOAT:
-
-		// Delta X and Y
-		if (strcmp(value->name, MSG_DELTA_X) == 0)
-            message->deltaX = value->float_value;
-		else if (strcmp(value->name, MSG_DELTA_Y) == 0)
-            message->deltaY = value->float_value;
-
 		// Scale and Rotation
-		else if (strcmp(value->name, MSG_DELTA_SCALE) == 0)
+		if (strcmp(value->name, MSG_DELTA_SCALE) == 0)
 			message->scale = value->float_value;
 		else if (strcmp(value->name, MSG_DELTA_ROTATION) == 0)
 			message->deltaRotation = value->float_value;
@@ -496,90 +482,31 @@ inline void parse_json_message(json_value *value, per_session_data* data, recv_m
     case JSON_BOOL:
         break;
     }
-
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 inline void handle_message(per_session_data* data, recv_message* message, 
-		struct libwebsocket_context *context, struct libwebsocket *wsi){
-
-	/**
-	 * DRAG -> One finger or mouse action on camera canvas
-	**/
-	if (strcmp(message->event_type.c_str(),MSG_EVENT_DRAG)==0 &&
-		  data->guiManager->isCameraReadyToStream()){
-
-		// Get the corresponding camera to be modified
-		Camera* camera;
-		PortholeCamera* sessionCamera = data->guiManager->getSessionCamera();
-		if (sessionCamera->followDefault == true)
-			camera = Engine::instance()->getDefaultCamera();
-		else
-			camera = sessionCamera->camera;
-
-		// Change pitch and yaw
-		Quaternion curOrientation = camera->getOrientation();
-
-		// Create the YAW and PITCH rotation quaternion
-		float yawAngle = message->deltaX * Math::DegToRad;
-		float pitchAngle = message->deltaY * Math::DegToRad;
-		Quaternion orientation = AngleAxis(yawAngle, Vector3f::UnitY()) * AngleAxis(pitchAngle, Vector3f::UnitX()) * AngleAxis(0, Vector3f::UnitZ());
-
-		// Apply rotation
-		camera->setOrientation(curOrientation * orientation);
+		struct libwebsocket_context *context, struct libwebsocket *wsi)
+{
+	if (strcmp(message->event_type.c_str(), MSG_EVENT_DRAG)==0 &&
+		  data->guiManager->isCameraReadyToStream())
+	{
+		PortholeService* svc = data->guiManager->getService();
+		int id = data->guiManager->getSessionCamera()->id;
+		svc->postEvent(Event::Move, id, message->x, message->y);
     }
 
-	/**
-	 * PINCH -> Two fingers on camera canvas
-	**/
-	else if (strcmp(message->event_type.c_str(),MSG_EVENT_PINCH)==0 &&
-		data->guiManager->isCameraReadyToStream()){
-
-		/** 
-		 * ZOOM
-		**/
-
-		// Get the corresponding camera to be modified
-		Camera* camera;
-		PortholeCamera* sessionCamera = data->guiManager->getSessionCamera();
-		if (sessionCamera->followDefault == true)
-			camera = Engine::instance()->getDefaultCamera();
-		else
-			camera = sessionCamera->camera;
-
-		// Current position
-		Vector3f myPosition = camera->getPosition();
-
-		// Zoom in
-		if (message->scale > 1){
-			myPosition[2] -= ZOOM_STEP*message->scale;
-		}
-		// Zoom out
-		else if (message->scale < 1)
-			myPosition[2] += ZOOM_STEP/message->scale;
-
-		// Apply zoom
-		camera->setPosition(myPosition);
-
-		/** 
-		 * ROTATION
-		**/
-
-		// Current orientation
-		Quaternion curOrientation = camera->getOrientation();
-
-		// Create the ROLL rotation quaternion
-		float rollAngle = message->deltaRotation * Math::DegToRad;
-		Quaternion orientation = AngleAxis(0, Vector3f::UnitY()) * AngleAxis(0, Vector3f::UnitX()) * AngleAxis(rollAngle, Vector3f::UnitZ());
-
-		// Apply rotation
-		camera->setOrientation(curOrientation * orientation);
-
+	if (strcmp(message->event_type.c_str(),MSG_EVENT_TAP)==0 &&
+		  data->guiManager->isCameraReadyToStream())
+	{
+		PortholeService* svc = data->guiManager->getService();
+		int id = data->guiManager->getSessionCamera()->id;
+		svc->postEvent(Event::Click, id, message->x, message->y);
     }
 
 	// First message received is a device spec message
-	else if (strcmp(message->event_type.c_str(),MSG_EVENT_SPEC)==0){
-
+	else if (strcmp(message->event_type.c_str(),MSG_EVENT_SPEC)==0)
+	{
 		// Save device specification
 		data->guiManager->setDeviceSpecifications(message->width,message->height,message->orientation);
 
@@ -605,12 +532,12 @@ inline void handle_message(per_session_data* data, recv_message* message,
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int ServerThread::callback_websocket(struct libwebsocket_context *context,
 			struct libwebsocket *wsi,
 			enum libwebsocket_callback_reasons reason,
-					       void *user, void *in, size_t len){
-
+					       void *user, void *in, size_t len)
+{
 	int n;
 	struct per_session_data *data = (per_session_data*) user;
 
@@ -619,14 +546,15 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 	/* On connection estabilished */
 	case LWS_CALLBACK_ESTABLISHED:
 	{
-
+		char cliname[1024];
+		char cliip[1024];
+		int fd = libwebsocket_get_socket_fd(wsi);
+		libwebsockets_get_peer_addresses(fd, cliname, 1024, cliip, 1024);
+		String cliName = ostr("%1%:%2%:%3%", %fd %cliip %cliname);
+		service->notifyConnected(cliName);
 		// Allocate gui manager
-		data->guiManager = new PortholeGUI(service);
+		data->guiManager = new PortholeGUI(service, cliName);
 		data->oldus = 0;
-
-#ifdef PORTHOLE_TEST_RTT
-		data->test_flag = "false";
-#endif
 
 		break;
 	}
@@ -657,65 +585,27 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		Camera* camera = sessionCamera->camera;
 		PixelData* canvas = sessionCamera->canvas;
 
-		// If camera need to be equal to default camera, update position
-		if (sessionCamera->followDefault){
-			Camera* defaultCamera = Engine::instance()->getDefaultCamera();
-			camera->setPosition(defaultCamera->getPosition() + defaultCamera->getHeadOffset());
-			camera->setOrientation(defaultCamera->getOrientation());
-		}
-
 		// IMAGE ENCODING
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-		gettimeofday(&tv, NULL);
-		unsigned long long compr_start =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-#endif
 		// Get camera image as JPEG/PNG and base64 encode it, because only simple strings could be sent via websockets  
 		// Multithreading stuff: Lock the camera output, to make sure the pixel data we are getting 
 		// is not coming from an unfinished frame.
 		camera->getOutput(0)->lock();
 		ByteArray* png = ImageUtils::encode(canvas, ImageUtils::FormatJpeg);
+		//FILE* pf = fopen("./test.jpg", "wb");
+		//fwrite((void*)png->getData(), 1, png->getSize(), pf);
+		//fclose(pf);
 		camera->getOutput(0)->unlock();
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-		gettimeofday(&tv, NULL);
-		unsigned long long compr_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_compr_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  (compr_end - compr_start) << std::endl; 
-#endif
 		// END IMAGE ENCODING
 
 		// BASE64 ENCODING
-#ifdef PORTHOLE_TEST_TIME_BASE64
-		gettimeofday(&tv, NULL);
-		unsigned long long base64_start =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-#endif
 		std::string base64image = base64_encode(png->getData(),png->getSize());
-#ifdef PORTHOLE_TEST_TIME_BASE64
-		gettimeofday(&tv, NULL);
-		unsigned long long base64_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_base64_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  (base64_end - base64_start) << std::endl; 
-#endif
 		// END BASE64 ENCODING
 
 		// String to be send: base64 image and camera id
 		string toSend = "{\"event_type\":\"stream\",\"base64image\":\"";
 		toSend.append(base64image.c_str());
 		toSend.append("\",\"camera_id\":" + boost::lexical_cast<string>(sessionCamera->id) +
-#ifdef PORTHOLE_TEST_RTT
-			",\"test_flag\":" + data->test_flag + "}");
-#else
 			"}");
-#endif
-
-#ifdef PORTHOLE_TEST_DIM
-		test_dim_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  toSend.length() << std::endl;
-#endif
 
 		// Send the base64 image
 		unsigned char* buf;
@@ -724,42 +614,17 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		n = sprintf((char *)p, "%s",toSend.c_str());
 
 		// WEBSOCKET WRITE
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-		gettimeofday(&tv, NULL);
-		unsigned long long websocket_start =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-#endif
 		n = libwebsocket_write(wsi, p, n, LWS_WRITE_TEXT);
 		if (n < 0) {
 			fprintf(stderr, "ERROR writing to socket");
 			return 1;
 		}
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-		gettimeofday(&tv, NULL);
-		unsigned long long websocket_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_websocket_cout << canvas->getWidth() << "," << canvas->getHeight() << "," << (websocket_end - websocket_start) << std::endl;
-#endif
-
-#ifdef PORTHOLE_TEST_TIME_GLOBAL
-		gettimeofday(&tv, NULL);
-		unsigned long long global_end =
-			(unsigned long long)(tv.tv_sec) * 1000 +
-			(unsigned long long)(tv.tv_usec) / 1000;
-		test_global_cout << canvas->getWidth() << "," << canvas->getHeight() << "," <<  (global_end - millisecondsSinceEpoch) << std::endl; 
-#endif
 
 		// Free the buffer
 		delete[] buf;
 
 		// Save new timestamp
 		data->oldus = millisecondsSinceEpoch;
-
-#ifdef PORTHOLE_TEST_RTT
-		data->test_flag = "false";
-#endif
 
 		// Pass the token
 		libwebsocket_callback_on_writable(context, wsi);
@@ -780,17 +645,11 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		json_value *root = json_parse((char*)in, &errorPos, &errorDesc, &errorLine, &allocator);
 		if (root)
 		{
-            //print(root);
-
 			// Fill message object
             parse_json_message(root, data, &message);
 
 			// Handle message received
             handle_message(data, &message, context, wsi);
-
-#ifdef PORTHOLE_TEST_RTT
-			data->test_flag = "true";
-#endif
 		}
 
 		break;
@@ -802,6 +661,12 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 
 	case LWS_CALLBACK_CLOSED:
 	{
+		char cliname[1024];
+		char cliip[1024];
+		int fd = libwebsocket_get_socket_fd(wsi);
+		libwebsockets_get_peer_addresses(fd, cliname, 1024, cliip, 1024);
+		String cliName = ostr("%1%:%2%:%3%", %fd %cliip %cliname);
+		service->notifyDisconnected(cliName);
 		// Call gui destructor
 		delete data->guiManager;
 		break;
@@ -815,8 +680,8 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /* list of supported protocols and callbacks */
-struct libwebsocket_protocols protocols[] = {
-
+struct libwebsocket_protocols protocols[] = 
+{
 	/* first protocol must always be HTTP handler */
 	{
 		"http-only",		/* name */
@@ -839,7 +704,7 @@ struct libwebsocket_protocols protocols[] = {
 
 PortholeService* ServerThread::service = NULL;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ServerThread::ServerThread(PortholeService* owner):
 use_ssl(0), opts(0), n(0)
 {
@@ -854,46 +719,51 @@ use_ssl(0), opts(0), n(0)
 
 	//setPollPriority(Service::PollLast);
 
-	if (!use_ssl){
+	if (!use_ssl)
+	{
 		cert_path = "";
 		key_path = "";
 	}
-	else{
+	else
+	{
 		cert_path = (DATA_PATH+"/server.pem").c_str();
 		key_path = (DATA_PATH+"/server.key.pem").c_str();
 	}
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-ServerThread::~ServerThread(){
+///////////////////////////////////////////////////////////////////////////////
+ServerThread::~ServerThread()
+{
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ServerThread::setPort(int portNumber)
 {
 	this->port = portNumber;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void ServerThread::setFunctionsBinder(PortholeFunctionsBinder* binder)
 {
 	PortholeGUI::setPortholeFunctionsBinder(binder);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void ServerThread::setXMLfile(char* xmlPath){
+///////////////////////////////////////////////////////////////////////////////
+void ServerThread::setXMLfile(char* xmlPath)
+{
 	PortholeGUI::parseXmlFile(xmlPath);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void ServerThread::setCSSPath(char* cssPath){
+///////////////////////////////////////////////////////////////////////////////
+void ServerThread::setCSSPath(char* cssPath)
+{
 	css_path = std::string(cssPath);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void ServerThread::threadProc(){
-
+///////////////////////////////////////////////////////////////////////////////
+void ServerThread::threadProc()
+{
 	// Buffer used to send/receive data using websockets
 	unsigned char buf[LWS_SEND_BUFFER_PRE_PADDING + 1024 +
 						  LWS_SEND_BUFFER_POST_PADDING];
@@ -917,7 +787,8 @@ void ServerThread::threadProc(){
 	//fprintf(stderr, " Using no-fork service loop\n");
 	oldus = 0;
 	n = 0;
-	while (n >= 0) {
+	while (n >= 0 && !SystemManager::instance()->isExitRequested()) 
+	{
 		struct timeval tv;
 
 		gettimeofday(&tv, NULL);
@@ -940,40 +811,19 @@ void ServerThread::threadProc(){
 	libwebsocket_context_destroy(context);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PortholeService::PortholeService()
 {
-
-#ifdef PORTHOLE_TEST_DIM
-	remove("Porthole_dim_log.txt");
-	test_dim_cout.open("Porthole_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_COMPRESSION
-	remove("Porthole_enc_log.txt");
-	test_compr_cout.open("Porthole_enc_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_BASE64
-	remove("Porthole_base64_log.txt");
-	test_base64_cout.open("Porthole_base64_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_WEBSOCKET
-	remove("Porthole_websocket_log.txt");
-	test_websocket_cout.open("Porthole_websocket_log.txt");
-#endif
-#ifdef PORTHOLE_TEST_TIME_GLOBAL
-	remove("Porthole_global_log.txt");
-	test_global_cout.open("Porthole_global_log.txt");
-#endif
-
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-PortholeService::~PortholeService(){
+///////////////////////////////////////////////////////////////////////////////
+PortholeService::~PortholeService()
+{
 	portholeServer->stop();
 	delete portholeServer;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PortholeService::start(int port, char* xmlPath, char* cssPath)
 {
 	myBinder = new PortholeFunctionsBinder();
@@ -985,35 +835,33 @@ void PortholeService::start(int port, char* xmlPath, char* cssPath)
 	portholeServer->start();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PortholeService::setup(Setting& settings){
-
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::setup(Setting& settings)
+{
 	cout << ">> !! Setup called" << endl;
-
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PortholeService::poll(){
-
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::poll()
+{
 //	cout << ">> !! Poll called" << endl;
-	
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-//                                         BASE64 ENC/DEC                                        //
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//                                         BASE64 ENC/DEC                      
+///////////////////////////////////////////////////////////////////////////////
 static const std::string base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
 
-
-inline bool is_base64(unsigned char c) {
+inline bool is_base64(unsigned char c) 
+{
   return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-inline std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
+inline std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) 
+{
   std::string ret;
   int i = 0;
   int j = 0;
@@ -1096,4 +944,58 @@ inline std::string base64_decode(std::string const& encoded_string) {
 
   return ret;
 }
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyConnected(const String& id)
+{
+	if(!myConnectedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String cmd = StringUtils::replaceAll(myConnectedCommand, "%id%", id);
+		i->queueCommand(cmd);
+	}
+}
 
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyDisconnected(const String& id)
+{
+	if(!myDisconnectedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String cmd = StringUtils::replaceAll(myConnectedCommand, "%id%", id);
+		i->queueCommand(cmd);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyCameraCreated(Camera* cam)
+{
+	if(!myCameraCreatedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String idstr = ostr("%1%", %cam->getCameraId());
+		String cmd = StringUtils::replaceAll(myCameraCreatedCommand, "%id%", idstr);
+		i->queueCommand(cmd);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::notifyCameraDestroyed(Camera* cam)
+{
+	if(!myCameraDestroyedCommand.empty())
+	{
+		PythonInterpreter* i = SystemManager::instance()->getScriptInterpreter();
+		String idstr = ostr("%1%", %cam->getCameraId());
+		String cmd = StringUtils::replaceAll(myCameraDestroyedCommand, "%id%", idstr);
+		i->queueCommand(cmd);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PortholeService::postEvent(Event::Type type, int sourceId, int x, int y)
+{
+	lockEvents();
+	Event* evt = writeHead();
+	evt->reset(type, ServiceType::Pointer, sourceId, getServiceId());
+	evt->setPosition(x, y);
+	unlockEvents();
+}

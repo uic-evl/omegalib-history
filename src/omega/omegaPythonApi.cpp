@@ -610,6 +610,12 @@ Camera* getCamera(const String& name)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+Camera* getCameraById(int id)
+{
+	return Engine::instance()->getCameraById(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 Camera* getOrCreateCamera(const String& name)
 {
 	Camera* cam = Engine::instance()->getCamera(name);
@@ -1079,6 +1085,7 @@ BOOST_PYTHON_MODULE(omega)
 	void (Node::*removeChildByIndex)(unsigned short) = &Node::removeChild;
 
 	void (Node::*rotate1)(const Vector3f& axis, const float& angle, Node::TransformSpace relativeTo) = &Node::rotate;
+	void (Node::*rotate2)(const	Quaternion& q, Node::TransformSpace relativeTo) = &Node::rotate;
 	void (Node::*translate1)(const Vector3f&, Node::TransformSpace relativeTo) = &Node::translate;
 	void (Node::*translate2)(float, float, float, Node::TransformSpace relativeTo) = &Node::translate;
 
@@ -1095,6 +1102,7 @@ BOOST_PYTHON_MODULE(omega)
 		.def("pitch", &Node::pitch, NodePitchOverloads())
 		.def("roll", &Node::roll, NodeRollOverloads())
 		.def("rotate", rotate1)
+		.def("rotate", rotate2)
 		.def("translate", translate1)
 		.def("translate", translate2)
 
@@ -1162,9 +1170,10 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(DisplayTileConfig, setPixelSize)
 		;
 
-
 	// Camera
 	PYAPI_REF_CLASS(Camera, Node)
+		PYAPI_METHOD(Camera, setEnabled)
+		PYAPI_METHOD(Camera, isEnabled)
 		PYAPI_REF_GETTER(Camera, getCustomTileConfig)
 		PYAPI_REF_GETTER(Camera, getController)
 		PYAPI_METHOD(Camera, setController)
@@ -1188,6 +1197,13 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(Camera, getViewPosition)
 		PYAPI_METHOD(Camera, setViewSize)
 		PYAPI_GETTER(Camera, getViewSize)
+		PYAPI_METHOD(Camera, getCameraId)
+		PYAPI_METHOD(Camera, setMask)
+		PYAPI_METHOD(Camera, getMask)
+		PYAPI_METHOD(Camera, isSceneEnabled)
+		PYAPI_METHOD(Camera, setSceneEnabled)
+		PYAPI_METHOD(Camera, isOverlayEnabled)
+		PYAPI_METHOD(Camera, setOverlayEnabled)
 		;
 
 	// Color
@@ -1319,6 +1335,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getEngine", getEngine, PYAPI_RETURN_REF);
 	def("getDefaultCamera", getDefaultCamera, PYAPI_RETURN_REF);
 	def("getCamera", getCamera, PYAPI_RETURN_REF);
+	def("getCameraById", getCameraById, PYAPI_RETURN_REF);
 	def("getOrCreateCamera", getOrCreateCamera, PYAPI_RETURN_REF);
 	def("getScene", getScene, PYAPI_RETURN_REF);
 	def("getSoundEnvironment", getSoundEnvironment, PYAPI_RETURN_REF);

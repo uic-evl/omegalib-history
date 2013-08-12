@@ -81,48 +81,6 @@ class SceneView : public osg::Object, public osg::CullSettings
 			return (_camera->getNumChildren()>childNo) ? _camera->getChild(childNo) : 0; 
 		}
 
-        /** Get the const scene data which to view. The data will typically be
-         *  an osg::Scene but can be any osg::Node type.
-         */
-        //const osg::Node* getSceneData(unsigned int childNo=0) const { return (_camera->getNumChildren()>childNo) ? _camera->getChild(childNo) : 0; }
-        
-        /** Get the number of scene data subgraphs added to the SceneView's camera.*/
-        //unsigned int getNumSceneData() const { return _camera->getNumChildren(); }
-
-        /** Set the viewport of the scene view to use specified osg::Viewport. */
-        //void setViewport(osg::Viewport* viewport) { _camera->setViewport(viewport); }
-
-        /** Set the viewport of the scene view to specified dimensions. */
-        //void setViewport(int x,int y,int width,int height) { _camera->setViewport(x,y,width,height); }
-
-        /** Get the viewport. */
-        //osg::Viewport* getViewport() { return (_camera->getViewport()!=0) ? _camera->getViewport() : 0; }
-
-        /** Get the const viewport. */
-        //const osg::Viewport* getViewport() const { return (_camera->getViewport()!=0) ? _camera->getViewport() : 0; }
-        
-        /** Set the DisplaySettings. */
-        //inline void setDisplaySettings(osg::DisplaySettings* vs) { _displaySettings = vs; }
-        
-        /** Get the const DisplaySettings */
-        //inline const osg::DisplaySettings* getDisplaySettings() const { return _displaySettings.get(); }
-
-        /** Get the DisplaySettings */
-        //inline osg::DisplaySettings* getDisplaySettings() { return _displaySettings.get(); }
-
-
-        //void setGlobalStateSet(osg::StateSet* state) { _globalStateSet = state; }
-        //osg::StateSet* getGlobalStateSet() { return _globalStateSet.get(); }
-        //const osg::StateSet* getGlobalStateSet() const { return _globalStateSet.get(); }
-
-        //void setSecondaryStateSet(osg::StateSet* state) { _secondaryStateSet = state; }
-        //osg::StateSet* getSecondaryStateSet() { return _secondaryStateSet.get(); }
-        //const osg::StateSet* getSecondaryStateSet() const { return _secondaryStateSet.get(); }
-
-        //void setLocalStateSet(osg::StateSet* state) { _localStateSet = state; }
-        osg::StateSet* getLocalStateSet() { return _localStateSet.get(); }
-        //const osg::StateSet* getLocalStateSet() const { return _localStateSet.get(); }
-
 		void setAutoNearFar(bool value);
         
         enum ActiveUniforms
@@ -163,35 +121,10 @@ class SceneView : public osg::Object, public osg::CullSettings
         void setRenderInfo(osg::RenderInfo& renderInfo) { _renderInfo = renderInfo; }
         osg::RenderInfo& getRenderInfo() { return _renderInfo; }
         const osg::RenderInfo& getRenderInfo() const { return _renderInfo; }
-        
-        /** Set the projection matrix. Can be thought of as setting the lens of a camera. */
-        //inline void setProjectionMatrix(const osg::Matrixf& matrix) { _camera->setProjectionMatrix(matrix); }
-
-        /** Get the projection matrix.*/
-        //osg::Matrixd& getProjectionMatrix() { return _camera->getProjectionMatrix(); }
-
-        /** Get the const projection matrix.*/
-        //const osg::Matrixd& getProjectionMatrix() const { return _camera->getProjectionMatrix(); }
-
-        /** Set the view matrix. Can be thought of as setting the position of the world relative to the camera in camera coordinates. */
-        //inline void setViewMatrix(const osg::Matrixf& matrix) { _camera->setViewMatrix(matrix); }
-        
-        /** Get the view matrix. */
-        //osg::Matrixd& getViewMatrix() { return _camera->getViewMatrix(); }
-
-        /** Get the const view matrix. */
-        //const osg::Matrixd& getViewMatrix() const { return _camera->getViewMatrix(); }
-
-        /** Get to the position and orientation of a modelview matrix, using the same convention as gluLookAt. */
-        //void getViewMatrixAsLookAt(osg::Vec3& eye,osg::Vec3& center,osg::Vec3& up,float lookDistance=1.0f) const;
 
         void setInitVisitor(osg::NodeVisitor* av) { _initVisitor = av; }
         osg::NodeVisitor* getInitVisitor() { return _initVisitor.get(); }
         const osg::NodeVisitor* getInitVisitor() const { return _initVisitor.get(); }
-
-        //void setUpdateVisitor(osg::NodeVisitor* av) { _updateVisitor = av; }
-        //osg::NodeVisitor* getUpdateVisitor() { return _updateVisitor.get(); }
-        //const osg::NodeVisitor* getUpdateVisitor() const { return _updateVisitor.get(); }
 
         void setCullVisitor(osgUtil::CullVisitor* cv) { _cullVisitor = cv; }
         osgUtil::CullVisitor* getCullVisitor() { return _cullVisitor.get(); }
@@ -222,13 +155,6 @@ class SceneView : public osg::Object, public osg::CullSettings
 
         /** Get the draw buffer value used at the start of each frame draw. */
         GLenum getDrawBufferValue() const { return _camera->getDrawBuffer(); }
-
-
-        /** Set whether the draw method should call renderer->prioritizeTexture.*/
-        //void setPrioritizeTextures(bool pt) { _prioritizeTextures = pt; }
-        
-        /** Get whether the draw method should call renderer->prioritizeTexture.*/
-        //bool getPrioritizeTextures() const { return _prioritizeTextures; }
 
         /** Set the frame stamp for the current frame.*/
         inline void setFrameStamp(osg::FrameStamp* fs) { _frameStamp = fs; }
@@ -290,7 +216,6 @@ class SceneView : public osg::Object, public osg::CullSettings
         
         bool                                        _initCalled;
         osg::ref_ptr<osg::NodeVisitor>              _initVisitor;
-        //osg::ref_ptr<osg::NodeVisitor>              _updateVisitor;
         osg::ref_ptr<osgUtil::CullVisitor>          _cullVisitor;
         osg::ref_ptr<osgUtil::StateGraph>           _stateGraph;
         osg::ref_ptr<osgUtil::RenderStage>          _renderStage;
@@ -300,16 +225,8 @@ class SceneView : public osg::Object, public osg::CullSettings
         osg::ref_ptr<osg::FrameStamp>               _frameStamp;
         
         osg::observer_ptr<osg::Camera>              _camera;
-        //osg::ref_ptr<osg::Camera>                   _cameraWithOwnership;
-        
-        //osg::ref_ptr<osg::StateSet>                 _globalStateSet;
-        //osg::ref_ptr<osg::DisplaySettings>          _displaySettings;
-        
-        //osg::ref_ptr<osg::StateSet>                 _secondaryStateSet;
 
 		osg::ref_ptr<osgDB::DatabasePager>			_databasePager;
-
-        //float                                       _fusionDistanceValue;
 
         bool                                        _prioritizeTextures;
         

@@ -73,8 +73,6 @@ void DrawContext::drawFrame(uint64 frameNum)
 	if(getCurrentStereoMode() == DisplayTileConfig::Mono)
 	{
 		eye = DrawContext::EyeCyclop;
-		updateViewport();
-		setupInterleaver();
 		// Draw scene
 		task = DrawContext::SceneDrawTask;
 		renderer->draw(*this);
@@ -86,8 +84,6 @@ void DrawContext::drawFrame(uint64 frameNum)
 	{
 		// Draw left eye scene and overlay
 		eye = DrawContext::EyeLeft;
-		updateViewport();
-		setupInterleaver();
 		task = DrawContext::SceneDrawTask;
 		renderer->draw(*this);
 		task = DrawContext::OverlayDrawTask;
@@ -95,8 +91,6 @@ void DrawContext::drawFrame(uint64 frameNum)
 
 		// Draw right eye scene and overlay
 		eye = DrawContext::EyeRight;
-		updateViewport();
-		setupInterleaver();
 		task = DrawContext::SceneDrawTask;
 		renderer->draw(*this);
 		task = DrawContext::OverlayDrawTask;
@@ -104,8 +98,6 @@ void DrawContext::drawFrame(uint64 frameNum)
 
 		// Draw mono overlay
 		eye = DrawContext::EyeCyclop;
-		updateViewport();
-		setupInterleaver();
 		task = DrawContext::OverlayDrawTask;
 		renderer->draw(*this);
 	}
@@ -301,4 +293,176 @@ void DrawContext::initializeStencilInterleaver(int gliWindowWidth, int gliWindow
 	}
 	glStencilOp (GL_KEEP, GL_KEEP, GL_KEEP); // disabling changes in stencil buffer
 	glFlush();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void DrawContext::updateViewBounds(
+	const Vector2f& viewPos, 
+	const Vector2f& viewSize, 
+	const Vector2i& canvasSize)
+{
+	float aw = (float)canvasSize[0] / tile->pixelSize[0];
+	float ah = (float)canvasSize[1] / tile->pixelSize[1];
+	Vector2f a(aw, ah);
+
+	// Convert the tile pixel offset in normalized coordinates
+	Vector2f offset(
+		(float)tile->offset[0] / canvasSize[0],
+		(float)tile->offset[1] / canvasSize[1]);
+
+	viewMin = (viewPos - offset).cwiseProduct(a);
+	viewMax = (viewPos + viewSize - offset).cwiseProduct(a);
+	
+	viewMin = viewMin.cwiseMax(Vector2f::Zero());
+	viewMax = viewMax.cwiseMin(Vector2f::Ones());
+
+	// Adjust the local pixel viewport.
+	viewport.min[0] = viewMin[0] * tile->pixelSize[0];
+	viewport.min[1] = viewMin[1] * tile->pixelSize[1];
+	viewport.max[0] = viewMax[0] * tile->pixelSize[0];
+	viewport.max[1] = viewMax[1] * tile->pixelSize[1];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void DrawContext::updateTransforms(
+	const AffineTransform3& head, 
+	const AffineTransform3& view, 
+	float eyeSeparation,
+	float nearZ,
+	float farZ)
+{
+	DisplaySystem* ds = renderer->getDisplaySystem();
+	DisplayConfig& dcfg = ds->getDisplayConfig();
+	
+	Vector3f pa = tile->bottomLeft;
+	Vector3f pb = tile->bottomRight;
+	Vector3f pc = tile->topLeft;
+	
+	// half eye separation
+	float hes = eyeSeparation / 2;
+	Vector3f pe = Vector3f::Zero();
+	switch(eye)
+	{
+	case EyeLeft:
+		pe[0] = -hes;
+		break;
+	case EyeRight:
+		pe[0] = hes;
+		break;
+	}
+
+	// Transform eye with head position / orientation. After this, eye position
+	// and tile coordinates are all in the same reference frame.
+	if(dcfg.panopticStereoEnabled)
+	{
+		// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
+		AffineTransform3 ht = AffineTransform3::Identity();
+		ht.translate(head.translation());
+		pe = ht.rotate(
+			AngleAxis(-tile->yaw * Math::DegToRad, Vector3f::UnitY())) * pe;
+	}
+	else
+	{
+		pe = head * pe;
+	}
+
+	Vector3f vr = pb - pa;
+	Vector3f vu = pc - pa;
+	Vector3f vn = vr.cross(vu);
+
+	Vector2f viewSize = viewMax - viewMin;
+
+	// Update tile corners based on local view position and size
+	pa = pa + vr * viewMin[0] + vu * viewMin[1];
+	pb = pa + vr * viewSize[0];
+	pc = pa + vu * viewSize[1];
+
+	vr.normalize();
+	vu.normalize();
+	vn.normalize();
+
+	// Compute the screen corner vectors.
+	Vector3f va = pa - pe;
+	Vector3f vb = pb - pe;
+	Vector3f vc = pc - pe;
+
+	// Find distance from eye to screen plane.
+	//Vector3f tm = pe - pa;
+	float d = -(vn.dot(va));
+
+	// Find the extent of the perpendicular projection.
+	float l = vr.dot(va) * nearZ / d;
+	float r = vr.dot(vb) * nearZ / d;
+	float b = vu.dot(va) * nearZ / d;
+	float t = vu.dot(vc) * nearZ / d;
+
+	// Compute the projection matrix. 
+	Transform3 oax;
+	oax.setIdentity();
+	oax(0,0) = 2 * nearZ / (r - l);
+	oax(0,2) = (r + l) / (r - l);
+	oax(1,1) = 2 * nearZ / (t - b);
+	oax(1,2) = (t + b) / (t - b);
+	oax(2,2) = - (farZ + nearZ) / (farZ - nearZ);
+	oax(2,3) = - (2 * farZ * nearZ) / (farZ - nearZ);
+	oax(3,2) = - 1;
+	oax(3,3) = 0;
+
+	projection = oax; 
+	
+	// Compute the view matrix. The view matrix has two main components:
+	// - the navigational component given by myViewTransform, converts points
+	//   from world space to 'camera' space (origin is determined by camera position / orientation)
+	// - the screen plane component, given by the current tile orientation and head position.
+	//   this component converts points from camera space to screen-oriented eye space 
+	//   (that is, origin is at eye position, and orientation is determined by the screen plane,
+	//   with positive Y being screen up vector, X being screen right vector and Z being screen normal)
+	AffineTransform3 newBasis;
+	newBasis.setIdentity();
+	newBasis.data()[0] = vr[0];
+	newBasis.data()[1] = vu[0];
+	newBasis.data()[2] = vn[0];
+
+	newBasis.data()[4] = vr[1];
+	newBasis.data()[5] = vu[1];
+	newBasis.data()[6] = vn[1];
+
+	newBasis.data()[8] = vr[2];
+	newBasis.data()[9] = vu[2];
+	newBasis.data()[10] = vn[2];
+
+	newBasis = newBasis.translate(-pe);
+
+	modelview = newBasis * view;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool valueInRange(int value, int min, int max)
+{ return (value >= min) && (value <= max); }
+
+///////////////////////////////////////////////////////////////////////////////
+bool DrawContext::overlapsView(
+	const Vector2f& viewPos, 
+	const Vector2f& viewSize, 
+	const Vector2i& canvasSize) const
+{
+	// Convert the normalized view coordinates into pixel coordinates
+	Vector2i vmin(
+		viewPos[0] * canvasSize[0],
+		viewPos[1] * canvasSize[1]);
+	Vector2i vmax(
+		viewSize[0] * canvasSize[0],
+		viewSize[1] * canvasSize[1]);
+	vmax += vmin;
+	
+	int tx = tile->offset[0];
+	int tw = tile->offset[0] + tile->pixelSize[0];
+	int ty = tile->offset[1];
+	int th = tile->offset[1] + tile->pixelSize[1];
+	
+	// Check overlap
+	bool xOverlap = valueInRange(vmin[0], tx, tw) || valueInRange(tx, vmin[0], vmax[0]);
+	bool yOverlap = valueInRange(vmin[1], ty, th) || valueInRange(ty, vmin[1], vmax[1]);
+	
+	return xOverlap && yOverlap;
 }

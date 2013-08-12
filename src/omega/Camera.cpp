@@ -66,7 +66,8 @@ Camera::Camera(Engine* e, uint flags):
 	myNearZ(0.1f),
 	myFarZ(1000.0f),
 	myViewPosition(0, 0),
-	myViewSize(1, 1)
+	myViewSize(1, 1),
+	myEnabled(true)
 {
 	myCustomTileConfig = new DisplayTileConfig();
 	//myProjectionOffset = -Vector3f::UnitZ();
@@ -203,12 +204,19 @@ CameraOutput* Camera::getOutput(uint contextId)
 	return myOutput[contextId].get();
 }
 
-bool valueInRange(int value, int min, int max)
-{ return (value >= min) && (value <= max); }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool Camera::isEnabled(const DrawContext& context)
+bool Camera::isEnabledInContext(const DrawContext& context)
 {
+	// If the camera is not enabled always return false.
+	if(!myEnabled) return false;
+
+	// If the camera is not enabled for the current task, return false.
+	if((context.task == DrawContext::SceneDrawTask &&
+		!(myFlags & DrawScene)) ||
+		(context.task == DrawContext::OverlayDrawTask &&
+		!(myFlags & DrawOverlay))) return false;
+
 	//CameraOutput* output = getOutput(context.gpuContext->getId());
 	//if(!output->isEnabled()) return false;
 
@@ -216,48 +224,37 @@ bool Camera::isEnabled(const DrawContext& context)
 	const DisplayConfig& dcfg = getEngine()->getDisplaySystem()->getDisplayConfig();
 	const Vector2i& canvasSize = dcfg.canvasPixelSize;
 
-	// Convert the normalized view coordinates into pixel coordinates
-	Vector2i vmin(
-		myViewPosition[0] * canvasSize[0],
-		myViewPosition[1] * canvasSize[1]);
-	Vector2i vmax(
-		myViewSize[0] * canvasSize[0],
-		myViewSize[1] * canvasSize[1]);
-	vmax += vmin;
-	
-	int tx = tile->offset[0];
-	int tw = tile->offset[0] + tile->pixelSize[0];
-	int ty = tile->offset[1];
-	int th = tile->offset[1] + tile->pixelSize[1];
-	
-	// Check overlap
-	bool xOverlap = valueInRange(vmin[0], tx, tw) || valueInRange(tx, vmin[0], vmax[0]);
-	bool yOverlap = valueInRange(vmin[1], ty, th) || valueInRange(ty, vmin[1], vmax[1]);
-	
-	return xOverlap && yOverlap;
+	return context.overlapsView(myViewPosition, myViewSize, canvasSize);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void Camera::beginDraw(DrawContext& context)
 {
+	Vector2i canvasSize;
+	if(myCustomTileConfig->enabled)
+	{
+		context.pushTileConfig(myCustomTileConfig);
+		canvasSize = myCustomTileConfig->pixelSize;
+	}
+	else
+	{
+		const DisplayConfig& dcfg = getEngine()->getDisplaySystem()->getDisplayConfig();
+		canvasSize = dcfg.canvasPixelSize;
+	}
+
+	context.updateViewport();
+	context.updateViewBounds(myViewPosition, myViewSize, canvasSize);
+	context.setupInterleaver();
+	context.updateTransforms(
+		myHeadTransform, myViewTransform, 
+		myEyeSeparation, 
+		myNearZ, myFarZ);
+
 	CameraOutput* output = myOutput[context.gpuContext->getId()];
 	if(output != NULL && output->isEnabled())
 	{
 		output->beginDraw(context);
 	}
-
-	if(myCustomTileConfig->enabled)
-	{
-		context.pushTileConfig(myCustomTileConfig);
-		updateViewBounds(context, myCustomTileConfig->pixelSize);
-	}
-	else
-	{
-		const DisplayConfig& dcfg = getEngine()->getDisplaySystem()->getDisplayConfig();
-		updateViewBounds(context, dcfg.canvasPixelSize);
-	}
-	updateOffAxisProjection(context);
-	context.modelview = myViewTransform;
 
 	if(myListener != NULL) myListener->beginDraw(this, context);
 }
@@ -334,130 +331,4 @@ void Camera::setController(CameraController* value)
 		myController->setCamera(this);
 		ModuleServices::addModule(myController);
 	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void Camera::updateOffAxisProjection(DrawContext& context)
-{
-	DisplaySystem* ds = context.renderer->getDisplaySystem();
-	DisplayConfig& dcfg = ds->getDisplayConfig();
-	
-	Vector3f pa = context.tile->bottomLeft;
-	Vector3f pb = context.tile->bottomRight;
-	Vector3f pc = context.tile->topLeft;
-	
-	// half eye separation
-	float hes = myEyeSeparation / 2;
-	Vector3f pe = Vector3f::Zero();
-	switch(context.eye)
-	{
-	case DrawContext::EyeLeft:
-		pe[0] = -hes;
-		break;
-	case DrawContext::EyeRight:
-		pe[0] = hes;
-		break;
-	}
-
-	// Transform eye with head position / orientation. After this, eye position
-	// and tile coordinates are all in the same reference frame.
-	if(dcfg.panopticStereoEnabled)
-	{
-		// CAVE2 SIMPLIFICATION: We are just interested in adjusting the observer yaw
-		myHeadTransform = AffineTransform3::Identity();
-		myHeadTransform.translate(myHeadOffset);
-		pe = myHeadTransform.rotate(
-			AngleAxis(-context.tile->yaw * Math::DegToRad, Vector3f::UnitY())) * pe;
-	}
-	else
-	{
-		pe = myHeadTransform * pe;
-	}
-
-	Vector3f vr = pb - pa;
-	Vector3f vu = pc - pa;
-	Vector3f vn = vr.cross(vu);
-
-	Vector2f viewSize = context.viewMax - context.viewMin;
-
-	// Update tile corners based on local view position and size
-	pa = pa + vr * context.viewMin[0] + vu * context.viewMin[1];
-	pb = pa + vr * viewSize[0];
-	pc = pa + vu * viewSize[1];
-
-	vr.normalize();
-	vu.normalize();
-	vn.normalize();
-
-	// Compute the screen corner vectors.
-	Vector3f va = pa - pe;
-	Vector3f vb = pb - pe;
-	Vector3f vc = pc - pe;
-
-	// Find distance from eye to screen plane.
-	//Vector3f tm = pe - pa;
-	float d = -(vn.dot(va));
-
-	// Find the extent of the perpendicular projection.
-	float l = vr.dot(va) * myNearZ / d;
-	float r = vr.dot(vb) * myNearZ / d;
-	float b = vu.dot(va) * myNearZ / d;
-	float t = vu.dot(vc) * myNearZ / d;
-
-	Transform3 oax;
-	oax.setIdentity();
-	oax(0,0) = 2 * myNearZ / (r - l);
-	oax(0,2) = (r + l) / (r - l);
-	oax(1,1) = 2 * myNearZ / (t - b);
-	oax(1,2) = (t + b) / (t - b);
-	oax(2,2) = - (myFarZ + myNearZ) / (myFarZ - myNearZ);
-	oax(2,3) = - (2 * myFarZ * myNearZ) / (myFarZ - myNearZ);
-	oax(3,2) = - 1;
-	oax(3,3) = 0;
-
-	Transform3 newBasis;
-	newBasis.setIdentity();
-	newBasis.data()[0] = vr[0];
-	newBasis.data()[1] = vu[0];
-	newBasis.data()[2] = vn[0];
-
-	newBasis.data()[4] = vr[1];
-	newBasis.data()[5] = vu[1];
-	newBasis.data()[6] = vn[1];
-
-	newBasis.data()[8] = vr[2];
-	newBasis.data()[9] = vu[2];
-	newBasis.data()[10] = vn[2];
-
-	oax = oax * newBasis;
-	
-	// Translate to apex of the frustum to the origin
-	context.projection = oax.translate(-pe);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void Camera::updateViewBounds(DrawContext& context, const Vector2i& canvasSize)
-{
-	const DisplayTileConfig* tile = context.tile;
-
-	float aw = (float)canvasSize[0] / tile->pixelSize[0];
-	float ah = (float)canvasSize[1] / tile->pixelSize[1];
-	Vector2f a(aw, ah);
-
-	// Convert the tile pixel offset in normalized coordinates
-	Vector2f offset(
-		(float)tile->offset[0] / canvasSize[0],
-		(float)tile->offset[1] / canvasSize[1]);
-
-	context.viewMin = (myViewPosition - offset).cwiseProduct(a);
-	context.viewMax = (myViewPosition + myViewSize - offset).cwiseProduct(a);
-	
-	context.viewMin = context.viewMin.cwiseMax(Vector2f::Zero());
-	context.viewMax = context.viewMax.cwiseMin(Vector2f::Ones());
-
-	// Adjust the local pixel viewport.
-	context.viewport.min[0] = context.viewMin[0] * tile->pixelSize[0];
-	context.viewport.min[1] = context.viewMin[1] * tile->pixelSize[1];
-	context.viewport.max[0] = context.viewMax[0] * tile->pixelSize[0];
-	context.viewport.max[1] = context.viewMax[1] * tile->pixelSize[1];
 }

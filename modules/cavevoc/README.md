@@ -49,7 +49,11 @@
         Python API</a>.<br>
     </font></li>
 </ol>
-<h2><font face="Helvetica, Arial, sans-serif">How to Run</font></h2>
+    <h2><font face="Helvetica, Arial, sans-serif">Simple Example</font></h2>
+    <p><font face="Helvetica, Arial, sans-serif">This demo simply takes
+        any recognized speech from CAVEVOC and print on the screen in
+        the CAVE including the confidence level reported by Google.</font><br>
+    </p>
 <ol>
   <li><font face="Helvetica, Arial, sans-serif">You should install
       Items 1-3&nbsp; on the PC that will access the microphone.</font></li>
@@ -98,6 +102,53 @@
     CAVEVOC-Auto code are kept to a minimum so you can further
     customize them for your needs.<br>
   </font></p>
+    <h2><font face="Helvetica, Arial, sans-serif">Second Example<br>
+      </font></h2>
+    <p><font face="Helvetica, Arial, sans-serif"><font face="Helvetica,
+          Arial, sans-serif">The second demo (called Ideation) lets you
+          create boxes and spheres, color them and move them, all via
+          voice command. To select an object simply turn your head
+          towards it.<br>
+        </font>Launch the program using: orun -s ideation.py<br>
+      </font></p>
+    <blockquote><img alt="" src="http://febret.github.io/omegalib/cavevoc/ideation.png" height="327" width="432"></blockquote>
+    <p><font face="Helvetica, Arial, sans-serif">Ideation is an example
+        that shows how you could use <a
+          href="http://pyparsing.wikispaces.com/">Pyparsing </a>to
+        parse the incoming voice commands. With Pyparsing you can very
+        quickly develop a parser for very complex grammars. In the demo
+        I have included the module: pyparsing.py so you don't need to
+        bother to download and install Pyparsing.</font></p>
+    <p><font face="Helvetica, Arial, sans-serif">The following are
+        example voice commands:<br>
+      </font></p>
+    <ul>
+      <li><font face="Helvetica, Arial, sans-serif">MAKE | BUILD |
+          CREATE A BOX | CUBE - creates a 1-foot cube</font></li>
+      <li><font face="Helvetica, Arial, sans-serif">MAKE | BUILD |
+          CREATE&nbsp; A SPHERE | BALL - creates a 1-foot diameter
+          sphere</font></li>
+      <li><font face="Helvetica, Arial, sans-serif">PAINT | COLOR | MAKE
+          IT RED | GREEN | BLUE | ....&nbsp; - color the object that
+          your head is pointing at Red. Other colors are green, blue,
+          magenta, orange, yellow, black.... you get the idea.</font></li>
+      <li><font face="Helvetica, Arial, sans-serif">NAME IT | THIS JASON
+          - give a name to the object</font></li>
+      <li><font face="Helvetica, Arial, sans-serif">PLACE JASON HERE -
+          if you navigate the space and say this it will take the object
+          named JASON and bring it to you and place it in front of you.</font></li>
+      <li><font face="Helvetica, Arial, sans-serif">AGAIN - if you say
+          either AGAIN or REPEAT, it will perform the last command
+          again. E.g. if you said MAKE A BOX last, it will make a second
+          box if you say AGAIN or REPEAT.</font></li>
+      <li><font face="Helvetica, Arial, sans-serif">MAKE A BOX AND PAINT
+          IT RED AND PLACE JASON HERE - You can chain commands together
+          with the AND operator.</font></li>
+    </ul>
+    <p><font face="Helvetica, Arial, sans-serif">To see the full extent
+        of the grammar and how it is used to activate parts of your code
+        you will need to read the ideation.py code.<br>
+      </font></p>
 <h2><font face="Helvetica, Arial, sans-serif">Some General Tips for
     Effective Use of Speech Recognition<br>
   </font></h2>
@@ -128,17 +179,26 @@
       audience. Another approach is to create a virtual
       character/avatar and have it so that it will only interpret
       your commands if you are facing it.<br>
+      <li><font face="Helvetica, Arial, sans-serif">Consider creating a
+          grammar to describe your commands and then use something like
+          <a href="http://pyparsing.wikispaces.com/">Pyparsing </a>to
+          implement the grammar parser. <br>
+        </font></li>
+      <li><font face="Helvetica, Arial, sans-serif">If you want to be
+          more advanced you can also use the <a href="http://nltk.org/">Natural Language Toolkit</a>. 
+          The main advantage of using natural language processing techniques is that 
+          you can minimize the need for the user to remember a specific grammar. <br>
+        </font></li>
+      <li><font face="Helvetica, Arial, sans-serif">But if you don't
+          have much experience in NLP, try to keep the number of speech
+          utterances low to minimize the need to remember them. In any
+          case it may be helpful to provide a "dropdown" cheat sheet in
+          the CAVE to help the user remember the commands. Better still
+          is to create a cheat sheet that unfolds to show the next word
+          in a phrase that can be spoken. A good example of this is used
+          in the video game <a
+            href="http://www.youtube.com/watch?v=WB7yDq1xgxM">End War</a>.<br>
     </font></li>
-  <li><font face="Helvetica, Arial, sans-serif">If you have
-      experience with <a
-        href="http://nlp.stanford.edu/software/lex-parser.shtml">Natural Language Parsers</a>, try to use one. This will help your
-      CAVE program understand phrases that are similar but not
-      exactly the same. This alleviates the user having to remember
-      a fixed grammar. But if you don't have much experience in NLP,
-      try to keep the number of speech utterances low to minimize
-      the need to remember them. In any case it may be helpful to
-      provide a "dropdown" cheet sheet in the CAVE to help the user
-      remember the commands.</font></li>
   <li><font face="Helvetica, Arial, sans-serif">Lastly you may
       consider implementing a state-machine-based conversation
       engine so that followup commands are possible:</font></li>
@@ -163,6 +223,8 @@
 </ul>
 <h2><font face="Helvetica, Arial, sans-serif">Release Notes</font></h2>
 <ul>
+      <li><font face="Helvetica, Arial, sans-serif">7/26/2013 - Revised
+          to include example using Pyparsing as the command parser.</font></li>
   <li><font face="Helvetica, Arial, sans-serif">7/20/13 - First
       version released.</font></li>
 </ul>

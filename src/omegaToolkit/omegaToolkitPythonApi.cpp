@@ -154,6 +154,9 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_STATIC_REF_GETTER(UiModule, createAndInitialize)
 		PYAPI_REF_GETTER(UiModule, getWidgetFactory)
 		PYAPI_REF_GETTER(UiModule, getUi)
+		PYAPI_REF_GETTER(UiModule, createExtendedUi)
+		PYAPI_REF_GETTER(UiModule, getExtendedUi)
+		PYAPI_REF_GETTER(UiModule, destroyExtendedUi)
 		;
 
 	// WidgetFactory

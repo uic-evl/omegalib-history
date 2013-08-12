@@ -10,7 +10,7 @@ omegalib is a middleware designed to ease the development of applications on vir
  * Web interface control and pixel streaming to HTML5 clients
  * Experimental SAGE integration
  * A customizable 2D / 3D widgets library
- * Support for a wide range of input peripherals (controllers, motion capture systems, touch surfaces, speech and brain interfaces), through the [http://code.google.com/p/omicron-sdk/ Omicron toolkit]
+ * Support for a wide range of input peripherals (controllers, motion capture systems, touch surfaces, speech and brain interfaces), through the [https://github.com/febret/omicron Omicron toolkit]
  * Extendable integration with third party higher level toolkits like vtk and Open Scene Graph.
  * Sound playback through a supercollider-based sound server. Omegalib takes care of synchronizing sound assets between the application and sound machines of a VR installation. The sound server is scalable (it runs on laptop stereo speakers or on the 22 channel CAVE2 audio system) and can be customized using the supercollider scripting language.
 Altough omegalib is designed for VR systems, it can be used to develop applications on standard desktop systems, leveraging the power of multiple GPU units when available.

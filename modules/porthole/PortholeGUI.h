@@ -4,6 +4,7 @@
  * Copyright 2010-2013		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
+ *  Daniele Donghi			d.donghi@gmail.com
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
  * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
@@ -98,7 +99,8 @@ namespace HTML {
 		"onmouseup",  /* Script to be run when mouse button is released */
 	};
 
-	static bool isEvent(string stringToSearch){
+	static bool isEvent(string stringToSearch)
+	{
 		for(int i=0; i < eventsNumber; i++)
 			if (stringToSearch.compare(events[i]) == 0)
 				return true; // found
@@ -108,7 +110,8 @@ namespace HTML {
 };
 
 // This will old a possible interface
-typedef struct PortholeInterfaceType: ReferenceType{
+typedef struct PortholeInterfaceType: ReferenceType
+{
 	int minWidth;
 	int minHeight;
 	string id;
@@ -117,7 +120,8 @@ typedef struct PortholeInterfaceType: ReferenceType{
 } PortholeInterfaceType;
 
 // A device specifications object
-typedef struct PortholeDevice: ReferenceType{
+typedef struct PortholeDevice: ReferenceType
+{
 	int deviceWidth;
 	int deviceHeight;
 	string deviceOrientation; // Portrait or Landscape
@@ -125,36 +129,38 @@ typedef struct PortholeDevice: ReferenceType{
 } PortholeDevice;
 
 // An element object
-typedef struct PortholeElement: ReferenceType{
+struct PortholeElement: ReferenceType
+{
 	string id;
 	string type;
 	string cameraType; // Defined if type is camera stream
 	string htmlValue;
-} PortholeElement;
+};
 
 // A omega Camera wrapper for Porthole
-typedef struct PortholeCamera: ReferenceType{
+struct PortholeCamera: ReferenceType
+{
 	int id;
 	Camera* camera;
 	PixelData* canvas;
-	bool followDefault;
 	int canvasWidth, canvasHeight;
 	float size; // 1.0 is default value = device size
 	//unsigned int oldusStreamSent; // Timestamp of last stream sent via socket
-}PortholeCamera;
+};
 
 // An obj binded with a Javascript event
-typedef struct PortholeEvent{
+struct PortholeEvent
+{
 	std::string htmlEvent;
 	int mouseButton;
 	char key;
 	std::string value;
 	PortholeCamera* sessionCamera;
-}PortholeEvent;
+};
 
 // Porthole functions binder
-struct PortholeFunctionsBinder: ReferenceType{
-
+struct PortholeFunctionsBinder: ReferenceType
+{
 	typedef void(*memberFunction)(PortholeEvent&);
 
 	void addFunction(std::string funcName, memberFunction func)
@@ -175,7 +181,8 @@ struct PortholeFunctionsBinder: ReferenceType{
 
 		std::map<std::string, string>::const_iterator py_it;
 		py_it = pythonFunMap.find(funcName);
-		if (py_it != pythonFunMap.end()){
+		if (py_it != pythonFunMap.end())
+		{
 			PythonInterpreter* pi = SystemManager::instance()->getScriptInterpreter();
 
 			String pythonScript = omicron::StringUtils::replaceAll(py_it->second, PORTHOLE_EVENT_TOKEN_VALUE, ev.value);
@@ -211,12 +218,12 @@ class PortholeService;
 
 ///////////////////////////////////////////////////////////////////////////////
 //! Implements the HTML GUI Manager for Porthole Service
-class PortholeGUI: public ReferenceType{
-
+class PortholeGUI: public ReferenceType
+{
 public:
 
 	// Constructor
-	PortholeGUI(PortholeService* owner);
+	PortholeGUI(PortholeService* owner, const String& clientId);
 
 	// Destructor
 	~PortholeGUI();
@@ -230,11 +237,13 @@ public:
 	// Return an object that contains the device specifications
 	PortholeDevice* getDevice() { return device; }
 
-	// Is camera object set?
-	bool isCameraReadyToStream() { return (sessionCamera != NULL); } 
+	bool isCameraReadyToStream() 
+	{ return (sessionCamera != NULL && sessionCamera->camera->isEnabled()); } 
 
 	// Get Porthole camera object for this client connected
 	PortholeCamera* getSessionCamera() { return sessionCamera; } 
+	PortholeService* getService()
+	{ return service; }
 
 	// Mod the camera with id cameraId 
 	// size: the ratio of camera: 1.0 is full size
@@ -262,8 +271,10 @@ private:
 	// The camera of this session
 	PortholeCamera* sessionCamera;
 
+	String clientId;
+
 	// Create a Porthole custom camera and a PixelData associated
-	void createCustomCamera(bool followDefaultCamera,  float widthPercent, float heightPercent, uint cameraMask = 0); 
+	void createCustomCamera(float widthPercent, float heightPercent, uint cameraMask = 0); 
 
 	static void searchNode(omega::xml::TiXmlElement* node);
 

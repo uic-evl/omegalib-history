@@ -568,6 +568,16 @@ Camera* Engine::getCamera(const String& name)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+Camera* Engine::getCameraById(int id)
+{
+	foreach(Camera* cam, myCameras)
+	{
+		if(cam->getCameraId() == id) return cam;
+	}
+	return NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 Engine::CameraCollection Engine::getCameras()
 {
     return myCameras;

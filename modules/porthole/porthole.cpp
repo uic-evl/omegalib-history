@@ -4,6 +4,7 @@
  * Copyright 2010-2013		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
+ *  Daniele Donghi			d.donghi@gmail.com
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
  * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
@@ -45,16 +46,6 @@ PortholeService* getService()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Camera* getCameraById(int id)
-{
-	if(SystemManager::instance()->isMaster())
-	{
-		return PortholeGUI::CamerasMap[id]->camera;
-	}
-	return NULL;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 bool initialize(
 	const String& xml = "porthole/default.xml", 
 	const String& css = "porthole/default.css", 
@@ -88,9 +79,12 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(initializeOverloads, initialize, 0, 3)
 BOOST_PYTHON_MODULE(porthole)
 {
 	PYAPI_REF_BASE_CLASS(PortholeService)
+		PYAPI_METHOD(PortholeService, setConnectedCommand)
+		PYAPI_METHOD(PortholeService, setDisconnectedCommand)
+		PYAPI_METHOD(PortholeService, setCameraCreatedCommand)
+		PYAPI_METHOD(PortholeService, setCameraDestroyedCommand)
 		;
 
-	def("getCameraById", getCameraById, PYAPI_RETURN_REF);
 	def("initialize", initialize, initializeOverloads());
 	def("getService", getService, PYAPI_RETURN_REF);
 }

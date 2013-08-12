@@ -4,6 +4,7 @@
  * Copyright 2010-2013		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
+ *  Daniele Donghi			d.donghi@gmail.com
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
  * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
@@ -31,15 +32,6 @@
  ******************************************************************************/
 #ifndef __PORTHOLE_SERVICE_H__
 #define __PORTHOLE_SERVICE_H__
-
-///////////////////////////////////////////////////////////////////////////////
-// Testing variables
-//#define PORTHOLE_TEST_RTT
-//#define PORTHOLE_TEST_DIM
-//#define PORTHOLE_TEST_TIME_COMPRESSION
-//#define PORTHOLE_TEST_TIME_BASE64
-//#define PORTHOLE_TEST_TIME_WEBSOCKET 
-//#define PORTHOLE_TEST_TIME_GLOBAL
 
 #include <omega.h>
 #include "websockets/libwebsockets.h"
@@ -132,11 +124,32 @@ public:
 	virtual void poll();
 	PortholeFunctionsBinder* getFunctionsBinder() { return myBinder; }
 
+	void postEvent(Event::Type type, int sourceId, int x, int y);
+
 	// Server instance. It will manage the incoming connections
 	//thread server_thread;
 	ServerThread* portholeServer;
 
+	void setConnectedCommand(const String cmd)
+	{ myConnectedCommand = cmd; }
+	void setDisconnectedCommand(const String cmd)
+	{ myDisconnectedCommand = cmd; }
+	void setCameraCreatedCommand(const String cmd)
+	{ myCameraCreatedCommand = cmd; }
+	void setCameraDestroyedCommand(const String cmd)
+	{ myCameraDestroyedCommand = cmd; }
+
+	// Notification functions called from the websockets thread
+	void notifyConnected(const String& id);
+	void notifyDisconnected(const String& id);
+	void notifyCameraCreated(Camera* cam);
+	void notifyCameraDestroyed(Camera* cam);
+
 private:
+	String myConnectedCommand;
+	String myDisconnectedCommand;
+	String myCameraCreatedCommand;
+	String myCameraDestroyedCommand;
 	PortholeFunctionsBinder* myBinder;
 };
 
