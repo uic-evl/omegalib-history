@@ -112,10 +112,10 @@ void MenuManager::initialize()
 		{
 			Setting& sUi = SystemManager::settingLookup("config/sound");
 
-			float volume = Config::getFloatValue("menuSoundVolume", sUi, 1.0);
-			float width = Config::getFloatValue("menuSoundWidth", sUi, 1.0);
-			float mix = Config::getFloatValue("menuSoundMix", sUi, 1.0);
-			float reverb = Config::getFloatValue("menuSoundReverb", sUi, 1.0);
+			float volume = Config::getFloatValue("menuSoundVolume", sUi, 0.2);
+			float width = Config::getFloatValue("menuSoundWidth", sUi, 2.0);
+			float mix = Config::getFloatValue("menuSoundMix", sUi, 0.0);
+			float reverb = Config::getFloatValue("menuSoundReverb", sUi, 0.0);
 
 			if( sUi.exists("showMenuSound") ){
 				myShowMenuSound = se->createSound("showMenuSound");

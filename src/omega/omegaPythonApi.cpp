@@ -686,8 +686,7 @@ SoundEnvironment* getSoundEnvironment()
 ///////////////////////////////////////////////////////////////////////////////
 bool isSoundEnabled()
 {
-	SoundManager* smng = Engine::instance()->getSoundManager();
-	return smng != NULL && smng->isSoundServerRunning();
+	return Engine::instance()->isSoundEnabled();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

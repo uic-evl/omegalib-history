@@ -228,6 +228,15 @@ void Engine::initialize()
 			}
 		}
 	}
+	else
+	{
+		soundManager = new SoundManager();
+		soundEnv = soundManager->getSoundEnvironment();
+		if(syscfg->exists("config/sound"))
+		{
+			soundEnabled = true;
+		}
+	}
 
 	// Load input mapping
 	if(syscfg->exists("config/inputMap"))
