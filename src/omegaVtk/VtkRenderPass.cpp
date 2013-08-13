@@ -175,6 +175,9 @@ sLock.lock();
 sLock.unlock();
 
 		glPopAttrib();
+
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
 	}
 }
