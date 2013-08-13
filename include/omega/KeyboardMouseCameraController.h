@@ -65,7 +65,6 @@ namespace omega {
 		bool myRotating;
 		bool myAltRotating;
 		Vector3f myLastPointerPosition;
-		Quaternion myBaseOrientation;
 		float myYaw;
 		float myPitch;
 	};
