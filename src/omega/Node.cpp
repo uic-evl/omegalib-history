@@ -357,6 +357,16 @@ void Node::lookAt(const Vector3f& position, const Vector3f& upVector)
 	m.col(0) = yaxis;
 	m.col(1) = xaxis;
 	m.col(2) = zaxis;
+
+	if(Math::isNaN(xaxis.x()) ||
+		Math::isNaN(yaxis.y()) ||
+		Math::isNaN(zaxis.z()))
+	{
+		ofwarn("Node::lookAt: %1%: could not look at %2% (up %3%) from %4%",
+			%mName %position %upVector %mDerivedPosition);
+		return;
+	}
+
 	mOrientation = m;
 	setInheritOrientation(false);
 	needUpdate();
