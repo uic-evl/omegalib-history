@@ -1308,6 +1308,8 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(SoundInstance, setRoomSize)
 		PYAPI_METHOD(SoundInstance, getRoomSize)
 		PYAPI_METHOD(SoundInstance, fade)
+		PYAPI_METHOD(SoundInstance, setPitch)
+		PYAPI_METHOD(SoundInstance, getPitch)
 		;
 
 	// MissionControlClient
