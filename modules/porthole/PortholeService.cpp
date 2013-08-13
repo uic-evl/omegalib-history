@@ -995,7 +995,7 @@ void PortholeService::postEvent(Event::Type type, int sourceId, int x, int y)
 {
 	lockEvents();
 	Event* evt = writeHead();
-	evt->reset(type, ServiceType::Pointer, sourceId, getServiceId());
+	evt->reset(type, Service::Pointer, sourceId, getServiceId());
 	evt->setPosition(x, y);
 	unlockEvents();
 }
