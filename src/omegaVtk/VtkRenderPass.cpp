@@ -45,7 +45,8 @@
 using namespace omegaVtk;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-VtkRenderPass::VtkRenderPass(Renderer* client, const String& name): RenderPass(client, name)
+VtkRenderPass::VtkRenderPass(Renderer* client, const String& name): 
+	RenderPass(client, name, -10)
 {
 	resetPropQueues();
 }
@@ -125,6 +126,10 @@ void VtkRenderPass::render(Renderer* mng, const DrawContext& context)
 		//state.renderer = mng->getRenderer();
 
 		//mng->getRootNode()->draw(&state);
+
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadMatrixd(context.projection.data());
 
 		// For scene node drawing, we are not using the gl matrix stack, we are using our own transforms,
 		// stored inside the scene nodes. So, create a new, clean transform on the stack.
