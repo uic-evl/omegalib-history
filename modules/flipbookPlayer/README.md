@@ -10,7 +10,7 @@ The `flipbookPlayer` module exposes one class `FlipbookPlayer` that represents t
 |---|---|
 static `FlipbookPlayer createAndInitialize()` | creates an instance of the flipbook player.
 `load(string filePath, int totalFrames, int startFrame)` | Starts loading frames from a single directory.
-`loadMultiDir(string filePath, int totalFrames, ...``..., int startFrame, int startPerDir, int startDirIndex)` | Starts loading frames from multiple directories.
+`loadMultiDir(string filePath, int totalFrames, ...` `..., int startFrame, int startPerDir, int startDirIndex)` | Starts loading frames from multiple directories.
 `play()` | starts playback. Actual playback will start after enough frames have been buffered.
 `pause()` | Pauses playback. Another call to play will restart playback from the current frame.
 `stop()` | Stops playback. Another call to play will restart playback from the beginning of the animation.
