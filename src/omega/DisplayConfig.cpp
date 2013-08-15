@@ -37,7 +37,6 @@
 #include "omega/Engine.h"
 #include "omega/CylindricalDisplayConfig.h"
 #include "omega/PlanarDisplayConfig.h"
-#include "omega/SageManager.h"
 
 using namespace omega;
 using namespace std;
@@ -211,15 +210,6 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 		PlanarDisplayConfig cdc;
 		cdc.buildConfig(cfg, scfg);
 	}
-
-	// If SAGE support is available and we have a sage configuration section, pass it to the SAGE manager.
-#ifdef OMEGA_USE_SAGE
-	if(scfg.exists("sage"))
-	{
-		SageManager* mng = SystemManager::instance()->getSageManager();
-		if(mng != NULL) mng->setup(scfg["sage"], cfg);
-	}
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////

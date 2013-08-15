@@ -27,7 +27,7 @@
 #ifndef __SAGE_MANAGER__
 #define __SAGE_MANAGER__
 
-#include "ModuleServices.h"
+#include <omega.h>
 
 class sail;
 
@@ -37,7 +37,7 @@ namespace omega
 	struct DisplayConfig;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	class OMEGA_API SageManager: public EngineModule
+	class SageManager: public EngineModule
 	{
 	public:
 		enum SageMode { Disabled, SingleNode };

@@ -46,8 +46,6 @@ namespace omega
 	class ApplicationBase;
 	class DisplaySystem;
 	class PythonInterpreter;
-	// Forward declaration of SageManager to break header circular dependency
-	class SageManager;
 	// Forward decl of Mission Control classes to break header circular dependency
 	class MissionControlClient;
 	class MissionControlServer;
@@ -159,8 +157,6 @@ namespace omega
 
 		PythonInterpreter* getScriptInterpreter(); 
 
-		SageManager* getSageManager(); 
-
 		void setupServiceManager();
 		void setupDisplaySystem();
 
@@ -213,9 +209,6 @@ namespace omega
 
 		// Stats manager.
 		StatsManager* myStatsManager;
-
-		// SAGE
-		SageManager* mySageManager;
 
 		// Mission Contol
 		MissionControlServer* myMissionControlServer;
@@ -277,10 +270,6 @@ namespace omega
 	///////////////////////////////////////////////////////////////////////////
 	inline PythonInterpreter* SystemManager::getScriptInterpreter() 
 	{ return myInterpreter; }
-
-	///////////////////////////////////////////////////////////////////////////
-	inline SageManager* SystemManager::getSageManager() 
-	{ return mySageManager; }
 
 	///////////////////////////////////////////////////////////////////////////
 	inline MultiInstanceConfig& SystemManager::getMultiInstanceConfig() 

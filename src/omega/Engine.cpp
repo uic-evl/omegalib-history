@@ -43,7 +43,6 @@
 #include "omega/SystemManager.h"
 #include "omega/PythonInterpreter.h"
 #include "omega/CameraController.h"
-#include "omega/SageManager.h"
 #include "omega/Console.h"
 
 using namespace omega;
