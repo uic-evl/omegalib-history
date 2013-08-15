@@ -22,5 +22,5 @@ static `FlipbookPlayer createAndInitialize()` | creates an instance of the flipb
 
 ### Using multithreaded image loading
 If you use the flipbook player as-is, you may have difficulty playing back an image-based animation at 60fps. This is because image decoding can take a significant part of the 16 milliseconds that each frame has to display, leading to repeated buffering and jittery playback. 
-A solution to this is to enable multithreaded image loading: in omegalib you can do this using the `setImageLoaderThreads(int threads)` global function. Ideally you should use as many threads as your machine phisical cores for image loading. If the threads are not required (for instance because the image buffer is already full), they will idle without consuming CPU resources.
+A solution to this is to enable multithreaded image loading: in omegalib you can do this using the `setImageLoaderThreads(int threads)` global function. Ideally you should use as many threads as your machine physical cores. If the threads are not required (for instance because the image buffer is already full), they will idle without consuming CPU resources.
 

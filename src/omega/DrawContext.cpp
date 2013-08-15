@@ -196,9 +196,11 @@ void DrawContext::setupInterleaver()
 	// The stencil buffer is set up if th tile is using an interleaved mode (line or pixel)
 	// or if the tile is left in default mode and the global stereo mode is an interleaved mode
 	if(tile->stereoMode == DisplayTileConfig::LineInterleaved ||
+		tile->stereoMode == DisplayTileConfig::ColumnInterleaved ||
 		tile->stereoMode == DisplayTileConfig::PixelInterleaved ||
 		(tile->stereoMode == DisplayTileConfig::Default && (
 				dcfg.stereoMode == DisplayTileConfig::LineInterleaved ||
+				dcfg.stereoMode == DisplayTileConfig::ColumnInterleaved ||
 				dcfg.stereoMode == DisplayTileConfig::PixelInterleaved)))
 	{
 		if(!stencilInitialized)
@@ -277,6 +279,21 @@ void DrawContext::initializeStencilInterleaver(int gliWindowWidth, int gliWindow
 			glBegin(GL_LINES);
 				glVertex2f(0, gliY);
 				glVertex2f(gliWindowWidth, gliY);
+			glEnd();	
+		}
+	}	
+	else if(stereoMode == DisplayTileConfig::ColumnInterleaved)
+	{
+		// Do we want to invert stereo?
+		bool invertStereo = ds->getDisplayConfig().invertStereo || tile->invertStereo; 
+		int startOffset = invertStereo ? -1 : -2;
+
+		for(float gliX = startOffset; gliX <= gliWindowWidth; gliX += 2)
+		{
+			glLineWidth(1);
+			glBegin(GL_LINES);
+				glVertex2f(gliX, 0);
+				glVertex2f(gliX,gliWindowHeight);
 			glEnd();	
 		}
 	}

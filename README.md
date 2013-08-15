@@ -2,6 +2,8 @@
 ========
 A creative framework for virtual reality and cluster-driven display systems
 
+Wiki page here: https://github.com/febret/omegalib/wiki
+
 omegalib is a middleware designed to ease the development of applications on virtual reality and immersive systems. Its main features are:
  * Support for hybrid systems, presenting high definition 2D and 3D content on the same display surface
  * A C++ and Python API. Applications can be developed as standalone executables in C++ or as scripts in Python. Omegalib also supports mixed native/script applications with user-defined C++ modules that can be exposed to Python through a simple declarative interface.
