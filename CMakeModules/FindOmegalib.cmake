@@ -48,7 +48,7 @@ if(OMEGA_BINARY_DIR)
 
 	###################################################################################################
 	# Set the output directories for libraries and binary files
-	if(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
+	if(MSVC)
 		# Since visual studio and Xcode builds are multiconfiguration, set two separate directories for debug and release builds
 		
 		set(OMICRON_LIB_DEBUG ${OMEGA_LIB_DIR_DEBUG}/omicron.lib)
@@ -74,38 +74,56 @@ if(OMEGA_BINARY_DIR)
 		set(CY_LIB_DEBUG ${OMEGA_LIB_DIR_DEBUG}/cyclops.lib)
 		set(CY_LIB_RELEASE ${OMEGA_LIB_DIR_RELEASE}/cyclops.lib)
 		
-		# glew
-		#find_library(GLEW_LIB_DEBUG NAMES glew PATHS ${OMEGA_LIB_DIR_DEBUG})
-		#find_library(GLEW_LIB_RELEASE NAMES glew PATHS ${OMEGA_LIB_DIR_RELEASE})
-		
-	else(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
-		set(OMICRON_LIB_DEBUG ${OMEGA_BIN_DIR}/libomicron.so)
-		set(OMICRON_LIB_RELEASE ${OMEGA_BIN_DIR}/libomicron.so)
-		
-		# omega
-		set(OMEGA_LIB_DEBUG ${OMEGA_BIN_DIR}/libomega.so)
-		set(OMEGA_LIB_RELEASE ${OMEGA_BIN_DIR}/libomega.so)
-		
-		# omegaToolkit
-		set(OTK_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaToolkit.so)
-		set(OTK_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaToolkit.so)
-		
-		# oosg
-		set(OOSG_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaOsg.so)
-		set(OOSG_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaOsg.so)
-		
-		# oosg
-		set(OVTK_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaVtk.so)
-		set(OVTK_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaVtk.so)
-		
-		# cyclops
-		set(CY_LIB_DEBUG ${OMEGA_BIN_DIR}/libcyclops.so)
-		set(CY_LIB_RELEASE ${OMEGA_BIN_DIR}/libcyclops.so)
-		
-		# glew
-		#find_library(GLEW_LIB_DEBUG NAMES glew PATHS ${OMEGA_LIB_DIR})
-		#find_library(GLEW_LIB_RELEASE NAMES glew PATHS ${OMEGA_LIB_DIR})
-	endif(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
+	elseif(UNIX)
+		if(APPLE) 
+			set(OMICRON_LIB_DEBUG ${OMEGA_BIN_DIR}/libomicron.dylib)
+			set(OMICRON_LIB_RELEASE ${OMEGA_BIN_DIR}/libomicron.dylib)
+			
+			# omega
+			set(OMEGA_LIB_DEBUG ${OMEGA_BIN_DIR}/libomega.dylib)
+			set(OMEGA_LIB_RELEASE ${OMEGA_BIN_DIR}/libomega.dylib)
+			
+			# omegaToolkit
+			set(OTK_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaToolkit.dylib)
+			set(OTK_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaToolkit.dylib)
+			
+			# oosg
+			set(OOSG_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaOsg.dylib)
+			set(OOSG_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaOsg.dylib)
+			
+			# oosg
+			set(OVTK_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaVtk.dylib)
+			set(OVTK_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaVtk.dylib)
+			
+			# cyclops
+			set(CY_LIB_DEBUG ${OMEGA_BIN_DIR}/libcyclops.dylib)
+			set(CY_LIB_RELEASE ${OMEGA_BIN_DIR}/libcyclops.dylib)
+			
+		else() # generic linux
+			set(OMICRON_LIB_DEBUG ${OMEGA_BIN_DIR}/libomicron.so)
+			set(OMICRON_LIB_RELEASE ${OMEGA_BIN_DIR}/libomicron.so)
+			
+			# omega
+			set(OMEGA_LIB_DEBUG ${OMEGA_BIN_DIR}/libomega.so)
+			set(OMEGA_LIB_RELEASE ${OMEGA_BIN_DIR}/libomega.so)
+			
+			# omegaToolkit
+			set(OTK_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaToolkit.so)
+			set(OTK_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaToolkit.so)
+			
+			# oosg
+			set(OOSG_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaOsg.so)
+			set(OOSG_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaOsg.so)
+			
+			# oosg
+			set(OVTK_LIB_DEBUG ${OMEGA_BIN_DIR}/libomegaVtk.so)
+			set(OVTK_LIB_RELEASE ${OMEGA_BIN_DIR}/libomegaVtk.so)
+			
+			# cyclops
+			set(CY_LIB_DEBUG ${OMEGA_BIN_DIR}/libcyclops.so)
+			set(CY_LIB_RELEASE ${OMEGA_BIN_DIR}/libcyclops.so)
+		endif()
+	endif()
 
 	#set(OMEGA_LIB debug ${OMEGA_LIB_DEBUG} debug ${OPENGL_LIBRARY} debug ${GLEW_LIB_DEBUG} debug ${LIBCONFIG_LIB_DEBUG} optimized ${OMEGA_LIB_RELEASE} optimized ${GLEW_LIB_RELEASE} optimized ${OPENGL_LIBRARY} optimized ${LIBCONFIG_LIB_RELEASE})
 	set(OMEGA_LIB debug ${OMICRON_LIB_DEBUG} optimized ${OMICRON_LIB_RELEASE} debug ${OMEGA_LIB_DEBUG} debug ${OPENGL_LIBRARY} optimized ${OMEGA_LIB_RELEASE} optimized ${OPENGL_LIBRARY})
