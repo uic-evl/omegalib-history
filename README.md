@@ -1,6 +1,6 @@
 ![logo](https://code.google.com/p/omegalib/logo?cct=1370642046) omegalib
 ========
-A creative framework for virtual reality and cluster-driven display systems. Hello EVL
+A creative framework for virtual reality and cluster-driven display systems.
 
 Wiki page here: https://github.com/febret/omegalib/wiki
 
