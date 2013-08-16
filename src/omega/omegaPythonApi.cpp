@@ -1170,7 +1170,7 @@ BOOST_PYTHON_MODULE(omega)
 		;
 
 	// Camera
-	PYAPI_REF_CLASS(Camera, Node)
+	PYAPI_REF_CLASS(Camera, SceneNode)
 		PYAPI_METHOD(Camera, setEnabled)
 		PYAPI_METHOD(Camera, isEnabled)
 		PYAPI_REF_GETTER(Camera, getCustomTileConfig)
