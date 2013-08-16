@@ -149,7 +149,7 @@ void OculusRiftService::initialize()
 	typedef KeyValue<String, DisplayTileConfig*> TileItem;
 	foreach(TileItem tile, cfg.tiles)
 	{
-		bool riftEnabled = Config::getBoolValue("riftEnabled", tile->settingData, false);
+		bool riftEnabled = Config::getBoolValue("riftEnabled", *tile->settingData, false);
 		if(riftEnabled)
 		{
 			tile->flags |= RiftEnabledFlag;
@@ -170,7 +170,7 @@ void OculusRiftService::initialize()
 	myLensOffset =  0.0f;
 
 	myScaleFactor = 1;
-	myAspectRatio = 1.6;
+	myAspectRatio = 1.6f;
 
 	// Initialize the Oculus Rift
 	initOVR();
