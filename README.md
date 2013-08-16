@@ -1,6 +1,8 @@
 ![logo](https://code.google.com/p/omegalib/logo?cct=1370642046) omegalib
 ========
-A creative framework for virtual reality and cluster-driven display systems
+A creative framework for virtual reality and cluster-driven display systems.
+
+Wiki page here: https://github.com/febret/omegalib/wiki
 
 omegalib is a middleware designed to ease the development of applications on virtual reality and immersive systems. Its main features are:
  * Support for hybrid systems, presenting high definition 2D and 3D content on the same display surface

@@ -36,7 +36,6 @@
  ******************************************************************************/
 #include "eqinternal.h"
 #include "omega/DisplaySystem.h"
-#include "omega/SageManager.h"
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>

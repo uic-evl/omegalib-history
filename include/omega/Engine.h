@@ -138,6 +138,7 @@ namespace omega {
 		void initializeSound();
 		SoundManager* getSoundManager();
 		SoundEnvironment* getSoundEnvironment();
+		bool isSoundEnabled();
 		//@}
 
 		//! Input mappings
@@ -263,6 +264,13 @@ namespace omega {
 	///////////////////////////////////////////////////////////////////////////
 	inline SoundEnvironment* Engine::getSoundEnvironment()
 	{ return soundEnv;	}
+
+	///////////////////////////////////////////////////////////////////////////
+	//! This is only used to indicate if sound was enabled via configuration
+	//! If this is true, we assume the master node is connected/connecting
+	//! to the sound server. Used to enable the sound volume Python menu.
+	inline bool Engine::isSoundEnabled()
+	{ return soundEnabled;	}
 }; // namespace omega
 
 #endif

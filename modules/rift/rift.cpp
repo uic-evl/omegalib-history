@@ -259,9 +259,6 @@ void OculusRiftService::poll()
 		// Register myself as a camera listener.
 		myCamera = Engine::instance()->getDefaultCamera();
 		myCamera->addListener(this);
-
-		// Match the projection eye separation with the lens separation.
-		myCamera->setEyeSeparation(myHMDInfo.LensSeparationDistance);
 	}
 	
 #ifndef RIFT_EMULATE
@@ -272,6 +269,11 @@ void OculusRiftService::poll()
 	{
 		myCamera->getController()->reset();
 	}*/
+	if(myCamera == NULL)
+	{
+		// Match the projection eye separation with the lens separation.
+		myCamera->setEyeSeparation(myHMDInfo.LensSeparationDistance);
+	}
 #endif
 }
 

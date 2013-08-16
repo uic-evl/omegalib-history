@@ -43,7 +43,6 @@
 #include "omega/SystemManager.h"
 #include "omega/PythonInterpreter.h"
 #include "omega/CameraController.h"
-#include "omega/SageManager.h"
 #include "omega/Console.h"
 
 using namespace omega;
@@ -226,6 +225,15 @@ void Engine::initialize()
 			{
 				initializeSound();
 			}
+		}
+	}
+	else
+	{
+		soundManager = new SoundManager();
+		soundEnv = soundManager->getSoundEnvironment();
+		if(syscfg->exists("config/sound"))
+		{
+			soundEnabled = true;
 		}
 	}
 

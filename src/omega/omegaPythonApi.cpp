@@ -686,8 +686,7 @@ SoundEnvironment* getSoundEnvironment()
 ///////////////////////////////////////////////////////////////////////////////
 bool isSoundEnabled()
 {
-	SoundManager* smng = Engine::instance()->getSoundManager();
-	return smng != NULL && smng->isSoundServerRunning();
+	return Engine::instance()->isSoundEnabled();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1309,6 +1308,8 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(SoundInstance, setRoomSize)
 		PYAPI_METHOD(SoundInstance, getRoomSize)
 		PYAPI_METHOD(SoundInstance, fade)
+		PYAPI_METHOD(SoundInstance, setPitch)
+		PYAPI_METHOD(SoundInstance, getPitch)
 		;
 
 	// MissionControlClient

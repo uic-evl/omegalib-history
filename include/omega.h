@@ -42,7 +42,6 @@
 #include "omega/PythonInterpreter.h"
 #include "omega/Texture.h"
 #include "omega/ImageUtils.h"
-#include "omega/SageManager.h"
 #include "omega/TrackedObject.h"
 
 #endif

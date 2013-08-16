@@ -37,7 +37,6 @@
 #include "omega/Engine.h"
 #include "omega/CylindricalDisplayConfig.h"
 #include "omega/PlanarDisplayConfig.h"
-#include "omega/SageManager.h"
 
 using namespace omega;
 using namespace std;
@@ -67,8 +66,11 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 	StringUtils::toLowerCase(sm);
 	if(sm == "default") cfg.stereoMode = DisplayTileConfig::Default;
 	else if(sm == "mono") cfg.stereoMode = DisplayTileConfig::Mono;
+	// 'interleaved' defaults to row interleaved
 	else if(sm == "interleaved") cfg.stereoMode = DisplayTileConfig::LineInterleaved;
+	else if(sm == "rowinterleaved") cfg.stereoMode = DisplayTileConfig::LineInterleaved;
 	else if(sm == "sidebyside") cfg.stereoMode = DisplayTileConfig::SideBySide;
+	else if(sm == "columninterleaved") cfg.stereoMode = DisplayTileConfig::ColumnInterleaved;
 
 	cfg.invertStereo = Config::getBoolValue("invertStereo", scfg);
 
@@ -128,7 +130,10 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 				StringUtils::toLowerCase(sm);
 				if(sm == "default") tc->stereoMode = DisplayTileConfig::Default;
 				else if(sm == "mono") tc->stereoMode = DisplayTileConfig::Mono;
+			        // 'interleaved' defaults to row interleaved
 				else if(sm == "interleaved") tc->stereoMode = DisplayTileConfig::LineInterleaved;
+				else if(sm == "rowinterleaved") tc->stereoMode = DisplayTileConfig::LineInterleaved;
+				else if(sm == "columninterleaved") tc->stereoMode = DisplayTileConfig::ColumnInterleaved;
 				else if(sm == "sidebyside") tc->stereoMode = DisplayTileConfig::SideBySide;
 				
 				tc->invertStereo = Config::getBoolValue("invertStereo", sTile);
@@ -211,15 +216,6 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 		PlanarDisplayConfig cdc;
 		cdc.buildConfig(cfg, scfg);
 	}
-
-	// If SAGE support is available and we have a sage configuration section, pass it to the SAGE manager.
-#ifdef OMEGA_USE_SAGE
-	if(scfg.exists("sage"))
-	{
-		SageManager* mng = SystemManager::instance()->getSageManager();
-		if(mng != NULL) mng->setup(scfg["sage"], cfg);
-	}
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////

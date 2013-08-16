@@ -53,7 +53,6 @@
 // Input services
 #include "omega/KeyboardService.h"
 #include "omega/MouseService.h"
-#include "omega/SageManager.h"
 #include "omega/ModuleServices.h"
 
 using namespace omega;
@@ -110,7 +109,6 @@ SystemManager::SystemManager():
 	myIsInitialized(false),
 	myIsMaster(true),
 	myServiceManager(NULL),
-	mySageManager(NULL),
 	myMissionControlServer(NULL),
 	myMissionControlClient(NULL)
 {
@@ -162,23 +160,8 @@ void SystemManager::setup(Config* appcfg)
 	omsg("SystemManager::setup");
 
 	setupConfig(appcfg);
-	
-#ifdef OMEGA_USE_SAGE
-	// DEMO HACK (SageManager should start on all nodes, but launch createSAIL only on nodes that do have
-	// output tiles to SAGE)
-	if(isMaster())
-	{
-		mySageManager = new SageManager();
-		ModuleServices::addModule(mySageManager);
-	}
-#endif
-
 	try
 	{
-		// The display system needs to be set up before service manager, because it finishes setting up
-		// the multi instance configuration parameters that are used during service configuration.
-		setupDisplaySystem();
-
 		if(myInterpreter->isEnabled())
 		{
 			if(mySystemConfig->exists("config"))
@@ -198,13 +181,17 @@ void SystemManager::setup(Config* appcfg)
 			}
 		}
 
-		myServiceManager = new ServiceManager();
-
 		// NOTE: We initialize the interpreter here (instead of the 
 		// SystemManager::initialize function) to allow it to load optional modules
 		// that may provide services that we then want do setup during
-		// setupServiceManager()
+		// setupServiceManager() or setupDisplaySystem()
 		myInterpreter->initialize("omegalib");
+
+		// The display system needs to be set up before service manager, because it finishes setting up
+		// the multi instance configuration parameters that are used during service configuration.
+		setupDisplaySystem();
+
+		myServiceManager = new ServiceManager();
 
 		setupServiceManager();
 	}

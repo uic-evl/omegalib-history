@@ -203,40 +203,6 @@ if(OMEGA_USE_DISPLAY_EQUALIZER)
 		${OmegaLib_SOURCE_DIR}/include/omega/EqualizerDisplaySystem.h) 
 endif(OMEGA_USE_DISPLAY_EQUALIZER)
 
-# SAGE Module
-#set(OMEGA_USE_SAGE false CACHE BOOL "Enable SAGE output support")
-# if the SAGE_DIRECTORY evn variable exists, enable SAGE support by default
-if("$ENV{SAGE_DIRECTORY}" STREQUAL "")
-	message("SAGE_DIRECTORY not found: SAGE support DISABLED")
-else()
-	message("SAGE_DIRECTORY found: SAGE support ENABLED")
-	set(SAGE_DIR $ENV{SAGE_DIRECTORY})
-	set(SAGE_INCLUDE_DIR ${SAGE_DIR}/include)
-	set(OMEGA_USE_SAGE true CACHE BOOL "Enable SAGE support")
-	if(WIN32)
-		set(SAGE_LIBS 
-			${SAGE_DIR}/lib/sail.lib 
-			${SAGE_DIR}/win32/lib/pthread.lib 
-			${SAGE_DIR}/win32/lib/quanta.lib
-			Userenv.lib # needed for GetUserProfileDirectory
-			)
-	else()
-		set(SAGE_LIBS 
-			${SAGE_DIR}/lib64/libsail.so
-			${SAGE_DIR}/lib64/libquanta.so
-			)
-	endif()
-	
-	if(OMEGA_USE_SAGE)
-		SET( srcs ${srcs}
-				SageManager.cpp
-				)
-		SET( headers ${headers}
-				${OmegaLib_SOURCE_DIR}/include/omega/SageManager.h
-				)
-	endif()
-endif()
-
 # Glut Display Module
 if( WIN32 )
 	set(OMEGA_USE_DISPLAY_GLUT true CACHE BOOL "Enable GLUT display system support")
