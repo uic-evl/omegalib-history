@@ -270,6 +270,7 @@ void Renderer::innerDraw(const DrawContext& context, Camera* cam)
 	{
 		getRenderer()->beginDraw2D(context);
 
+		// Let the interpreter handle scriptable draw callbacks.
 		PythonInterpreter* pi = SystemManager::instance()->getScriptInterpreter();
 		pi->draw(context, cam);
 		
