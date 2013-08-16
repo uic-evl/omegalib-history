@@ -52,13 +52,16 @@ namespace omega
 	class Renderer;
 	class Camera;
 
+	// Forward decl used in DisplayTileConfig
+	class DisplayConfig;
+
 	///////////////////////////////////////////////////////////////////////////
-	struct DisplayTileConfig: public ReferenceType
+	class OMEGA_API DisplayTileConfig: public ReferenceType
 	{
 	public:
 	  enum StereoMode { Mono, LineInterleaved, ColumnInterleaved, PixelInterleaved, SideBySide, Default };
 
-		DisplayTileConfig(const Setting& s = Setting(NULL)): 
+		DisplayTileConfig(): 
 			drawStats(false), 
 			disableScene(false), 
 			disableOverlay(false), 
@@ -69,16 +72,24 @@ namespace omega
 			flags(0),
 			invertStereo(false),
 			isInGrid(false),
-			settingData(s),
 			isHMD(false),
+			settingData(NULL),
 			offset(Vector2i::Zero()),
 			position(Vector2i::Zero())
 			{
 			}
 
+		//! Parse a configuration from a setting, using values from the display
+		//! config defaults when needed.
+		void parseConfig(const Setting& sTile, DisplayConfig& cfg);
+		//! Computes the corner positions for the specified tile using 
+		//! information stored in the tile and configuration like center, yaw 
+		//! and pitch, lcd size and so on.
+		void computeTileCorners();
+
 		//! Stores the tile setting unparsed data. Useful to allow user code
 		//! process additional custom options.
-		const Setting& settingData;
+		const Setting* settingData;
 
 		StereoMode stereoMode;
 		//! When set to true, eyes are inverted in stereo mode.
@@ -176,15 +187,10 @@ namespace omega
 
 	///////////////////////////////////////////////////////////////////////////
 	//! Stores omegalib display configuration data.
-	struct DisplayConfig
+	class DisplayConfig
 	{
 	public:
 		static void LoadConfig(Setting& s, DisplayConfig& cfg);
-
-		//! Computes the corner positions for the specified tile using 
-		//! information stored in the tile and configuration like center, yaw 
-		//! and pitch, lcd size and so on.
-		void computeTileCorners(DisplayTileConfig* tile);
 
 		//! Modifies the display configuration to run on the tile subset 
 		//! specified in MultiInstanceConfig. This call modifies enabled tiles 
