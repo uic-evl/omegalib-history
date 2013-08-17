@@ -46,6 +46,13 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 {
 	//myDrawStatistics = Config::getBoolValue("drawStatistics", scfg);
 
+	// Initialize the canvas size to 0.
+	cfg.canvasPixelSize = Vector2i::Zero();
+
+	// Set a default tile resolution.
+	cfg.tileResolution[0] = 640;
+	cfg.tileResolution[1] = 480;
+
 	String cfgType = Config::getStringValue("geometry", scfg, "ConfigPlanar");
 
 	//cfg.numTiles = Config::getVector2iValue("numTiles", scfg);
@@ -64,7 +71,7 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 	
 	String sm = Config::getStringValue("stereoMode", scfg, "default");
 	StringUtils::toLowerCase(sm);
-	if(sm == "default") cfg.stereoMode = DisplayTileConfig::Default;
+	if(sm == "default") cfg.stereoMode = DisplayTileConfig::Mono;
 	else if(sm == "mono") cfg.stereoMode = DisplayTileConfig::Mono;
 	// 'interleaved' defaults to row interleaved
 	else if(sm == "interleaved") cfg.stereoMode = DisplayTileConfig::LineInterleaved;
@@ -126,6 +133,11 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 				DisplayTileConfig* tc = new DisplayTileConfig();
 				cfg.tiles[sTile.getName()] = tc;
 				tc->parseConfig(sTile, cfg);
+
+				// Update the canvas size.
+				Vector2i tileEndPoint = tc->offset + tc->pixelSize;
+				cfg.canvasPixelSize = 
+					cfg.canvasPixelSize.cwiseMax(tileEndPoint);
 
 				ncfg.tiles[ncfg.numTiles] = tc;
 				tc->id = ncfg.numTiles;
