@@ -45,7 +45,7 @@
     </font></li>
   <li><font face="Helvetica, Arial, sans-serif">CAVEVOC CAVE Demo
       Application - demo.py - This is a simple CAVE application to
-      show you how to use the <a href="http://uiv-evl.github.io/omegalib/cavevoc/html/namespacecavevoc.html">CAVEVOC
+      show you how to use the <a href="http://uic-evl.github.io/omegalib/cavevoc/html/namespacecavevoc.html">CAVEVOC
         Python API</a>.<br>
     </font></li>
 </ol>
