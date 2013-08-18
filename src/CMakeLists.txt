@@ -29,6 +29,12 @@ include(ExternalProject)
 #include(OmegaAddTutorial)
 include(UsePch)
 
+# Set virtual memory size for precompiled header
+if(WIN32)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500")
+endif()
+
+
 include(${OmegaLib_SOURCE_DIR}/external/UseOmicron.cmake)
 
 set(OMEGA_HARDCODE_DATA_PATHS true CACHE BOOL "When set to true, the data and application paths will be hardcoded in macros and will be used default for file lookups")

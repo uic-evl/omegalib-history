@@ -235,6 +235,7 @@ enable_precompiled_headers(precompiled.h srcs)
 add_library( omega SHARED ${srcs} ${headers})
 target_link_libraries(omega ${OMICRON_LIB} freetype ftgl FreeImage)
 
+
 ###############################################################################
 # Setup module-specific link info
 set(EXT_LIB_DIR ${OmegaLib_SOURCE_DIR}/external/libs32)
