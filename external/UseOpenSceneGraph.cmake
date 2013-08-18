@@ -1,3 +1,34 @@
+###############################################################################
+# THE OMEGA LIB PROJECT
+#-----------------------------------------------------------------------------
+# Copyright 2010-2013		Electronic Visualization Laboratory, 
+#							University of Illinois at Chicago
+# Authors:										
+#  Alessandro Febretti		febret@gmail.com
+#-----------------------------------------------------------------------------
+# Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+# University of Illinois at Chicago
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without modification, 
+# are permitted provided that the following conditions are met:
+# 
+# Redistributions of source code must retain the above copyright notice, this 
+# list of conditions and the following disclaimer. Redistributions in binary 
+# form must reproduce the above copyright notice, this list of conditions and 
+# the following disclaimer in the documentation and/or other materials provided 
+# with the distribution. 
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+###############################################################################
 include(ExternalProject)
 
 set(OMEGA_USE_EXTERNAL_OSG false CACHE BOOL "Enable to use an external osg build instead of the built-in one.")
@@ -9,70 +40,45 @@ if(OMEGA_USE_EXTERNAL_OSG)
 	set(OMEGA_EXTERNAL_OSG_SOURCE_PATH CACHE PATH "The external osg source path")
 endif()
 
-if(OMEGA_OS_WIN)
-	set(EXTLIB_NAME OpenSceneGraph-3.0.1-VS10-x86)
-elseif(OMEGA_OS_LINUX)
-	if(OMEGA_ARCH_32)
-		set(EXTLIB_NAME OpenSceneGraph-3.0.1-linux-x86)
-	else(OMEGA_ARCH_32)
-		set(EXTLIB_NAME OpenSceneGraph-3.0.1-linux-x64)
-	endif(OMEGA_ARCH_32)
-else(OMEGA_OS_WIN)
-	if(CMAKE_BUILD_TYPE MATCHES RELEASE)
-		if(OMEGA_ARCH_32)
-			set(EXTLIB_NAME OpenSceneGraph-3.0.1-osx-x86-release-12741)
-		else(OMEGA_ARCH_32)
-			set(EXTLIB_NAME OpenSceneGraph-3.0.1-osx-x64-release-12741)
-		endif(OMEGA_ARCH_32)
-	else(CMAKE_BUILD_TYPE MATCHES RELEASE)
-		if(OMEGA_ARCH_32)
-			set(EXTLIB_NAME OpenSceneGraph-3.0.1-osx-x86-debug-12741)
-		else(OMEGA_ARCH_32)
-			set(EXTLIB_NAME OpenSceneGraph-3.0.1-osx-x64-debug-12741)
-		endif(OMEGA_ARCH_32)
-	endif(CMAKE_BUILD_TYPE MATCHES RELEASE)
-
-endif(OMEGA_OS_WIN)
-
 if(OMEGA_USE_EXTERNAL_OSG)
     set(EXTLIB_DIR ${OMEGA_EXTERNAL_OSG_BINARY_PATH})
     set(OSG_BINARY_DIR ${OMEGA_EXTERNAL_OSG_BINARY_PATH})
-else(OMEGA_USE_EXTERNAL_OSG)
-    set(EXTLIB_TGZ ${CMAKE_BINARY_DIR}/${EXTLIB_NAME}.tar.gz)
-    set(EXTLIB_DIR ${CMAKE_BINARY_DIR}/${EXTLIB_NAME})
-    set(OSG_BINARY_DIR ${CMAKE_BINARY_DIR}/${EXTLIB_NAME})
-endif(OMEGA_USE_EXTERNAL_OSG)
+else()
+    set(OSG_BUILD_DIR ${CMAKE_BINARY_DIR}/src/osg-prefix/src/osg-build)
+    set(OSG_BINARY_DIR ${OSG_BUILD_DIR})
+endif()
 
-# Uncomment this line to make omegalib use an external openscenegraph binary build
-# set(EXTLIB_DIR D:/Workspace/3rdparty/OpenSceneGraph-3.0.1-VS10.0.30319-x86-debug-12741)
+ExternalProject_Add(
+	osg
+	URL ${CMAKE_SOURCE_DIR}/external/osg.tar.gz
+	CMAKE_ARGS 
+		-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+		-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}
+		-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
+		-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}
+		-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE}
+		-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG}
+	INSTALL_COMMAND ""
+	)
+set_target_properties(osg PROPERTIES FOLDER "3rdparty")
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/${EXTLIB_NAME}.tar.gz)
-  message(STATUS "Downloading OpenSceneGraph binary archive...")
-  file(DOWNLOAD http://omegalib.googlecode.com/files/${EXTLIB_NAME}.tar.gz ${EXTLIB_TGZ} SHOW_PROGRESS)
-endif(NOT EXISTS ${CMAKE_BINARY_DIR}/${EXTLIB_NAME}.tar.gz)
-
-if(NOT EXISTS ${EXTLIB_DIR})
-  message(STATUS "Extracting OpenSceneGraph...")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzfh
-    ${EXTLIB_TGZ} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-endif(NOT EXISTS ${EXTLIB_DIR})
 
 if(OMEGA_USE_EXTERNAL_OSG)
     set(OSG_INCLUDES ${OMEGA_EXTERNAL_OSG_SOURCE_PATH}/include)
 else()
-	set(OSG_INCLUDES ${EXTLIB_DIR}/include)
+	set(OSG_INCLUDES ${CMAKE_BINARY_DIR}/src/osg-prefix/src/osg/include)
 endif()
 
 # reduced component set.
 #set(OSG_COMPONENTS osg osgAnimation osgDB osgFX osgManipulator osgShadow osgUtil OpenThreads)
-set(OSG_COMPONENTS osg osgAnimation osgDB osgFX osgGA osgManipulator osgShadow osgTerrain osgText osgUtil osgVolume osgViewer osgSim osgWidget OpenThreads)
+set(OSG_COMPONENTS osg osgAnimation osgDB osgFX osgShadow osgTerrain osgText osgUtil osgVolume OpenThreads osgGA osgViewer osgSim)
 
 if(OMEGA_OS_WIN)
 	if(OMEGA_USE_EXTERNAL_OSG)
 		foreach( C ${OSG_COMPONENTS} )
 			set(${C}_LIBRARY ${OMEGA_EXTERNAL_OSG_BINARY_PATH}/lib/${C}.lib)
 			set(${C}_LIBRARY_DEBUG ${OMEGA_EXTERNAL_OSG_BINARY_PATH}/lib/${C}d.lib)
-			set(${C}_INCLUDE_DIR ${OMEGA_EXTERNAL_OSG_SOURCE_PATH}/include)
+			#set(${C}_INCLUDE_DIR ${OMEGA_EXTERNAL_OSG_SOURCE_PATH}/include)
 			set(OSG_LIBS ${OSG_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 		endforeach()
 
@@ -81,43 +87,42 @@ if(OMEGA_OS_WIN)
 		file(COPY ${OMEGA_EXTERNAL_OSG_BINARY_PATH}/bin/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} PATTERN "*.dll")
 	else()
 		foreach( C ${OSG_COMPONENTS} )
-			set(${C}_LIBRARY ${EXTLIB_DIR}/lib/release/${C}.lib)
-			set(${C}_LIBRARY_DEBUG ${EXTLIB_DIR}/lib/debug/${C}d.lib)
-			set(${C}_INCLUDE_DIR ${EXTLIB_DIR}/include)
+			set(${C}_LIBRARY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE}/${C}.lib)
+			set(${C}_LIBRARY_DEBUG ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG}/${C}d.lib)
 			set(OSG_LIBS ${OSG_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 		endforeach()
 
 		# Copy the dlls into the target directories
-		file(COPY ${EXTLIB_DIR}/bin/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG} PATTERN "*.dll")
-		file(COPY ${EXTLIB_DIR}/bin/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} PATTERN "*.dll")
+		#file(COPY ${OSG_BUILD_DIR}/bin/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG} PATTERN "*.dll")
+		#file(COPY ${EXTLIB_DIR}/bin/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} PATTERN "*.dll")
 	endif()
 	
 
 elseif(OMEGA_OS_LINUX)
     foreach( C ${OSG_COMPONENTS} )
-		set(${C}_LIBRARY ${EXTLIB_DIR}/lib/release/lib${C}.so)
-		set(${C}_LIBRARY_DEBUG ${EXTLIB_DIR}/lib/debug/lib${C}d.so)
-		set(${C}_INCLUDE_DIR ${OSG_INCLUDES})
+			set(${C}_LIBRARY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE}/${C}.so)
+			set(${C}_LIBRARY_DEBUG ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG}/${C}d.so)
+		#set(${C}_INCLUDE_DIR ${OSG_INCLUDES})
 		set(OSG_LIBS ${OSG_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 	endforeach()
 
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-		file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-	else(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-		file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-	endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-else(OMEGA_OS_WIN)
+	# if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		# file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+		# file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	# else()
+		# file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+		# file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	# endif()
+else()
 	foreach( C ${OSG_COMPONENTS} )
-		set(${C}_LIBRARY ${EXTLIB_DIR}/lib/lib${C}d.dylib)
-		set(${C}_LIBRARY_DEBUG ${EXTLIB_DIR}/lib/lib${C}d.dylib)
-		set(${C}_INCLUDE_DIR ${OSG_INCLUDES})
+		set(${C}_LIBRARY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE}/${C}.dylib)
+		set(${C}_LIBRARY_DEBUG ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG}/${C}d.dylib)
+		#set(${C}_INCLUDE_DIR ${OSG_INCLUDES})
 		set(OSG_LIBS ${OSG_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 	endforeach()
-	file(COPY ${EXTLIB_DIR}/lib/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-	file(COPY ${EXTLIB_DIR}/lib/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-endif(OMEGA_OS_WIN)
+	# file(COPY ${EXTLIB_DIR}/lib/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	# file(COPY ${EXTLIB_DIR}/lib/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/UseOsgWorks.cmake)
 # Add osgWorks to openscenegraph includes and libraries (this simplified inclusion in other projects.

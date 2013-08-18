@@ -67,6 +67,8 @@ void GamepadCameraController::handleEvent(const Event& evt)
 void GamepadCameraController::update(const UpdateContext& context)
 {
 	if(!isEnabled()) return;
-	//updateCamera(mySpeedVector, myYaw, myPitch, 0, context.dt);
+	Camera* c = getCamera();
+	c->setOrientation(Math::quaternionFromEuler(Vector3f(myPitch, myYaw, 0)));
+	c->translate(mySpeedVector * context.dt, Node::TransformLocal);
 }
 

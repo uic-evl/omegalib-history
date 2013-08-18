@@ -1,7 +1,6 @@
+#include <omega.h>
 #include <osg/Image>
 #include <osg/Notify>
-
-#include <omega.h>
 
 //#include <osgDB/Registry>
 #include <osgDB/FileNameUtils>
