@@ -123,6 +123,7 @@ if(OMEGA_BUILD_STATIC)
 else(OMEGA_BUILD_STATIC)
 	add_library( omegaOsg SHARED ${srcs} ${headers})
 endif(OMEGA_BUILD_STATIC)
+add_dependencies(omegaOsg osg osgWorks)
 
 ###################################################################################################
 # Setup link info.

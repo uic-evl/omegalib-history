@@ -205,12 +205,11 @@ endif(OMEGA_USE_DISPLAY_EQUALIZER)
 
 # Glut Display Module
 if( WIN32 )
-	set(OMEGA_USE_DISPLAY_GLUT true CACHE BOOL "Enable GLUT display system support")
+	set(OMEGA_USE_DISPLAY_GLUT false CACHE BOOL "Enable GLUT display system support")
 	if(OMEGA_USE_DISPLAY_GLUT)
 		set( srcs ${srcs} GlutDisplaySystem.cpp)
 		set( headers ${headers} ${OmegaLib_SOURCE_DIR}/include/omega/GlutDisplaySystem.h) 
 	endif(OMEGA_USE_DISPLAY_GLUT)
-	set(OMEGA_USE_DISPLAY_EQUALIZER true CACHE BOOL "Enable Equalizer display system support")
 endif( WIN32 )
 
 # Fast image loading library
@@ -234,6 +233,7 @@ source_group(boostPython REGULAR_EXPRESSION boostPython/)
 enable_precompiled_headers(precompiled.h srcs)
 add_library( omega SHARED ${srcs} ${headers})
 target_link_libraries(omega ${OMICRON_LIB} freetype ftgl FreeImage)
+add_dependencies(omega omicron)
 
 
 ###############################################################################

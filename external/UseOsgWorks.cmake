@@ -130,6 +130,8 @@ else(APPLE)
 		)
 endif(APPLE)
 
+add_dependencies(osgWorks osg)
+
 set_target_properties(osgWorks PROPERTIES FOLDER "3rdparty")
 # define path to libraries built by the equalizer external project
 set(OSGWORKS_BINARY_DIR ${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib)
@@ -159,3 +161,4 @@ endif(OMEGA_OS_WIN)
 add_definitions(-DOSGWORKS_STATIC)
 
 set(OSGWORKS_INCLUDES ${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks/include)
+
