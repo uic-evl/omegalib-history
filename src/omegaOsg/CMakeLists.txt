@@ -1,37 +1,8 @@
-###################################################################################################
-# THE OMEGA LIB PROJECT
-#-------------------------------------------------------------------------------------------------
-# Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
-# Authors:										
-#  Alessandro Febretti		febret@gmail.com
-#-------------------------------------------------------------------------------------------------
-# Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
-# All rights reserved.
-# Redistribution and use in source and binary forms, with or without modification, are permitted 
-# provided that the following conditions are met:
-# 
-# Redistributions of source code must retain the above copyright notice, this list of conditions 
-# and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
-# notice, this list of conditions and the following disclaimer in the documentation and/or other 
-# materials provided with the distribution. 
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
-# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################################
-
-###################################################################################################
 # Compile definitions
-ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS -DOOSG_EXPORTING)
+add_definitions( -D_CRT_SECURE_NO_WARNINGS -DOOSG_EXPORTING)
 
-###################################################################################################
 # Source files
-SET( srcs 
+set( srcs 
 		OsgModule.cpp
 		OsgRenderPass.cpp
 		OsgSceneObject.cpp
@@ -39,9 +10,7 @@ SET( srcs
 		ReaderFreeImage.cpp
 		)
 		
-###################################################################################################
-# Headers
-SET( headers 
+set( headers 
 		# omega
 		${CMAKE_SOURCE_DIR}/include/omegaOsg/oosgbase.h
 		${CMAKE_SOURCE_DIR}/include/omegaOsg/OsgModule.h
@@ -50,8 +19,20 @@ SET( headers
 		${CMAKE_SOURCE_DIR}/include/omegaOsg/SceneView.h
 		${CMAKE_SOURCE_DIR}/include/omegaOsg/ReaderFreeImage.h
         ) 
-        
-###################################################################################################
+# add the freetype plugin directly to omegaOsg. The freetype plugin is not compiled with
+# openscenegraph since it can't easily find the freetype library dependency. Finding freetype
+# would require forwarding an environment variable (FREETYPE_DIR) to the external project
+# osg, which is not currently supported by cmake. 
+# see http://www.cmake.org/pipermail/cmake/2011-October/046798.html
+#So adding the freetype reader to omegaOsg is the easiest solution for now.
+set(freetypeSrcs 
+	freetype/FreeTypeFont.cpp
+	freetype/FreeTypeFont.h
+	freetype/FreeTypeLibrary.cpp
+	freetype/FreeTypeLibrary.h
+	freetype/ReaderWriterFreeType.cpp)
+
+# optional modules        
 set(OMEGAOSG_USE_FBX true CACHE BOOL "Enables Fbx support for omegaOsg.")
 if(OMEGAOSG_USE_FBX)
 	include(${CMAKE_SOURCE_DIR}/external/UseFbx.cmake)
@@ -76,7 +57,6 @@ if(OMEGAOSG_USE_FBX)
 			) 
 endif()
 
-###################################################################################################
 set(OMEGAOSG_USE_INVENTOR false CACHE BOOL "Enables Inventor (.vrml, .iv) support for omegaOsg. Needs the Coin3d library installed")
 if(OMEGAOSG_USE_INVENTOR)
     find_package(Inventor)
@@ -101,10 +81,11 @@ if(OMEGAOSG_USE_INVENTOR)
 	endif()
 endif()
 
-###################################################################################################
+# setup some platform-specific options
 source_group(omegaOsg REGULAR_EXPRESSION omegaOsg/)		
 source_group(fbx REGULAR_EXPRESSION omegaOsg/fbx/)		
 source_group(Inventor REGULAR_EXPRESSION omegaOsg/Inventor/)		
+source_group(Freetype REGULAR_EXPRESSION omegaOsg/freetype/)		
 
 IF(WIN32)
     SET(TARGET_EXTERNAL_LIBRARIES wininet)
@@ -116,19 +97,17 @@ IF(APPLE)
     SET(TARGET_EXTERNAL_LIBRARIES iconv ${SYS_CONFIG_LIBRARY})
 endif(APPLE)
 
-###################################################################################################
 # Setup compile info
 if(OMEGA_BUILD_STATIC)
-	add_library( omegaOsg ${srcs} ${headers})
+	add_library( omegaOsg ${srcs} ${freetypeSrcs} ${headers})
 else(OMEGA_BUILD_STATIC)
-	add_library( omegaOsg SHARED ${srcs} ${headers})
+	add_library( omegaOsg SHARED ${srcs} ${freetypeSrcs} ${headers})
 endif(OMEGA_BUILD_STATIC)
 add_dependencies(omegaOsg osg osgWorks)
 
-###################################################################################################
 # Setup link info.
 target_link_libraries(omegaOsg 
-	omega ${OSG_LIBS} ${FBX_LIBNAME} ${TARGET_EXTERNAL_LIBRARIES})
+	omega freetype ${OSG_LIBS} ${FBX_LIBNAME} ${TARGET_EXTERNAL_LIBRARIES})
 
 if(OMEGAOSG_USE_INVENTOR)
     if(INVENTOR_FOUND)
