@@ -83,7 +83,6 @@ Engine::Engine(ApplicationBase* app):
     myDefaultCamera(NULL),
 	//myPointerMode(PointerModeWand)
 	myDrawPointers(false),
-	myDebugWand(false),
 	myPrimaryButton(Event::Button3),
 	myEventDispatchEnabled(true),
 	soundEnv(NULL)
@@ -397,14 +396,6 @@ void Engine::handleEvent(const Event& evt)
 	if(!myEventDispatchEnabled) return;
 
 	myHandleEventTimeStat->startTiming();
-
-	if(myDebugWand)
-	{
-		if(evt.getServiceType() == Event::ServiceTypeWand)
-		{
-			ofmsg("|Wand position: %1% flags %2%", %evt.getPosition() %evt.getFlags());
-		}
-	}
 
 	// Python events are processed with normal priority. First pass them to modules
 	// With higher priority...
