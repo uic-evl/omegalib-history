@@ -400,15 +400,20 @@ void Engine::handleEvent(const Event& evt)
 	// Python events are processed with normal priority. First pass them to modules
 	// With higher priority...
 	ModuleServices::handleEvent(evt, EngineModule::PriorityHighest);
-	ModuleServices::handleEvent(evt, EngineModule::PriorityHigh);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityHigh);
 
 	// Now to python callbacks...
-	getSystemManager()->getScriptInterpreter()->handleEvent(evt);
+	if(!evt.isProcessed()) 
+		getSystemManager()->getScriptInterpreter()->handleEvent(evt);
 
 	// Now to modules with lower priority.
-	ModuleServices::handleEvent(evt, EngineModule::PriorityNormal);
-	ModuleServices::handleEvent(evt, EngineModule::PriorityLow);
-	ModuleServices::handleEvent(evt, EngineModule::PriorityLowest);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityNormal);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityLow);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityLowest);
 
 	// Update pointers.
 	if(myDrawPointers)
