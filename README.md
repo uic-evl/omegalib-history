@@ -2,7 +2,7 @@
 ========
 A creative framework for virtual reality and cluster-driven display systems.
 
-- Intro page: http://io.github.com/uic-evl/omegalib
+- Intro page: http://uic-evl.github.io/omegalib/
 - Wiki: https://github.com/uic-evl/omegalib/wiki
 
 ## If you are in a rush:
