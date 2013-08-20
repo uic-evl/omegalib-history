@@ -32,11 +32,12 @@ set(OSGWORKS_GENERATOR ${CMAKE_GENERATOR})
 #endif(OMEGA_TOOL_VS10)
 
 # Equalizer support enabled: uncompress and prepare the external project.
-if(APPLE)
+if(WIN32)
+	# On windows things are a little more complex: The 'Source And Build Tree' 
+	# option we use in linux  does not seem to work
 	ExternalProject_Add(
 		osgWorks
 		URL ${CMAKE_SOURCE_DIR}/external/osgw2.tar.gz
-		#CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_BINARY_DIR}
 		CMAKE_GENERATOR ${OSGWORKS_GENERATOR}
 		CMAKE_ARGS 
 			-DCMAKE_SHARED_LINKER_FLAGS:STRING="${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:msvcprt.lib /NODEFAULTLIB:libcpmt.lib"
@@ -104,7 +105,7 @@ else()
 			-DOSGBuildRoot:PATH=${OSG_BINARY_DIR}
 			INSTALL_COMMAND ""
 		)
-endif(APPLE)
+endif()
 
 add_dependencies(osgWorks osg)
 
