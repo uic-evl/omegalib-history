@@ -264,6 +264,9 @@ void Engine::initialize()
 	//myDefaultCamera->setPosition(obs->getHeadPosition());
 	myDefaultCamera->setPosition(Vector3f::Zero());
 
+	// All the engine modules loaded after this point are marked non-core:
+	// This means that they will be unloaded during an application reset
+	// (see Engine::reset)
 	ModuleServices::setNonCoreMode();
 
 	// Setup stats
