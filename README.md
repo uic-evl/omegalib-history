@@ -2,18 +2,18 @@
 ========
 A creative framework for virtual reality and cluster-driven display systems.
 
-Intro page: http://io.github.com/uic-evl/omegalib
-Wiki: https://github.com/uic-evl/omegalib/wiki
+- Intro page: http://io.github.com/uic-evl/omegalib
+- Wiki: https://github.com/uic-evl/omegalib/wiki
 
-If you are in a rush:
-Download a Windows precompiled version: https://github.com/febret/omegalib-windows/archive/master.zip
-Quickly download and build on Linux / OSX:
+## If you are in a rush:
+- Download a Windows precompiled version: https://github.com/febret/omegalib-windows/archive/master.zip
+- Quickly download and build on Linux / OSX:
 ```
 > wget http://uic-evl.github.io/omegalib/getomega
 > chmod +x getomega
 > ./getomega
 ```
 
-More info on building: https://github.com/uic-evl/omegalib/wiki/Building
-Troubleshooting and FAQ: https://github.com/uic-evl/omegalib/wiki/HowTos
-Support Forum: https://groups.google.com/forum/#!forum/omegalib
+- More info on building: https://github.com/uic-evl/omegalib/wiki/Building
+- Troubleshooting and FAQ: https://github.com/uic-evl/omegalib/wiki/HowTos
+- Support Forum: https://groups.google.com/forum/#!forum/omegalib
