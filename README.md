@@ -6,8 +6,8 @@ A creative framework for virtual reality and cluster-driven display systems.
 - Wiki: https://github.com/uic-evl/omegalib/wiki
 
 ## If you are in a rush:
-- Download a Windows precompiled version: https://github.com/febret/omegalib-windows/archive/master.zip
-- Quickly download and build on Linux / OSX:
+- *Download a Windows precompiled version*: https://github.com/febret/omegalib-windows/archive/master.zip
+- *Quickly download and build on Linux / OSX*:
 ```
 > wget http://uic-evl.github.io/omegalib/getomega
 > chmod +x getomega
