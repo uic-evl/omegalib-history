@@ -323,10 +323,6 @@ void Engine::reset()
         Setting& s = cfg->lookup("config/camera");
 		myDefaultCamera->setup(s);
     }
-	//myDefaultCamera->resetOrientation();
-	//myDefaultCamera->setPosition(Vector3f::Zero());
-	//myDefaultCamera->getController()->reset();
-	//myDefaultCamera->removeAllChildren();
 	
 	if(soundEnv != NULL)
 	{
