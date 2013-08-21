@@ -430,7 +430,7 @@ namespace omega
 
 		argv[argc] = 0;
 
-		ofmsg("Executing: %1%", %command);
+		//ofmsg("Executing: %1%", %command);
 		int nTries = 10;
 		while( nTries-- )
 		{
