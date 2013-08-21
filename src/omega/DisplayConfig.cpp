@@ -214,6 +214,21 @@ bool DisplayConfig::isHostInTileSection(const String& hostname, int tilex, int t
 }
 
 //////////////////////////////////////////////////////////////////////////////
+void DisplayConfig::setTilesEnabled(int tilex, int tiley, int tilew, int tileh, bool enabled)
+{
+	foreach(Tile t, tiles)
+	{
+		if(t->gridX >= tilex &&
+			t->gridX < tilex + tilew &&
+			t->gridY >= tiley &&
+			t->gridY < tiley + tileh)
+		{
+			t->enabled = enabled;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 void DisplayTileConfig::parseConfig(const Setting& sTile, DisplayConfig& cfg)
 {
 	settingData = &sTile;
@@ -318,3 +333,4 @@ void DisplayTileConfig::computeTileCorners()
 	tc->bottomLeft = tc->center - (up * th / 2) - (right * tw / 2);
 	tc->bottomRight = tc->center - (up * th / 2) + (right * tw / 2);
 }
+

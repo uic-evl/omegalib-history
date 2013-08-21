@@ -646,17 +646,10 @@ bool isHostInTileSection(const String& hostname, int tilex, int tiley, int tilew
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void hideLocalTiles()
+void setTilesEnabled(int tilex, int tiley, int tilew, int tileh, bool enabled)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	ds->hideLocalTiles();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void showLocalTiles()
-{
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	ds->showLocalTiles();
+	DisplayConfig& dc = SystemManager::instance()->getDisplaySystem()->getDisplayConfig();
+	dc.setTilesEnabled(tilex, tiley, tilew, tileh, enabled);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1369,8 +1362,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getImageLoaderThreads", getImageLoaderThreads);
 	def("getHostname", getHostname, PYAPI_RETURN_VALUE);
 	def("isHostInTileSection", isHostInTileSection);
-	def("hideLocalTiles", hideLocalTiles);
-	def("showLocalTiles", showLocalTiles);
+	def("setTilesEnabled", setTilesEnabled);
 	def("printModules", printModules);
 
 	def("isEventDispatchEnabled", isEventDispatchEnabled);

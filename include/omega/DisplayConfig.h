@@ -202,6 +202,10 @@ namespace omega
 		//! Returns true if the specified host is running a tile in the specified section. 
 		bool isHostInTileSection(const String& hostname, int tilex, int tiley, int tilew, int tileh);
 
+		//! Enables or disables tiles in the specified rectangle. Tiles must
+		//! be part of the tile grid.
+		void setTilesEnabled(int tilex, int tiley, int tilew, int tileh, bool enabled);
+
 	public:
 		// UGLY CONSTANTS.
 		static const int MaxNodes = 64;
@@ -280,6 +284,7 @@ namespace omega
 		//@}
 		
 		
+		typedef KeyValue<String, DisplayTileConfig*> Tile;
 		//! Tile configurations.
 		Dictionary<String, DisplayTileConfig*> tiles;
 

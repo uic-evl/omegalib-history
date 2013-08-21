@@ -60,6 +60,9 @@ DisplayTileConfig::StereoMode DrawContext::getCurrentStereoMode()
 ///////////////////////////////////////////////////////////////////////////////
 void DrawContext::drawFrame(uint64 frameNum)
 {
+	// If the current tile is not enabled, return now.
+	if(!tile->enabled) return;
+
 	this->frameNum = frameNum;
 
 	FrameInfo curFrame(frameNum, gpuContext);
