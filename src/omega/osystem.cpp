@@ -456,6 +456,22 @@ namespace omega
 		return cCurrentPath;
 	}
 
+	///////////////////////////////////////////////////////////////////////////
+	String ogetexecpath()
+	{
+		char path[2048];
+		path[0] = '\0';
+#ifdef OMEGA_OS_LINUX
+		readlink("/proc/self/exe", path, 2048);
+#elif defined OMEGA_OS_WIN
+		GetModuleName(NULL, path, 2048);
+#else
+		owarn("OSX NOT IMPLEMENTED: (osystem.cpp) ogetexecpath");
+		owarn("Imlement using _NSGetExecutablePath()");
+#endif	
+		return path;
+	}
+	
 	String _dataPrefix;
 
 	///////////////////////////////////////////////////////////////////////////
