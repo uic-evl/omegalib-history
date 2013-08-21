@@ -146,9 +146,6 @@ namespace omega {
 		Event::Flags getPrimaryButton() { return myPrimaryButton; }
 		//@}
 
-		void setDebugWandEnabled(float value) { myDebugWand = value; }
-		bool isDebugWandEnabled() { return myDebugWand; }
-
 		virtual void initialize();
 		virtual void dispose();
 		//! Resets the omegalib engine to its initial state. Useful for runtime
@@ -214,8 +211,6 @@ namespace omega {
 		// Cameras.
 		Ref<Camera> myDefaultCamera;
 		CameraCollection myCameras;
-
-		bool myDebugWand;
 
 		// Sound
 		Ref<SoundManager> soundManager;

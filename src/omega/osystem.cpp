@@ -43,28 +43,18 @@
 
 #include <iostream>
 
-//#ifdef WIN32
-//#include <windows.h> // needed for Sleep 
-//#else
-//#include <unistd.h>
-//#include<sys/wait.h>
-//#define Sleep(x) usleep((x)*1000)
-//#endif
-
 #ifndef WIN32
 	#include <unistd.h>
 	#include<sys/wait.h>
 #endif
 
-// TODO: move thi to osystem (ogetcwd)
 #ifdef OMEGA_OS_WIN
     #include <direct.h>
     #define GetCurrentDir _getcwd
 #else
     #include <unistd.h>
     #define GetCurrentDir getcwd
- #endif
-
+#endif
 
 namespace omega
 {
@@ -241,7 +231,7 @@ namespace omega
 			
 			if(!disableSIGINTHandler)
 			{
-				omsg("Registering Control-C SIGINT handler");
+				//omsg("Registering Control-C SIGINT handler");
 				signal(SIGINT, sigproc);
 			}
 
@@ -440,7 +430,7 @@ namespace omega
 
 		argv[argc] = 0;
 
-		ofmsg("Executing: %1%", %command);
+		//ofmsg("Executing: %1%", %command);
 		int nTries = 10;
 		while( nTries-- )
 		{
@@ -466,6 +456,22 @@ namespace omega
 		return cCurrentPath;
 	}
 
+	///////////////////////////////////////////////////////////////////////////
+	String ogetexecpath()
+	{
+		char path[2048];
+		path[0] = '\0';
+#ifdef OMEGA_OS_LINUX
+		readlink("/proc/self/exe", path, 2048);
+#elif defined OMEGA_OS_WIN
+		GetModuleName(NULL, path, 2048);
+#else
+		owarn("OSX NOT IMPLEMENTED: (osystem.cpp) ogetexecpath");
+		owarn("Imlement using _NSGetExecutablePath()");
+#endif	
+		return path;
+	}
+	
 	String _dataPrefix;
 
 	///////////////////////////////////////////////////////////////////////////
