@@ -51,6 +51,8 @@
 #ifdef OMEGA_OS_WIN
     #include <direct.h>
     #define GetCurrentDir _getcwd
+	// Needed for GetModuleFileName
+	#include <Windows.h>
 #else
     #include <unistd.h>
     #define GetCurrentDir getcwd
@@ -464,7 +466,7 @@ namespace omega
 #ifdef OMEGA_OS_LINUX
 		readlink("/proc/self/exe", path, 2048);
 #elif defined OMEGA_OS_WIN
-		GetModuleName(NULL, path, 2048);
+		GetModuleFileName(NULL, path, 2048);
 #else
 		owarn("OSX NOT IMPLEMENTED: (osystem.cpp) ogetexecpath");
 		owarn("Imlement using _NSGetExecutablePath()");
