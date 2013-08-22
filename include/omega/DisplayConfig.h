@@ -168,6 +168,10 @@ namespace omega
 			this->bottomRight = bottomRight;
 		}
 
+		//! Convenience method to check for intersection between a ray and
+		//! this tile.
+		bool rayIntersects(const Ray& ray);
+
 		//! Set the resolution in pixels of this tile. Method used instead of
 		// property because python API can't use Vector2i.
 		void setPixelSize(int width, int height)

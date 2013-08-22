@@ -46,29 +46,8 @@ void WandInputFilter::handleEvent(const Event& evt)
 		typedef KeyValue<String, DisplayTileConfig*> TileItem;
 		foreach(TileItem dtc, dcfg.tiles)
 		{
-			if(dtc->enabled)
-			{
-				// Intersect with two triangles defining the tile surface
-				Vector3f topRight = 
-					dtc->topLeft + (dtc->bottomRight - dtc->bottomLeft);
-				
-				pair<bool, float> intersect1 = Math::intersects(ray, 
-					dtc->topLeft,
-					dtc->bottomLeft,
-					dtc->bottomRight,
-					true, false);
-				pair<bool, float> intersect2 = Math::intersects(ray, 
-					topRight,
-					dtc->topLeft,
-					dtc->bottomRight,
-					true, false);
-				// If we found an intersection, we are done.
-				if(intersect1.first || intersect2.first)
-				{
-					//ofmsg("intersect: with tile %1%", %dtc->name);
-					return;
-				}
-			}
+			// If we found an intersection, we are done.
+			if(dtc->enabled && dtc->rayIntersects(ray)) return;
 		}
 
 		// No intersection: mark the wand event as processed so it will not
