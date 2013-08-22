@@ -37,33 +37,42 @@ void WandInputFilter::handleEvent(const Event& evt)
 	// active tile.
 	if(evt.getServiceType() == Event::ServiceTypeWand)
 	{
-		// Get the wand ray
+		// Get sensor-space the wand ray
 		Ray ray;
-		ds->getViewRayFromEvent(evt, ray);
+		ray.setOrigin(evt.getPosition());
+		ray.setDirection(evt.getOrientation() * -Vector3f::UnitZ());
 
-		// Add enabled planes to the plane list
-		List<Plane> tilePlanes;
+		// Loop through enabled tiles.
 		typedef KeyValue<String, DisplayTileConfig*> TileItem;
 		foreach(TileItem dtc, dcfg.tiles)
 		{
 			if(dtc->enabled)
 			{
-				tilePlanes.push_back(Plane(
+				// Intersect with two triangles defining the tile surface
+				Vector3f topRight = 
+					dtc->topLeft + (dtc->bottomRight - dtc->bottomLeft);
+				
+				pair<bool, float> intersect1 = Math::intersects(ray, 
+					dtc->topLeft,
+					dtc->bottomLeft,
+					dtc->bottomRight,
+					true, false);
+				pair<bool, float> intersect2 = Math::intersects(ray, 
+					topRight,
 					dtc->topLeft,
 					dtc->bottomRight,
-					dtc->bottomRight));
+					true, false);
+				// If we found an intersection, we are done.
+				if(intersect1.first || intersect2.first)
+				{
+					//ofmsg("intersect: with tile %1%", %dtc->name);
+					return;
+				}
 			}
 		}
 
-		// See if there is an intersection between the wand ray and any of 
-		// the enabled tiles.
-		pair<bool, float> intersect = Math::intersects(ray, tilePlanes, false);
-
 		// No intersection: mark the wand event as processed so it will not
 		// be dispatched to other modules.
-		if(!intersect.first)
-		{
-			evt.setProcessed();
-		}
+		evt.setProcessed();
 	}
 }
