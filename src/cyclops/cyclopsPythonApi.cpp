@@ -243,7 +243,7 @@ BOOST_PYTHON_MODULE(cyclops)
 		;
 
 	// AnimatedObject
-	class_<AnimatedObject, bases<Entity>, boost::noncopyable, Ref<AnimatedObject> >("AnimatedObject", no_init)
+	PYAPI_REF_CLASS(AnimatedObject, Entity)
 		.def("create", &AnimatedObject::create, PYAPI_RETURN_REF).staticmethod("create")
 		.def("hasAnimations", &AnimatedObject::hasAnimations)
 		.def("getNumAnimations", &AnimatedObject::getNumAnimations)
@@ -265,7 +265,7 @@ BOOST_PYTHON_MODULE(cyclops)
 		PYAPI_ENUM_VALUE(Light, Custom);
 
 	// Light
-	class_<Light, bases<Node>, boost::noncopyable, Ref<Light> >("Light", no_init)
+	PYAPI_REF_CLASS(Light, SceneNode)
 		.def("create", &Light::create, PYAPI_RETURN_REF).staticmethod("create")
 		.def("setColor", &Light::setColor)
 		.def("setAmbient", &Light::setAmbient)
@@ -290,7 +290,7 @@ BOOST_PYTHON_MODULE(cyclops)
 		;
 
 	// ModelInfo
-	class_<ModelInfo, boost::noncopyable, Ref<ModelInfo> >("ModelInfo")
+	PYAPI_REF_BASE_CLASS_WITH_CTOR(ModelInfo)
 		.def_readwrite("name", &ModelInfo::name)
 		.def_readwrite("options", &ModelInfo::options)
 		.def_readwrite("generateNormals", &ModelInfo::generateNormals)

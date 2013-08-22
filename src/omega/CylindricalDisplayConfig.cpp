@@ -95,7 +95,7 @@ bool CylindricalDisplayConfig::buildConfig(DisplayConfig& cfg, Setting& scfg)
 				// Save the tile viewport
 				//tc->viewport = Vector4f(tileViewportX, tileViewportY, tileViewportWidth, tileViewportHeight);
 
-				cfg.computeTileCorners(tc);
+				tc->computeTileCorners();
 			}
 			yPos += cfg.tileSize.y();
 			tileViewportY += tileViewportHeight;

@@ -53,9 +53,6 @@ using namespace std;
 #define START_BLOCK(string, name) string += indent + name + "\n" + indent + "{\n"; indent += "\t";
 #define END_BLOCK(string) indent = indent.substr(0, indent.length() - 1); string += indent + "}\n";
 
-// This static variable is used to signal local tiles visibility
-bool sLocalTilesVisible = true;
-
 ///////////////////////////////////////////////////////////////////////////////
 void exitConfig()
 {
@@ -614,16 +611,4 @@ bool EqualizerDisplaySystem::getViewRayFromEvent(const Event& evt, Ray& ray, boo
 		return true;
 	}
 	return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void EqualizerDisplaySystem::hideLocalTiles() 
-{
-	sLocalTilesVisible = false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void EqualizerDisplaySystem::showLocalTiles() 
-{
-	sLocalTilesVisible = true;
 }

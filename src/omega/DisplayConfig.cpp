@@ -46,6 +46,13 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 {
 	//myDrawStatistics = Config::getBoolValue("drawStatistics", scfg);
 
+	// Initialize the canvas size to 0.
+	cfg.canvasPixelSize = Vector2i::Zero();
+
+	// Set a default tile resolution.
+	cfg.tileResolution[0] = 640;
+	cfg.tileResolution[1] = 480;
+
 	String cfgType = Config::getStringValue("geometry", scfg, "ConfigPlanar");
 
 	//cfg.numTiles = Config::getVector2iValue("numTiles", scfg);
@@ -64,7 +71,7 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 	
 	String sm = Config::getStringValue("stereoMode", scfg, "default");
 	StringUtils::toLowerCase(sm);
-	if(sm == "default") cfg.stereoMode = DisplayTileConfig::Default;
+	if(sm == "default") cfg.stereoMode = DisplayTileConfig::Mono;
 	else if(sm == "mono") cfg.stereoMode = DisplayTileConfig::Mono;
 	// 'interleaved' defaults to row interleaved
 	else if(sm == "interleaved") cfg.stereoMode = DisplayTileConfig::LineInterleaved;
@@ -122,79 +129,15 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 			const Setting& sTile = sTileHost[j];
 			if(sTile.getType() == Setting::TypeGroup)
 			{
-				DisplayTileConfig* tc = new DisplayTileConfig(sTile);
+				// Create a new display tile and parse config.
+				DisplayTileConfig* tc = new DisplayTileConfig();
 				cfg.tiles[sTile.getName()] = tc;
-				tc->name = sTile.getName();
+				tc->parseConfig(sTile, cfg);
 
-				String sm = Config::getStringValue("stereoMode", sTile, "default");
-				StringUtils::toLowerCase(sm);
-				if(sm == "default") tc->stereoMode = DisplayTileConfig::Default;
-				else if(sm == "mono") tc->stereoMode = DisplayTileConfig::Mono;
-			        // 'interleaved' defaults to row interleaved
-				else if(sm == "interleaved") tc->stereoMode = DisplayTileConfig::LineInterleaved;
-				else if(sm == "rowinterleaved") tc->stereoMode = DisplayTileConfig::LineInterleaved;
-				else if(sm == "columninterleaved") tc->stereoMode = DisplayTileConfig::ColumnInterleaved;
-				else if(sm == "sidebyside") tc->stereoMode = DisplayTileConfig::SideBySide;
-				
-				tc->invertStereo = Config::getBoolValue("invertStereo", sTile);
-				tc->enabled = Config::getBoolValue("enabled", sTile);
-				
-				//tc.index = index;
-				//tc.interleaved = Config::getBoolValue("interleaved", sTile);
-				tc->device = Config::getIntValue("device", sTile);
-
-				tc->center = Config::getVector3fValue("center", sTile, Vector3f::Zero());
-				tc->yaw = Config::getFloatValue("yaw", sTile, 0);
-				tc->pitch = Config::getFloatValue("pitch", sTile, 0);
-
-				tc->position = Config::getVector2iValue("position", sTile);
-				tc->disableScene = Config::getBoolValue("disableScene", sTile);
-
-				tc->offscreen = Config::getBoolValue("offscreen", sTile, false);
-				tc->borderless = Config::getBoolValue("borderless", sTile, cfg.borderless);
-
-				tc->disableMouse = Config::getBoolValue("disableMouse", sTile, false);
-
-				tc->isHMD = Config::getBoolValue("isHMD", sTile, false);
-
-				//tc->viewport = Config::getVector4fValue("viewport", sTile, tc->viewport);
-
-				// If the tile config contains a size entry use it, oterwise use the default tile and bezel size data
-				if(sTile.exists("size"))
-				{
-					tc->size = Config::getVector2fValue("size", sTile);
-				}
-				else
-				{
-					tc->size = cfg.tileSize - cfg.bezelSize;
-				}
-
-				if(sTile.exists("resolution"))
-				{
-					tc->pixelSize = Config::getVector2iValue("resolution", sTile);
-				}
-				else
-				{
-					tc->pixelSize = cfg.tileResolution;
-				}
-
-				if(sTile.exists("offset"))
-				{
-					tc->offset = Config::getVector2iValue("offset", sTile);
-				}
-				else
-				{
-					std::vector<std::string> args = StringUtils::split(String(sTile.getName()), "xt");
-					Vector2i index = Vector2i(atoi(args[0].c_str()), atoi(args[1].c_str()));
-					tc->offset = index.cwiseProduct(tc->pixelSize);
-					cfg.tileGrid[index[0]][index[1]] = tc;
-				}
-
-				// Custom camera
-				tc->cameraName = Config::getStringValue("cameraName", sTile, "");
-
-				// Compute default values for this tile corners. These values may be overwritted by display config generators applied later on.
-				cfg.computeTileCorners(tc);
+				// Update the canvas size.
+				Vector2i tileEndPoint = tc->offset + tc->pixelSize;
+				cfg.canvasPixelSize = 
+					cfg.canvasPixelSize.cwiseMax(tileEndPoint);
 
 				ncfg.tiles[ncfg.numTiles] = tc;
 				tc->id = ncfg.numTiles;
@@ -216,30 +159,6 @@ void DisplayConfig::LoadConfig(Setting& scfg, DisplayConfig& cfg)
 		PlanarDisplayConfig cdc;
 		cdc.buildConfig(cfg, scfg);
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-void DisplayConfig::computeTileCorners(DisplayTileConfig* tc)
-{
-	float tw = tc->size[0];
-	float th = tc->size[1];
-
-	// Compute the display corners for custom display geometries
-	Quaternion orientation = AngleAxis(tc->yaw * Math::DegToRad, Vector3f::UnitY()) * AngleAxis(tc->pitch * Math::DegToRad, Vector3f::UnitX());
-	// Define the default display up and right vectors
-	Vector3f up = Vector3f::UnitY();
-	Vector3f right = Vector3f::UnitX();
-
-	// Compute the tile corners using the display center and oriented normal.
-	up = orientation * up;
-	right = orientation * right;
-
-	// Reorient Z.
-	right.z() = - right.z();
-
-	tc->topLeft = tc->center + (up * th / 2) - (right * tw / 2);
-	tc->bottomLeft = tc->center - (up * th / 2) - (right * tw / 2);
-	tc->bottomRight = tc->center - (up * th / 2) + (right * tw / 2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -293,3 +212,125 @@ bool DisplayConfig::isHostInTileSection(const String& hostname, int tilex, int t
 	}
 	return false;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+void DisplayConfig::setTilesEnabled(int tilex, int tiley, int tilew, int tileh, bool enabled)
+{
+	foreach(Tile t, tiles)
+	{
+		if(t->gridX >= tilex &&
+			t->gridX < tilex + tilew &&
+			t->gridY >= tiley &&
+			t->gridY < tiley + tileh)
+		{
+			t->enabled = enabled;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void DisplayTileConfig::parseConfig(const Setting& sTile, DisplayConfig& cfg)
+{
+	settingData = &sTile;
+
+	DisplayTileConfig* tc = this;
+
+	tc->name = sTile.getName();
+
+	String sm = Config::getStringValue("stereoMode", sTile, "default");
+	StringUtils::toLowerCase(sm);
+	if(sm == "default") tc->stereoMode = DisplayTileConfig::Default;
+	else if(sm == "mono") tc->stereoMode = DisplayTileConfig::Mono;
+		// 'interleaved' defaults to row interleaved
+	else if(sm == "interleaved") tc->stereoMode = DisplayTileConfig::LineInterleaved;
+	else if(sm == "rowinterleaved") tc->stereoMode = DisplayTileConfig::LineInterleaved;
+	else if(sm == "columninterleaved") tc->stereoMode = DisplayTileConfig::ColumnInterleaved;
+	else if(sm == "sidebyside") tc->stereoMode = DisplayTileConfig::SideBySide;
+				
+	tc->invertStereo = Config::getBoolValue("invertStereo", sTile);
+	tc->enabled = Config::getBoolValue("enabled", sTile);
+				
+	//tc.index = index;
+	//tc.interleaved = Config::getBoolValue("interleaved", sTile);
+	tc->device = Config::getIntValue("device", sTile);
+
+	tc->center = Config::getVector3fValue("center", sTile, Vector3f::Zero());
+	tc->yaw = Config::getFloatValue("yaw", sTile, 0);
+	tc->pitch = Config::getFloatValue("pitch", sTile, 0);
+
+	tc->position = Config::getVector2iValue("position", sTile);
+	tc->disableScene = Config::getBoolValue("disableScene", sTile);
+
+	tc->offscreen = Config::getBoolValue("offscreen", sTile, false);
+	tc->borderless = Config::getBoolValue("borderless", sTile, cfg.borderless);
+
+	tc->disableMouse = Config::getBoolValue("disableMouse", sTile, false);
+
+	tc->isHMD = Config::getBoolValue("isHMD", sTile, false);
+
+	//tc->viewport = Config::getVector4fValue("viewport", sTile, tc->viewport);
+
+	// If the tile config contains a size entry use it, oterwise use the default tile and bezel size data
+	if(sTile.exists("size"))
+	{
+		tc->size = Config::getVector2fValue("size", sTile);
+	}
+	else
+	{
+		tc->size = cfg.tileSize - cfg.bezelSize;
+	}
+
+	if(sTile.exists("resolution"))
+	{
+		tc->pixelSize = Config::getVector2iValue("resolution", sTile);
+	}
+	else
+	{
+		tc->pixelSize = cfg.tileResolution;
+	}
+
+	if(sTile.exists("offset"))
+	{
+		tc->offset = Config::getVector2iValue("offset", sTile);
+	}
+	else
+	{
+		std::vector<std::string> args = StringUtils::split(String(sTile.getName()), "xt");
+		Vector2i index = Vector2i(atoi(args[0].c_str()), atoi(args[1].c_str()));
+		tc->offset = index.cwiseProduct(tc->pixelSize);
+		cfg.tileGrid[index[0]][index[1]] = tc;
+	}
+
+	// Custom camera
+	tc->cameraName = Config::getStringValue("cameraName", sTile, "");
+
+	// Compute default values for this tile corners. These values may be overwritted by display config generators applied later on.
+	computeTileCorners();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void DisplayTileConfig::computeTileCorners()
+{
+	DisplayTileConfig* tc = this;
+
+	float tw = tc->size[0];
+	float th = tc->size[1];
+
+	// Compute the display corners for custom display geometries
+	Quaternion orientation = AngleAxis(tc->yaw * Math::DegToRad, Vector3f::UnitY()) * AngleAxis(tc->pitch * Math::DegToRad, Vector3f::UnitX());
+	// Define the default display up and right vectors
+	Vector3f up = Vector3f::UnitY();
+	Vector3f right = Vector3f::UnitX();
+
+	// Compute the tile corners using the display center and oriented normal.
+	up = orientation * up;
+	right = orientation * right;
+
+	// Reorient Z.
+	right.z() = - right.z();
+
+	tc->topLeft = tc->center + (up * th / 2) - (right * tw / 2);
+	tc->bottomLeft = tc->center - (up * th / 2) - (right * tw / 2);
+	tc->bottomRight = tc->center - (up * th / 2) + (right * tw / 2);
+}
+

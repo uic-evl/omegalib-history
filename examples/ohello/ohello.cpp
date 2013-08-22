@@ -103,16 +103,23 @@ void HelloRenderPass::render(Renderer* client, const DrawContext& context)
 	if(context.task == DrawContext::SceneDrawTask)
 	{
 		client->getRenderer()->beginDraw3D(context);
+	if(oglError) return;
 
 		// Enable depth testing and lighting.
 		glEnable(GL_DEPTH_TEST);
+	if(oglError) return;
 		glEnable(GL_LIGHTING);
+	if(oglError) return;
 	
 		// Setup light.
 		glEnable(GL_LIGHT0);
+	if(oglError) return;
 		glEnable(GL_COLOR_MATERIAL);
-		glLightfv(GL_LIGHT0, GL_COLOR, Color(1.0, 1.0, 1.0).data());
+	if(oglError) return;
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, Color(1.0, 1.0, 1.0).data());
+	if(oglError) return;
 		glLightfv(GL_LIGHT0, GL_POSITION, Vector3s(0.0f, 0.0f, 1.0f).data());
+	if(oglError) return;
 
 		// Draw a rotating cube.
 		glTranslatef(0, 2, -2); 
@@ -133,7 +140,9 @@ void HelloRenderPass::render(Renderer* client, const DrawContext& context)
 			glEnd();
 		}
 
+	if(oglError) return;
 		client->getRenderer()->endDraw();
+	if(oglError) return;
 	}
 }
 

@@ -220,9 +220,16 @@ bool Camera::isEnabledInContext(const DrawContext& context)
 	//CameraOutput* output = getOutput(context.gpuContext->getId());
 	//if(!output->isEnabled()) return false;
 
-	const DisplayTileConfig* tile = context.tile;
-	const DisplayConfig& dcfg = getEngine()->getDisplaySystem()->getDisplayConfig();
-	const Vector2i& canvasSize = dcfg.canvasPixelSize;
+	Vector2i canvasSize;
+	if(myCustomTileConfig->enabled)
+	{
+		canvasSize = myCustomTileConfig->pixelSize;
+	}
+	else
+	{
+		const DisplayConfig& dcfg = getEngine()->getDisplaySystem()->getDisplayConfig();
+		canvasSize = dcfg.canvasPixelSize;
+	}
 
 	return context.overlapsView(myViewPosition, myViewSize, canvasSize);
 }

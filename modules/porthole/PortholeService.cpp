@@ -589,12 +589,12 @@ int ServerThread::callback_websocket(struct libwebsocket_context *context,
 		// Get camera image as JPEG/PNG and base64 encode it, because only simple strings could be sent via websockets  
 		// Multithreading stuff: Lock the camera output, to make sure the pixel data we are getting 
 		// is not coming from an unfinished frame.
-		camera->getOutput(0)->lock();
+		//camera->getOutput(0)->lock();
 		ByteArray* png = ImageUtils::encode(canvas, ImageUtils::FormatJpeg);
 		//FILE* pf = fopen("./test.jpg", "wb");
 		//fwrite((void*)png->getData(), 1, png->getSize(), pf);
 		//fclose(pf);
-		camera->getOutput(0)->unlock();
+		//camera->getOutput(0)->unlock();
 		// END IMAGE ENCODING
 
 		// BASE64 ENCODING

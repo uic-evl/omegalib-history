@@ -83,7 +83,6 @@ Engine::Engine(ApplicationBase* app):
     myDefaultCamera(NULL),
 	//myPointerMode(PointerModeWand)
 	myDrawPointers(false),
-	myDebugWand(false),
 	myPrimaryButton(Event::Button3),
 	myEventDispatchEnabled(true),
 	soundEnv(NULL)
@@ -197,7 +196,7 @@ void Engine::initialize()
 			soundEnv = soundManager->getSoundEnvironment();
 			soundManager->startSoundServer();
 
-			ofmsg("Engine: Checking if sound server is ready at %1% on port %2%... (5 seconds max)", %soundServerIP %soundServerPort);
+			ofmsg("Engine: Checking if sound server is ready at %1% on port %2%... (Waiting for %3% seconds)", %soundServerIP %soundServerPort %(soundServerCheckDelay/1000));
 
 			bool serverReady = true;
 			timeb tb;
@@ -226,11 +225,26 @@ void Engine::initialize()
 				initializeSound();
 			}
 		}
+		else
+		{
+			// Still create the SoundManager and SoundEnvironment to allow
+			// sound apps to run with sound disabled.
+			soundManager = new SoundManager();
+			soundEnv = soundManager->getSoundEnvironment();
+			omsg("Engine: Running with sound disabled.");
+			if(syscfg->exists("config/sound"))
+			{
+				soundEnabled = true;
+			}
+		}
 	}
 	else
 	{
+		// Still create the SoundManager and SoundEnvironment to allow
+		// sound apps to run with sound disabled.
 		soundManager = new SoundManager();
 		soundEnv = soundManager->getSoundEnvironment();
+		omsg("Engine: Running with sound disabled.");
 		if(syscfg->exists("config/sound"))
 		{
 			soundEnabled = true;
@@ -264,6 +278,9 @@ void Engine::initialize()
 	//myDefaultCamera->setPosition(obs->getHeadPosition());
 	myDefaultCamera->setPosition(Vector3f::Zero());
 
+	// All the engine modules loaded after this point are marked non-core:
+	// This means that they will be unloaded during an application reset
+	// (see Engine::reset)
 	ModuleServices::setNonCoreMode();
 
 	// Setup stats
@@ -320,10 +337,6 @@ void Engine::reset()
         Setting& s = cfg->lookup("config/camera");
 		myDefaultCamera->setup(s);
     }
-	//myDefaultCamera->resetOrientation();
-	//myDefaultCamera->setPosition(Vector3f::Zero());
-	//myDefaultCamera->getController()->reset();
-	//myDefaultCamera->removeAllChildren();
 	
 	if(soundEnv != NULL)
 	{
@@ -399,26 +412,23 @@ void Engine::handleEvent(const Event& evt)
 
 	myHandleEventTimeStat->startTiming();
 
-	if(myDebugWand)
-	{
-		if(evt.getServiceType() == Event::ServiceTypeWand)
-		{
-			ofmsg("|Wand position: %1% flags %2%", %evt.getPosition() %evt.getFlags());
-		}
-	}
-
 	// Python events are processed with normal priority. First pass them to modules
 	// With higher priority...
 	ModuleServices::handleEvent(evt, EngineModule::PriorityHighest);
-	ModuleServices::handleEvent(evt, EngineModule::PriorityHigh);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityHigh);
 
 	// Now to python callbacks...
-	getSystemManager()->getScriptInterpreter()->handleEvent(evt);
+	if(!evt.isProcessed()) 
+		getSystemManager()->getScriptInterpreter()->handleEvent(evt);
 
 	// Now to modules with lower priority.
-	ModuleServices::handleEvent(evt, EngineModule::PriorityNormal);
-	ModuleServices::handleEvent(evt, EngineModule::PriorityLow);
-	ModuleServices::handleEvent(evt, EngineModule::PriorityLowest);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityNormal);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityLow);
+	if(!evt.isProcessed()) 
+		ModuleServices::handleEvent(evt, EngineModule::PriorityLowest);
 
 	// Update pointers.
 	if(myDrawPointers)

@@ -4,7 +4,6 @@
  * Copyright 2010-2013		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
- *  Daniele Donghi			d.donghi@gmail.com
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
  * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
@@ -29,6 +28,10 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	The interface between the Scalable Adaptive Graphics Environment (SAGE)
+ *	and omegalib.
  ******************************************************************************/
 #include "SageManager.h"
 

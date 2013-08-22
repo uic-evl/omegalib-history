@@ -45,7 +45,7 @@
     </font></li>
   <li><font face="Helvetica, Arial, sans-serif">CAVEVOC CAVE Demo
       Application - demo.py - This is a simple CAVE application to
-      show you how to use the <a href="http://febret.github.io/omegalib/cavevoc/html/namespacecavevoc.html">CAVEVOC
+      show you how to use the <a href="http://uic-evl.github.io/omegalib/cavevoc/html/namespacecavevoc.html">CAVEVOC
         Python API</a>.<br>
     </font></li>
 </ol>
@@ -69,7 +69,7 @@
       display its confidence level (reported by Google) and the
       text, in a random position on the screen in front of you,
       hence the picture below.<br>
-      <img alt="" src="http://febret.github.io/omegalib/cavevoc/cavevoc-cave.png" border="1" height="299"
+      <img alt="" src="http://uic-evl.github.io/omegalib/cavevoc/cavevoc-cave.png" border="1" height="299"
         hspace="1" vspace="1" width="447"><br>
     </font></li>
   <li><font face="Helvetica, Arial, sans-serif">Launch Processing
@@ -79,7 +79,7 @@
       of the CAVE (e.g. lyra.evl.uic.edu).</font></li>
   <li><font face="Helvetica, Arial, sans-serif">Now RUN the
       CAVEVOC-PTT.pde application.<br>
-      <img alt="" src="http://febret.github.io/omegalib/cavevoc/cavevoc-processing.png" border="1"
+      <img alt="" src="http://uic-evl.github.io/omegalib/cavevoc/cavevoc-processing.png" border="1"
         height="166" hspace="1" vspace="1" width="445"><br>
     </font></li>
   <li><font face="Helvetica, Arial, sans-serif">Hold down any key on
@@ -111,7 +111,7 @@
           towards it.<br>
         </font>Launch the program using: orun -s ideation.py<br>
       </font></p>
-    <blockquote><img alt="" src="http://febret.github.io/omegalib/cavevoc/ideation.png" height="327" width="432"></blockquote>
+    <blockquote><img alt="" src="http://uic-evl.github.io/omegalib/cavevoc/ideation.png" height="327" width="432"></blockquote>
     <p><font face="Helvetica, Arial, sans-serif">Ideation is an example
         that shows how you could use <a
           href="http://pyparsing.wikispaces.com/">Pyparsing </a>to

@@ -1,30 +1,3 @@
-###################################################################################################
-# THE OMEGA LIB PROJECT
-#-------------------------------------------------------------------------------------------------
-# Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
-# Authors:										
-#  Alessandro Febretti		febret@gmail.com
-#-------------------------------------------------------------------------------------------------
-# Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
-# All rights reserved.
-# Redistribution and use in source and binary forms, with or without modification, are permitted 
-# provided that the following conditions are met:
-# 
-# Redistributions of source code must retain the above copyright notice, this list of conditions 
-# and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
-# notice, this list of conditions and the following disclaimer in the documentation and/or other 
-# materials provided with the distribution. 
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
-# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################################
-# modified in svn
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 cmake_minimum_required(VERSION 2.8.3) 
 
@@ -39,7 +12,7 @@ endif(COMMAND cmake_policy)
 
 message("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 
-###################################################################################################
+###############################################################################
 # Create a build name depending on the OS, Toolset and architecture.
 if(CMAKE_GENERATOR STREQUAL "Visual Studio 9 2008")
 	set(OMEGA_OS_WIN 1)
@@ -56,11 +29,15 @@ elseif(CMAKE_GENERATOR STREQUAL "Visual Studio 10")
 	set(OMEGA_ARCH_32 1)
 	set(OMEGA_ARCH_WIN32 1)
 	set(OMEGA_TOOL_VS10 1)
+	# Allocate 500MB for precompiled headers
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500")	
 elseif(CMAKE_GENERATOR STREQUAL "Visual Studio 10 Win64")
 	set(OMEGA_OS_WIN 1)
 	set(OMEGA_ARCH_64 1)
 	set(OMEGA_ARCH_WIN32 1)
 	set(OMEGA_TOOL_VS10 1)
+	# Allocate 500MB for precompiled headers
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500")	
 elseif(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
 	if(APPLE)
 		set(OMEGA_OS_OSX 1)
@@ -95,7 +72,7 @@ if(OMEGA_OS_WIN)
 	add_definitions(-DWINNT=0x600)
 endif(OMEGA_OS_WIN)
 
-###################################################################################################
+###############################################################################
 # Set the output directories for libraries and binary files
 if(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
 	# Since visual studio builds are multiconfiguration, set two separate directories for debug and release builds
@@ -120,7 +97,7 @@ else(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
 	file(MAKE_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 endif(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
 
-###################################################################################################
+###############################################################################
 # Visual studio specific options.
 # if(MSVC)
 	# # Exclude libcmt when linking in visual studio
@@ -129,7 +106,6 @@ endif(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
 	# add_definitions(-D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4018)
 # endif(MSVC)
 
-###################################################################################################
+###############################################################################
 # Add subdirectiories
 add_subdirectory(src)
-
