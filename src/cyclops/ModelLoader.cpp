@@ -149,7 +149,6 @@ osg::Node* ModelLoader::processDefaultOptions(osg::Node* node, ModelAsset* asset
 		{
 			omsg("Optimizing model");
 			osgUtil::Optimizer optOSGFile;
-			//optOSGFile.optimize(node, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
 			optOSGFile.optimize(node, 
 				osgUtil::Optimizer::SHARE_DUPLICATE_STATE | 
 				osgUtil::Optimizer::MERGE_GEOMETRY | 

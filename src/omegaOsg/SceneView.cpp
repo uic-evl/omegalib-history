@@ -32,8 +32,8 @@
  * What's in this file
  *	A customized wrapper around an openscenegraph scene
  ******************************************************************************/
-#include "omegaOsg/SceneView.h"
 #include "omega/osystem.h"
+#include "omegaOsg/SceneView.h"
 
 #include <osgUtil/Statistics>
 #include <osgUtil/UpdateVisitor>
