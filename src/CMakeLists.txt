@@ -181,38 +181,6 @@ if(OMEGA_BUILD_OSG_LIB)
 			endforeach()
 		endif(OMEGA_OS_WIN)
 
-		#add osgWOrks into include
-		#include_directories(${CMAKE_BINARY_DIR}/osgWorks/include)
-
-		# below is copied from UseOsgWorks.cmake
-		# goal is to link osgWorks lib files
-		#set(OSGWORKS_BINARY_DIR ${CMAKE_BINARY_DIR}/osgWorks/lib)
-		#set(OSGWORKS_COMPONENTS osgwTools osgwQuery)
-
-		#if(OMEGA_OS_WIN)
-		#    foreach( C ${OSGWORKS_COMPONENTS} )
-		#		set(${C}_LIBRARY ${OSGWORKS_BINARY_DIR}/${C}.lib)
-		#		set(${C}_LIBRARY_DEBUG ${OSGWORKS_BINARY_DIR}/${C}d.lib)
-		#		set(OSGWORKS_LIBS ${OSGWORKS_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
-		#	endforeach()
-		#elseif(OMEGA_OS_LINUX)
-		#    foreach( C ${OSGWORKS_COMPONENTS} )
-		#		set(${C}_LIBRARY ${OSGWORKS_BINARY_DIR}/lib${C}.a)
-		#		set(${C}_LIBRARY_DEBUG ${OSGWORKS_BINARY_DIR}/lib${C}.a)
-		#		set(OSGWORKS_LIBS ${OSGWORKS_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
-		#	endforeach()
-		#elseif(APPLE)
-		#	foreach( C ${OSGWORKS_COMPONENTS} )
-		#		set(${C}_LIBRARY ${OSGWORKS_BINARY_DIR}/lib${C}.a)
-		#		set(${C}_LIBRARY_DEBUG ${OSGWORKS_BINARY_DIR}/lib${C}.a)
-		#		set(OSGWORKS_LIBS ${OSGWORKS_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
-		#	endforeach()
-		#endif(OMEGA_OS_WIN)
-
-		# end of copied from UserOsgWorks.cmake
-
-		# unfortunately it's not working. NEED TO DO SOMETHING TO OSGWORKS_LIBS
-
 		add_subdirectory(apps/osgbCollision)
 		add_subdirectory(apps/osgbBCC)
 		add_subdirectory(apps/osgbCollisionWithoutOmega)
