@@ -40,7 +40,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // The current omegalib version string.
-#define OMEGA_VERSION "4.2-alpha3"
+#define OMEGA_VERSION "4.2-alpha5"
 
 ///////////////////////////////////////////////////////////////////////////////
 // WIN32 Platform-specific includes & macros.
@@ -95,6 +95,8 @@ namespace omega
 
 	//! Returns the current working directory.
 	OMEGA_API String ogetcwd();
+	//! Returns the path to the currently running executable
+	OMEGA_API String ogetexecpath();
 
 	//! @internal - python support only. This is a bit of a hack, adds a prefix
 	//! that can be used for data lookups. Right now ImageUtils is the only

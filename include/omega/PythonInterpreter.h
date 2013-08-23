@@ -72,7 +72,7 @@ namespace omega
 			SetCwdToScriptPath = 1 << 1,
 			//! Adds the script path to the search path for python modules (loaded using the import command)
 			AddScriptPathToModuleSearchPath = 1 << 2,
-			DefaultRunFlags = SetCwdToScriptPath | AddScriptPathToModuleSearchPath
+			DefaultRunFlags = SetCwdToScriptPath
 		};
 
 		//! @internal returns the last event received by the interpreter. Used for script interoperability

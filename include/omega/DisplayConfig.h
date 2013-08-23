@@ -168,6 +168,10 @@ namespace omega
 			this->bottomRight = bottomRight;
 		}
 
+		//! Convenience method to check for intersection between a ray and
+		//! this tile.
+		bool rayIntersects(const Ray& ray);
+
 		//! Set the resolution in pixels of this tile. Method used instead of
 		// property because python API can't use Vector2i.
 		void setPixelSize(int width, int height)
@@ -201,6 +205,10 @@ namespace omega
 
 		//! Returns true if the specified host is running a tile in the specified section. 
 		bool isHostInTileSection(const String& hostname, int tilex, int tiley, int tilew, int tileh);
+
+		//! Enables or disables tiles in the specified rectangle. Tiles must
+		//! be part of the tile grid.
+		void setTilesEnabled(int tilex, int tiley, int tilew, int tileh, bool enabled);
 
 	public:
 		// UGLY CONSTANTS.
@@ -280,6 +288,7 @@ namespace omega
 		//@}
 		
 		
+		typedef KeyValue<String, DisplayTileConfig*> Tile;
 		//! Tile configurations.
 		Dictionary<String, DisplayTileConfig*> tiles;
 
