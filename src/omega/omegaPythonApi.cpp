@@ -551,9 +551,11 @@ struct Quaternion_from_python
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-void querySceneRay(const Vector3f& origin, const Vector3f& dir, boost::python::object callback)
+void querySceneRay(
+	const Vector3f& origin, const Vector3f& dir, 
+	boost::python::object callback, uint flags = 0)
 {
-	const SceneQueryResultList& sqrl = Engine::instance()->querySceneRay(Ray(origin, dir));
+	const SceneQueryResultList& sqrl = Engine::instance()->querySceneRay(Ray(origin, dir), flags);
     boost::python::list l;
 	if(sqrl.size() == 0)
 	{
@@ -956,6 +958,7 @@ public:
 	}
 };
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(querySceneRayOverloads, querySceneRay, 3, 4);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeYawOverloads, yaw, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodePitchOverloads, pitch, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeRollOverloads, roll, 1, 2) 
@@ -1324,6 +1327,12 @@ BOOST_PYTHON_MODULE(omega)
 
 	class_< vector<String> >("StringVector").def(vector_indexing_suite< vector<String> >());
 
+	// Event Flags
+	PYAPI_ENUM(SceneQuery::QueryFlags, QueryFlags)
+			PYAPI_ENUM_VALUE(SceneQuery, QueryFirst)
+			PYAPI_ENUM_VALUE(SceneQuery, QuerySort)
+			;
+
 	// Free Functions
 	def("getEvent", getEvent, return_value_policy<reference_existing_object>());
 	def("getEngine", getEngine, PYAPI_RETURN_REF);
@@ -1334,7 +1343,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getScene", getScene, PYAPI_RETURN_REF);
 	def("getSoundEnvironment", getSoundEnvironment, PYAPI_RETURN_REF);
 	def("isSoundEnabled", isSoundEnabled);
-	def("querySceneRay", querySceneRay);
+	def("querySceneRay", &querySceneRay, querySceneRayOverloads());
 	def("hitNode", hitNode);
 	def("getRayFromEvent", getRayFromEvent);
 	def("getRayFromPoint", getRayFromPoint);
