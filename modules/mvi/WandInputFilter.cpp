@@ -37,33 +37,21 @@ void WandInputFilter::handleEvent(const Event& evt)
 	// active tile.
 	if(evt.getServiceType() == Event::ServiceTypeWand)
 	{
-		// Get the wand ray
+		// Get sensor-space the wand ray
 		Ray ray;
-		ds->getViewRayFromEvent(evt, ray);
+		ray.setOrigin(evt.getPosition());
+		ray.setDirection(evt.getOrientation() * -Vector3f::UnitZ());
 
-		// Add enabled planes to the plane list
-		List<Plane> tilePlanes;
+		// Loop through enabled tiles.
 		typedef KeyValue<String, DisplayTileConfig*> TileItem;
 		foreach(TileItem dtc, dcfg.tiles)
 		{
-			if(dtc->enabled)
-			{
-				tilePlanes.push_back(Plane(
-					dtc->topLeft,
-					dtc->bottomRight,
-					dtc->bottomRight));
-			}
+			// If we found an intersection, we are done.
+			if(dtc->enabled && dtc->rayIntersects(ray)) return;
 		}
-
-		// See if there is an intersection between the wand ray and any of 
-		// the enabled tiles.
-		pair<bool, float> intersect = Math::intersects(ray, tilePlanes, false);
 
 		// No intersection: mark the wand event as processed so it will not
 		// be dispatched to other modules.
-		if(!intersect.first)
-		{
-			evt.setProcessed();
-		}
+		evt.setProcessed();
 	}
 }

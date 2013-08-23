@@ -334,3 +334,19 @@ void DisplayTileConfig::computeTileCorners()
 	tc->bottomRight = tc->center - (up * th / 2) + (right * tw / 2);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+bool DisplayTileConfig::rayIntersects(const Ray& ray)
+{
+	// Intersect with two triangles defining the tile surface
+	Vector3f topRight = topLeft + (bottomRight - bottomLeft);
+				
+	pair<bool, float> intersect1 = Math::intersects(ray, 
+		topLeft, bottomLeft, bottomRight,
+		true, false);
+	pair<bool, float> intersect2 = Math::intersects(ray, 
+		topRight, topLeft, bottomRight,
+		true, false);
+	// If we found an intersection, we are done.
+	return intersect1.first || intersect2.first;
+}
+
