@@ -150,36 +150,9 @@ if(OMEGA_BUILD_OSG_LIB)
 	add_subdirectory(apps/osgviewer)
 	# Shi
 	if(OMEGA_USE_OSGBULLET)
-		include(FindBulletHelper)
-		#include bullet
-		include_directories(
-			${BULLET_INCLUDE_DIRS}
-    		${BULLET_EXTRAS_INCLUDE_DIR}
-    	)
     	#add osgBullet into include
-		include_directories(${CMAKE_BINARY_DIR}/osgBullet/include)
-
-		set(OSGBULLET_LIB_DIR ${CMAKE_BINARY_DIR}/osgBullet/lib)
-		set(OSGBULLET_COMPONENTS osgbCollision osgbDynamics osgbInteraction)
-		if(OMEGA_OS_WIN)
-			foreach( C ${OSGBULLET_COMPONENTS})
-				set(${C}_LIBRARY ${OSGBULLET_LIB_DIR}/${C}.lib)
-				set(${C}_LIBRARY_DEBUG ${OSGBULLET_LIB_DIR}/${C}d.lib)
-				set(OSGBULLET_LIBS ${OSGBULLET_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
-			endforeach()
-		elseif(OMEGA_OS_LINUX)
-		    foreach( C ${OSGBULLET_COMPONENTS} )
-				set(${C}_LIBRARY ${OSGBULLET_LIB_DIR}/lib${C}.a)
-				set(${C}_LIBRARY_DEBUG ${OSGBULLET_LIB_DIR}/lib${C}.a)
-				set(OSGBULLET_LIBS ${OSGBULLET_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
-			endforeach()
-		elseif(APPLE)
-			foreach( C ${OSGBULLET_COMPONENTS} )
-				set(${C}_LIBRARY ${OSGBULLET_LIB_DIR}/lib${C}.a)
-				set(${C}_LIBRARY_DEBUG ${OSGBULLET_LIB_DIR}/lib${C}.a)
-				set(OSGBULLET_LIBS ${OSGBULLET_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
-			endforeach()
-		endif(OMEGA_OS_WIN)
+    	include(${CMAKE_SOURCE_DIR}/external/UseOsgBullet.cmake)
+		include_directories(${OSGBULLET_INCLUDES})
 
 		add_subdirectory(apps/osgbCollision)
 		add_subdirectory(apps/osgbBCC)
