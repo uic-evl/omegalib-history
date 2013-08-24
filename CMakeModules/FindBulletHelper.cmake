@@ -4,7 +4,7 @@ set( _bulletComponents
 )
 
 set( _defaultBulletLocations
-    "C:/Program Files/BULLET_PHYSICS"
+    "${CMAKE_BINARY_DIR}/bullet"
 )
 
 # Macro to force the stock FindBullet.cmake script to
@@ -30,7 +30,7 @@ endmacro( unFindBullet )
 #  * Default installation (in which the stock FindBullet.cmake script does all the work)
 #  * Alternate Install Location (user must set the BulletInstallLocation variable)
 #  * Source And Build Tree (user must supply both the BulletSourceRoot and BulletBuildRoot variables)
-set( BulletInstallType "Source And Build Tree" CACHE STRING "Type of Bullet install: 'Default Installation', 'Alternate Install Location', or 'Source And Build Tree'." )
+set( BulletInstallType "Default Installation" CACHE STRING "Type of Bullet install: 'Default Installation', 'Alternate Install Location', or 'Source And Build Tree'." )
 set_property( CACHE BulletInstallType PROPERTY STRINGS "Default Installation" "Alternate Install Location" "Source And Build Tree" )
 
 # We need to detect when the user changes the Bullet install type

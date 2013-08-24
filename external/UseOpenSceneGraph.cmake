@@ -31,7 +31,7 @@
 ###############################################################################
 include(ExternalProject)
 
-set(OMEGA_USE_EXTERNAL_OSG true CACHE BOOL "Enable to use an external osg build instead of the built-in one.")
+set(OMEGA_USE_EXTERNAL_OSG false CACHE BOOL "Enable to use an external osg build instead of the built-in one.")
 if(OMEGA_USE_EXTERNAL_OSG)
 	# When using external osg builds, for now you need to make sure manually the OSG binary
 	# include dir is in the compiler include search, paths otherwise osgWorks won't compile.
