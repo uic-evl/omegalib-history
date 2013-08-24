@@ -339,7 +339,7 @@ void OsgbBasicDemo::initialize()
     //mySceneNode->setBoundingBoxVisible(false);
     getEngine()->getScene()->addChild(mySceneNode);
 	//getEngine()->getDefaultCamera()->lookAt(omicron::Vector3f(0,-1,-100), omicron::Vector3f(0,0,-1));
-	getEngine()->getDefaultCamera()->setProjection(90, 1, 1, 200);
+	//getEngine()->getDefaultCamera()->setProjection(90, 1, 1, 200);
 	getEngine()->getDefaultCamera()->setPosition(0,20,80);
 	getEngine()->getDefaultCamera()->setOrientation(0.993938, -0.109776, -0.005964, -0.000659);
 	
