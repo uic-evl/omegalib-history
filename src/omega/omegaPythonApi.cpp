@@ -551,9 +551,11 @@ struct Quaternion_from_python
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-void querySceneRay(const Vector3f& origin, const Vector3f& dir, boost::python::object callback)
+void querySceneRay(
+	const Vector3f& origin, const Vector3f& dir, 
+	boost::python::object callback, uint flags = 0)
 {
-	const SceneQueryResultList& sqrl = Engine::instance()->querySceneRay(Ray(origin, dir));
+	const SceneQueryResultList& sqrl = Engine::instance()->querySceneRay(Ray(origin, dir), flags);
     boost::python::list l;
 	if(sqrl.size() == 0)
 	{
@@ -646,17 +648,10 @@ bool isHostInTileSection(const String& hostname, int tilex, int tiley, int tilew
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void hideLocalTiles()
+void setTilesEnabled(int tilex, int tiley, int tilew, int tileh, bool enabled)
 {
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	ds->hideLocalTiles();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void showLocalTiles()
-{
-	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-	ds->showLocalTiles();
+	DisplayConfig& dc = SystemManager::instance()->getDisplaySystem()->getDisplayConfig();
+	dc.setTilesEnabled(tilex, tiley, tilew, tileh, enabled);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -963,6 +958,7 @@ public:
 	}
 };
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(querySceneRayOverloads, querySceneRay, 3, 4);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeYawOverloads, yaw, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodePitchOverloads, pitch, 1, 2) 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(NodeRollOverloads, roll, 1, 2) 
@@ -1331,6 +1327,12 @@ BOOST_PYTHON_MODULE(omega)
 
 	class_< vector<String> >("StringVector").def(vector_indexing_suite< vector<String> >());
 
+	// Event Flags
+	PYAPI_ENUM(SceneQuery::QueryFlags, QueryFlags)
+			PYAPI_ENUM_VALUE(SceneQuery, QueryFirst)
+			PYAPI_ENUM_VALUE(SceneQuery, QuerySort)
+			;
+
 	// Free Functions
 	def("getEvent", getEvent, return_value_policy<reference_existing_object>());
 	def("getEngine", getEngine, PYAPI_RETURN_REF);
@@ -1341,7 +1343,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getScene", getScene, PYAPI_RETURN_REF);
 	def("getSoundEnvironment", getSoundEnvironment, PYAPI_RETURN_REF);
 	def("isSoundEnabled", isSoundEnabled);
-	def("querySceneRay", querySceneRay);
+	def("querySceneRay", &querySceneRay, querySceneRayOverloads());
 	def("hitNode", hitNode);
 	def("getRayFromEvent", getRayFromEvent);
 	def("getRayFromPoint", getRayFromPoint);
@@ -1369,8 +1371,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getImageLoaderThreads", getImageLoaderThreads);
 	def("getHostname", getHostname, PYAPI_RETURN_VALUE);
 	def("isHostInTileSection", isHostInTileSection);
-	def("hideLocalTiles", hideLocalTiles);
-	def("showLocalTiles", showLocalTiles);
+	def("setTilesEnabled", setTilesEnabled);
 	def("printModules", printModules);
 
 	def("isEventDispatchEnabled", isEventDispatchEnabled);
