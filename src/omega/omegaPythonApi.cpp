@@ -691,17 +691,6 @@ MissionControlClient* getMissionControlClient()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void overridePanopticStereo(bool value)
-{
-	SystemManager* sm = SystemManager::instance();
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
-	if(eqds != NULL)
-	{
-		eqds->getDisplayConfig().panopticStereoEnabled = value;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
 void toggleStereo()
 {
 	SystemManager* sm = SystemManager::instance();
@@ -710,6 +699,13 @@ void toggleStereo()
 	{
 		eqds->getDisplayConfig().forceMono = !eqds->getDisplayConfig().forceMono;
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+DisplayConfig* getDisplayConfig()
+{
+	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
+	return &ds->getDisplayConfig();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1157,13 +1153,29 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(CameraController, reset)
 	;
 
+	PYAPI_ENUM(DisplayTileConfig::StereoMode, StereoMode)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, Mono)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, LineInterleaved)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, ColumnInterleaved)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, PixelInterleaved)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, SideBySide)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, Default)
+			;
+
 	PYAPI_REF_BASE_CLASS(DisplayTileConfig)
 		.def_readwrite("enabled", &DisplayTileConfig::enabled)
 		.def_readwrite("topLeft", &DisplayTileConfig::topLeft)
 		.def_readwrite("bottomLeft", &DisplayTileConfig::bottomLeft)
 		.def_readwrite("bottomRight", &DisplayTileConfig::bottomRight)
+		.def_readwrite("stereoMode", &DisplayTileConfig::stereoMode)
 		PYAPI_METHOD(DisplayTileConfig, setCorners)
 		PYAPI_METHOD(DisplayTileConfig, setPixelSize)
+		;
+
+	PYAPI_REF_BASE_CLASS(DisplayConfig)
+		.def_readwrite("forceMono", &DisplayConfig::forceMono)
+		.def_readwrite("stereoMode", &DisplayConfig::stereoMode)
+		.def_readwrite("panopticStereoEnabled", &DisplayConfig::panopticStereoEnabled)
 		;
 
 	// Camera
@@ -1353,7 +1365,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getBoolSetting", &getBoolSetting);
 	def("getStringSetting", &getStringSetting);
 	def("getButtonSetting", &getButtonSetting);
-	def("overridePanopticStereo", overridePanopticStereo);
+	def("getDisplayConfig", getDisplayConfig, PYAPI_RETURN_REF);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);
 	def("setTileCamera", setTileCamera);
 	def("toggleStereo", toggleStereo);

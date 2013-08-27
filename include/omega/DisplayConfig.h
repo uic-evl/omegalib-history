@@ -191,7 +191,7 @@ namespace omega
 
 	///////////////////////////////////////////////////////////////////////////
 	//! Stores omegalib display configuration data.
-	class DisplayConfig
+	class DisplayConfig: public ReferenceType
 	{
 	public:
 		static void LoadConfig(Setting& s, DisplayConfig& cfg);
