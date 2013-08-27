@@ -47,6 +47,9 @@ namespace omega {
 
 	private:
 		Event::Flags myNavigateButton;
+
+		int myWandSourceId;
+
 		//! When this button is pressed, the controller will not process any input or change the camera.
 		//! Useful to temporary map the same input buttons and axes to some different functionality.
 		Event::Flags myOverrideButton;
