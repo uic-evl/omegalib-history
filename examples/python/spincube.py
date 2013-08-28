@@ -10,6 +10,8 @@ box.setEffect("textured -v emissive -d cyclops/test/omega-transparent.png")
 
 # Spin the box!
 def onUpdate(frame, t, dt):
-	box.pitch(dt)
-	box.yaw(dt / 3)
+	global pitch, yaw
+	if(pitch == True): box.pitch(dt)
+	if(yaw == True): box.yaw(dt / 3)
 setUpdateFunction(onUpdate)
+

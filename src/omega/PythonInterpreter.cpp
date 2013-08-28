@@ -147,9 +147,6 @@ void PythonInterpreter::addPythonPath(const char* dir)
 {
 	ofmsg("PythonInterpreter::addPythonPath: %1%", %dir);
 	
-	//PyEval_AcquireLock();
-	//PyThreadState_Swap(sMainThreadState);
-
 	// Convert slashes for this platform.
 	String out_dir = dir ? dir : "";
 #ifdef OMEGA_OS_WIN
@@ -161,9 +158,6 @@ void PythonInterpreter::addPythonPath(const char* dir)
 	PyObject* newpath = PyString_FromString(out_dir.c_str());
 	PyList_Insert(opath, 0, newpath);
 	Py_DECREF(newpath);
-
-	//PyThreadState_Swap(NULL);
-	//PyEval_ReleaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,6 +259,7 @@ void PythonInterpreter::initialize(const char* programName)
 
 	// Run initialization commands
 	PyRun_SimpleString("from omega import *");
+	PyRun_SimpleString("from euclid import *");
 	if(myInitCommand != "") PyRun_SimpleString(myInitCommand.c_str());
 	
 	omsg("Python Interpreter initialized.");
@@ -466,8 +461,9 @@ void PythonInterpreter::clean()
 		eval("for uniquevar in [var for var in globals().copy() if var[0] != \"_\" and var != 'clearall']: del globals()[uniquevar]");
 	}
 
-	// Import omega module by default
+	// Import omega and euclid modules by default
 	eval("from omega import *");
+	eval("from euclid import *");
 
 	// unregister callbacks
 	unregisterAllCallbacks();
@@ -488,7 +484,7 @@ void PythonInterpreter::cleanRun(const String& filename)
 	// through a :r! command. Also note how we explicitly import module omega, 
 	// since all global symbols have been unloaded by the previously mentioned 
 	// reset command.
-	queueCommand(ostr("from omega import *; orun(\"%1%\")", %filename), true);
+	queueCommand(ostr("from omega import *; from euclid import *; orun(\"%1%\")", %filename), true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
