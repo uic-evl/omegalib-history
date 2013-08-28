@@ -92,6 +92,9 @@ void MenuManager::initialize()
 		my3dMenuEnabled = Config::getBoolValue("menu3dEnabled", sUi, true);
 		myNavigationSuspended = Config::getBoolValue("menuSuspendNavigation", sUi, myNavigationSuspended);
 
+
+		myMenuInteractorId = Config::getIntValue("menuInteractorId", sUi, -1);
+
 		// Parse menu toggle button name (if present)
 		String toggleButtonName = Config::getStringValue("menuToggleButton", sUi, "");
 		if(toggleButtonName != "")
@@ -180,7 +183,7 @@ void MenuManager::update(const UpdateContext& context)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void MenuManager::handleEvent(const Event& evt)
 {
-	if(!evt.isProcessed())
+	if(!evt.isProcessed() && (evt.getSourceId() == myMenuInteractorId || myMenuInteractorId == -1 ) )
 	{
 		if(myMainMenu != NULL)
 		{
