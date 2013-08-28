@@ -551,6 +551,30 @@ struct Quaternion_from_python
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+Quaternion quaternionFromPitchYawRoll(float pitch, float yaw, float roll)
+{
+	return Math::quaternionFromEuler(Vector3f(pitch, yaw, roll));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Quaternion quaternionFromPitchYawRollDeg(float pitch, float yaw, float roll)
+{
+	return Math::quaternionFromEuler(Vector3f(pitch, yaw, roll) * Math::DegToRad);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Vector3f quaternionToPitchYawRollDeg(const Quaternion& q)
+{
+	return Math::quaternionToEuler(q) * Math::RadToDeg;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Vector3f quaternionToPitchYawRoll(const Quaternion& q)
+{
+	return Math::quaternionToEuler(q);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void querySceneRay(
 	const Vector3f& origin, const Vector3f& dir, 
 	boost::python::object callback, uint flags = 0)
@@ -1400,6 +1424,11 @@ BOOST_PYTHON_MODULE(omega)
 	def("getDisplayPixelSize", getDisplayPixelSize);
 
 	def("getMissionControlClient", getMissionControlClient, PYAPI_RETURN_REF);
+
+	def("quaternionToPitchYawRoll", quaternionToPitchYawRoll, PYAPI_RETURN_VALUE);
+	def("quaternionToPitchYawRollDeg", quaternionToPitchYawRollDeg, PYAPI_RETURN_VALUE);
+	def("quaternionFromPitchYawRoll", quaternionFromPitchYawRoll, PYAPI_RETURN_VALUE);
+	def("quaternionFromPitchYawRollDeg", quaternionFromPitchYawRollDeg, PYAPI_RETURN_VALUE);
 };
 
 // Black magic. Include the pyeuclid source code (saved as hex file using xdd -i)
