@@ -38,6 +38,7 @@
 #include "cyclops/SceneLoader.h"
 #include "cyclops/LineSet.h"
 #include "cyclops/Text3D.h"
+#include "cyclops/ModelGeometry.h"
 
 #ifdef OMEGA_USE_PYTHON
 
@@ -77,6 +78,20 @@ BOOST_PYTHON_MODULE(cyclops)
 		.def_readwrite("geometryOutput", &ProgramAsset::geometryOutput)
 		.def_readwrite("embedded", &ProgramAsset::embedded);
 
+	// ModelGeometry
+	PYAPI_REF_BASE_CLASS(ModelGeometry)
+		PYAPI_STATIC_REF_GETTER(ModelGeometry, create)
+		PYAPI_METHOD(ModelGeometry, addVertex)
+		PYAPI_METHOD(ModelGeometry, setVertex)
+		PYAPI_GETTER(ModelGeometry, getVertex)
+		PYAPI_METHOD(ModelGeometry, addColor)
+		PYAPI_METHOD(ModelGeometry, setColor)
+		PYAPI_GETTER(ModelGeometry, getColor)
+		PYAPI_METHOD(ModelGeometry, clear)
+		PYAPI_METHOD(ModelGeometry, addPrimitive)
+		PYAPI_GETTER(ModelGeometry, getName)
+		;
+
 	PYAPI_REF_BASE_CLASS(ModelLoader);
 
 	// SceneManager
@@ -84,6 +99,7 @@ BOOST_PYTHON_MODULE(cyclops)
 	PYAPI_REF_BASE_CLASS(SceneManager)
 		PYAPI_METHOD(SceneManager, setMainLight)
 		PYAPI_REF_GETTER(SceneManager, getMainLight)
+		PYAPI_METHOD(SceneManager, addModel)
 		PYAPI_METHOD(SceneManager, loadModel)
 		.def("loadModelAsync", loadModelAsync1)
 		PYAPI_METHOD(SceneManager, setBackgroundColor)

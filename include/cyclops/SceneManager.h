@@ -64,6 +64,7 @@ namespace cyclops {
 	class SceneLoader;
 	class SceneManager;
 	class AnimatedObject;
+	class ModelGeometry;
 
 	///////////////////////////////////////////////////////////////////////////
 	struct ShadowSettings
@@ -157,6 +158,7 @@ namespace cyclops {
 		bool loadModel(ModelInfo* info);
 		LoadModelAsyncTask* loadModelAsync(ModelInfo* info);
 		void loadModelAsync(ModelInfo* info, const String& callback);
+		void addModel(ModelGeometry* geom);
 		ModelAsset* getModel(const String& name);
 		const List< Ref<ModelAsset> >& getModels();
 		void addLoader(ModelLoader* loader);

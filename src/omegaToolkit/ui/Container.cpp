@@ -744,11 +744,11 @@ void ContainerRenderable::draw3d(const DrawContext& context)
 
 		if(!c3ds.center)
 		{
-			glTranslatef(c3ds.position[0], c3ds.position[1] - height, c3ds.position[2]);
+			glTranslated(c3ds.position[0], c3ds.position[1] - height, c3ds.position[2]);
 		}
 		else
 		{
-			glTranslatef(c3ds.position[0] - width / 2, c3ds.position[1] - height / 2, c3ds.position[2]);
+			glTranslated(c3ds.position[0] - width / 2, c3ds.position[1] - height / 2, c3ds.position[2]);
 		}
 
 		// TODO: redo this using DrawInterface.
