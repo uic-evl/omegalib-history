@@ -53,7 +53,7 @@ void WandCameraController::setup(Setting& s)
 	String ovrbtn = Config::getStringValue("overrideButton", s, "Button6");
 	myOverrideButton = Event::parseButtonName(ovrbtn);
 
-	myWandSourceId = Config::getIntValue("trackerSourceId", s, -1);
+	myWandSourceId = Config::getIntValue("wandSourceId", s, -1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ void WandCameraController::handleEvent(const Event& evt)
 {
 	if(!isEnabled()) return;
 
-	if(evt.getServiceType() == Service::Wand && myWandSourceId == evt.getSourceId())
+	if(evt.getServiceType() == Service::Wand && ( myWandSourceId == evt.getSourceId() || myWandSourceId == -1 ) )
 	{
 		if(evt.isFlagSet(myOverrideButton))
 		{
