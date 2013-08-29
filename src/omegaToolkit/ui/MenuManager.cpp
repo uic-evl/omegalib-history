@@ -93,7 +93,7 @@ void MenuManager::initialize()
 		myNavigationSuspended = Config::getBoolValue("menuSuspendNavigation", sUi, myNavigationSuspended);
 
 
-		myMenuInteractorId = Config::getIntValue("menuInteractorId", sUi, -1);
+		myMenuInteractorId = Config::getIntValue("menuWandId", sUi, -1);
 
 		// Parse menu toggle button name (if present)
 		String toggleButtonName = Config::getStringValue("menuToggleButton", sUi, "");
