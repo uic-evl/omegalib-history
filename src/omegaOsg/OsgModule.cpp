@@ -53,18 +53,22 @@ OsgModule* OsgModule::mysInstance = NULL;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 osg::Image* OsgModule::pixelDataToOsg(PixelData* img)
 {
-	bool leaveMemoryAlone = false;
+	//bool leaveMemoryAlone = false;
 
-	// If the image delete is disabled, the image does not own the pixel buffer. Tell the
-	// same to osg::Image. Otherwise, pass the buffer ownership to osg::Image.
-	if(img->isDeleteDisabled())
-	{
-		leaveMemoryAlone = true;
-	}
-	else
-	{
-		img->setDeleteDisabled(true);
-	}
+	//// If the image delete is disabled, the image does not own the pixel buffer. Tell the
+	//// same to osg::Image. Otherwise, pass the buffer ownership to osg::Image.
+	//if(img->isDeleteDisabled())
+	//{
+	//	leaveMemoryAlone = true;
+	//}
+	//else
+	//{
+	//	img->setDeleteDisabled(true);
+	//}
+	// CHANGE: osg::Image never gets ownership of pixel data. We do not care
+	// if it gets released. The PixelData object manages the buffer lifetime.
+	bool leaveMemoryAlone = true;
+
 	int s = img->getWidth();
     int t = img->getHeight();
     int r = 1;
@@ -88,7 +92,6 @@ osg::Image* OsgModule::pixelDataToOsg(PixelData* img)
 		leaveMemoryAlone ? osg::Image::NO_DELETE : osg::Image::USE_MALLOC_FREE);
 
 	img->unmap();
-
 	return pOsgImage;
 }
 
