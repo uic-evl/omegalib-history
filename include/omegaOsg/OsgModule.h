@@ -72,8 +72,15 @@ namespace omegaOsg
 		};
 
 		static OsgModule* instance();
-		static osg::Image* pixelDataToOsg(PixelData* img);
+		
+		//! Convert an omegalib PixelData object to an osg::Image. PixelData and the osg Image
+		//! will share the same pixel buffer.
+		//! If transferBufferOwnership is set to true, the underlying pixel buffer will be owned
+		//! by the osg image: deleting the PixelData object will not deallocate the buffer. By
+		//! default, PixelData retains ownership of the buffer.
+		static osg::Image* pixelDataToOsg(PixelData* img, bool transferBufferOwnership = false);
 
+		
 	public:
 		OsgModule();
 		virtual ~OsgModule();

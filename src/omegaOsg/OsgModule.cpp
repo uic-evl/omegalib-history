@@ -51,24 +51,35 @@ OsgModule* OsgModule::mysInstance = NULL;
 //bool OsgModule::mysAmbientOverrideHack = true;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-osg::Image* OsgModule::pixelDataToOsg(PixelData* img)
+osg::Image* OsgModule::pixelDataToOsg(PixelData* img, bool transferBufferOwnership)
 {
-	//bool leaveMemoryAlone = false;
+	bool leaveMemoryAlone = false;
 
-	//// If the image delete is disabled, the image does not own the pixel buffer. Tell the
-	//// same to osg::Image. Otherwise, pass the buffer ownership to osg::Image.
-	//if(img->isDeleteDisabled())
-	//{
-	//	leaveMemoryAlone = true;
-	//}
-	//else
-	//{
-	//	img->setDeleteDisabled(true);
-	//}
-	// CHANGE: osg::Image never gets ownership of pixel data. We do not care
-	// if it gets released. The PixelData object manages the buffer lifetime.
-	bool leaveMemoryAlone = true;
-
+	
+	// Three cases here:
+	// 1 - the pixel data does not own the pixel buffer. 
+	// 2 - the pixel data owns the buffer and wants to transfer ownership.
+	// 2 - the pixel data owns the buffer and wants to keep ownership.
+	if(img->isDeleteDisabled())
+	{
+		// case 1 - tell osg to leave the buffer alone
+		leaveMemoryAlone = true;
+	}
+	else
+	{
+		if(transferBufferOwnership)
+		{
+			// case 2 - the osg image is in charge of the buffer now
+			img->setDeleteDisabled(true);
+		}
+		else
+		{
+			// case 3 - the omegalib pixel data object keeps the ownership
+			// tell osg to leave the buffer alone.
+			leaveMemoryAlone = true;
+		}
+	}
+	
 	int s = img->getWidth();
     int t = img->getHeight();
     int r = 1;

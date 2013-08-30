@@ -66,7 +66,11 @@ ReaderWriter::ReadResult ReaderFreeImage::readImage(const std::string& file, con
 	omega::Ref<omega::PixelData> img = omega::ImageUtils::loadImage(filePath, false);
 	if(img == NULL) return ReadResult::FILE_NOT_FOUND;
 
-	osg::Image* pOsgImage = omegaOsg::OsgModule::pixelDataToOsg(img);
+	// Create an osg Image from the pixel data. the osg image gets ownership 
+	// of the pixel buffer, since the PixelData object will be destroyed at 
+	// the end of this function.
+	osg::Image* pOsgImage = omegaOsg::OsgModule::pixelDataToOsg(img, true);
+	
 	
     ReadResult rr(pOsgImage);
     if(rr.validImage()) rr.getImage()->setFileName(filePath);
