@@ -1,35 +1,43 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	A class to store pixels and modify pixels
+ ******************************************************************************/
 #include "omega/PixelData.h"
 #include "omega/glheaders.h"
 
 using namespace omega;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PixelData::PixelData(Format fmt, int width, int height, byte* data, uint usageFlags):
 	myUsageFlags(usageFlags),
 	myData(data),
@@ -37,7 +45,8 @@ PixelData::PixelData(Format fmt, int width, int height, byte* data, uint usageFl
 	myHeight(height),
 	myFormat(fmt),
 	mySize(0),
-	myDeleteDisabled(false)
+	myDeleteDisabled(false),
+	myChangingPixels(false)
 	//myDirty(true)
 {
 	setDirty(true);
@@ -59,7 +68,7 @@ PixelData::PixelData(Format fmt, int width, int height, byte* data, uint usageFl
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 PixelData::~PixelData()
 {
 	if(!myDeleteDisabled)
@@ -76,7 +85,7 @@ PixelData::~PixelData()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PixelData::updateSize()
 {
 	switch(myFormat)
@@ -93,7 +102,7 @@ void PixelData::updateSize()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PixelData::resize(int width, int height)
 {
 	if(width != myWidth || height != myHeight)
@@ -112,7 +121,7 @@ void PixelData::resize(int width, int height)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int PixelData::getPitch()
 {
 	switch(myFormat)
@@ -127,7 +136,7 @@ int PixelData::getPitch()
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int PixelData::getBpp()
 {
 	switch(myFormat)
@@ -142,7 +151,7 @@ int PixelData::getBpp()
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 byte* PixelData::map()
 {
 	myLock.lock();
@@ -155,7 +164,7 @@ byte* PixelData::map()
 	return myData;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PixelData::unmap()
 {
 	if(checkUsage(PixelBufferObject))
@@ -166,7 +175,7 @@ void PixelData::unmap()
 	myLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 byte* PixelData::bind(const GpuContext* context)
 {
 	if(checkUsage(PixelBufferObject))
@@ -178,7 +187,7 @@ byte* PixelData::bind(const GpuContext* context)
 	return myData;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PixelData::unbind()
 {
 	if(checkUsage(PixelBufferObject))
@@ -188,7 +197,7 @@ void PixelData::unbind()
 	myLock.unlock();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 uint PixelData::getRedMask()
 {
 	switch(myFormat)
@@ -199,7 +208,7 @@ uint PixelData::getRedMask()
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 uint PixelData::getGreenMask()
 {
 	switch(myFormat)
@@ -210,7 +219,7 @@ uint PixelData::getGreenMask()
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 uint PixelData::getBlueMask()
 {
 	switch(myFormat)
@@ -221,7 +230,7 @@ uint PixelData::getBlueMask()
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 uint PixelData::getAlphaMask()
 {
 	switch(myFormat)
@@ -232,7 +241,7 @@ uint PixelData::getAlphaMask()
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PixelData::copyFrom(PixelData* other)
 {
 	if(other != NULL && other->getSize() == mySize)
@@ -245,10 +254,144 @@ void PixelData::copyFrom(PixelData* other)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void PixelData::refreshTexture(Texture* texture, const DrawContext& context)
 {
 	if(!texture->isInitialized()) texture->initialize(myWidth, myHeight);
 	texture->writePixels(this);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+void PixelData::beginPixelAccess()
+{
+	if(myChangingPixels)
+	{
+		oerror("PixelData::beginPixelAccess: already changing pixels");
+		return;
+	}
+	map();
+	myChangingPixels = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PixelData::setPixel(int x, int y, int r, int g, int b, int a)
+{
+	if(myChangingPixels && x < myWidth && y < myHeight)
+	{
+		int offset;
+		switch(myFormat)
+		{
+		case FormatRgb:
+			offset = (y * myWidth + x) * 3;
+			myData[offset] = r;
+			myData[offset + 1] = g;
+			myData[offset + 2] = b;
+			break;
+		case FormatRgba:
+			offset = (y * myWidth + x) * 4;
+			myData[offset] = r;
+			myData[offset + 1] = g;
+			myData[offset + 2] = b;
+			myData[offset + 3] = a;
+			break;
+		case FormatMonochrome:
+			offset = (y * myWidth + x);
+			myData[offset] = r;
+			break;
+		}
+		setDirty();
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+int PixelData::getPixelR(int x, int y)
+{
+	if(myChangingPixels && x < myWidth && y < myHeight)
+	{
+		int offset;
+		switch(myFormat)
+		{
+		case FormatRgb:
+			offset = (y * myWidth + x) * 3;
+			return myData[offset];
+		case FormatRgba:
+			offset = (y * myWidth + x) * 4;
+			return myData[offset];
+		case FormatMonochrome:
+			offset = (y * myWidth + x);
+			return myData[offset];
+		}
+	}
+	return -1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+int PixelData::getPixelG(int x, int y)
+{
+	if(myChangingPixels && x < myWidth && y < myHeight)
+	{
+		int offset;
+		switch(myFormat)
+		{
+		case FormatRgb:
+			offset = (y * myWidth + x) * 3;
+			return myData[offset + 1];
+		case FormatRgba:
+			offset = (y * myWidth + x) * 4;
+			return myData[offset + 1];
+		case FormatMonochrome:
+			offset = (y * myWidth + x);
+			return myData[offset];
+		}
+	}
+	return -1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+int PixelData::getPixelB(int x, int y)
+{
+	if(myChangingPixels && x < myWidth && y < myHeight)
+	{
+		int offset;
+		switch(myFormat)
+		{
+		case FormatRgb:
+			offset = (y * myWidth + x) * 3;
+			return myData[offset + 2];
+		case FormatRgba:
+			offset = (y * myWidth + x) * 4;
+			return myData[offset + 2];
+		case FormatMonochrome:
+			offset = (y * myWidth + x);
+			return myData[offset];
+		}
+	}
+	return -1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+int PixelData::getPixelA(int x, int y)
+{
+	if(myChangingPixels)
+	{
+		int offset;
+		switch(myFormat)
+		{
+		case FormatRgb:
+			return 255;
+		case FormatRgba:
+			offset = (y * myWidth + x) * 4;
+			return myData[offset + 3];
+		case FormatMonochrome:
+			return 255;
+		}
+	}
+	return -1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PixelData::endPixelAccess()
+{
+	myChangingPixels = false;
+	unmap();
+}

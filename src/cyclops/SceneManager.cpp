@@ -45,6 +45,7 @@
 #include "cyclops/SceneManager.h"
 #include "cyclops/SceneLoader.h"
 #include "cyclops/Shapes.h"
+#include "cyclops/ModelGeometry.h"
 
 using namespace cyclops;
 using namespace omegaToolkit;
@@ -848,6 +849,20 @@ void SceneManager::recompileShaders(ProgramAsset* program, const String& svariat
 void SceneManager::setBackgroundColor(const Color& color)
 {
 	getEngine()->getDisplaySystem()->setBackgroundColor(color);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void SceneManager::addModel(ModelGeometry* geom)
+{
+	oassert(geom != NULL);
+	ModelAsset* asset = new ModelAsset();
+	asset->name = geom->getName();
+	asset->numNodes = 1;
+	asset->info = NULL;
+	asset->nodes.push_back(geom->getOsgNode());
+
+	myModelDictionary[asset->name] = asset;
+	myModelList.push_back(asset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -29,89 +29,73 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *-----------------------------------------------------------------------------
- * What's in this file
- *	A class to store pixels and modify pixels
+ * What's in this file:
+ *  ModelGeometry lets users define their own custom geometry for drawing.
  ******************************************************************************/
-#ifndef __PIXEL_DATA_H__
-#define __PIXEL_DATA_H__
+#ifndef __CY_MODEL_GEOMETRY__
+#define __CY_MODEL_GEOMETRY__
 
-#include "osystem.h"
-#include "omega/TextureSource.h"
+#include "cyclopsConfig.h"
+#include "EffectNode.h"
+#include "Uniforms.h"
+#include "SceneManager.h"
 
-namespace omega {
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	class OMEGA_API PixelData: public TextureSource
+#include <osg/Group>
+#include <osg/Geode>
+#include <osg/Geometry>
+
+#define OMEGA_NO_GL_HEADERS
+#include <omega.h>
+#include <omegaOsg.h>
+#include <omegaToolkit.h>
+
+namespace cyclops {
+	using namespace omega;
+	using namespace omegaOsg;
+
+	///////////////////////////////////////////////////////////////////////////
+	class CY_API ModelGeometry: public ReferenceType
 	{
 	public:
-		enum Format { FormatRgb, FormatRgba, FormatMonochrome};
-		enum UsageFlags { /*RenderTexture = 1 << 0 ,*/ PixelBufferObject = 1 << 1 };
+		//! Creation method, to reflect the python API of most objects.
+		static ModelGeometry* create(const String& name)
+		{
+			return new ModelGeometry(name);
+		}
+
 	public:
-		PixelData(Format fmt, int width, int height, byte* data = NULL, uint usageFlags = 0);
-		virtual ~PixelData();
+		ModelGeometry(const String& name);
 
-		byte* map();
-		void unmap();
+		//! Adds a vertex and return its index.
+		int addVertex(const Vector3f& v);
+		//! Replaces an existing vertex
+		void setVertex(int index, const Vector3f& v);
+		//! Retrieves an existing vertex
+		Vector3f getVertex(int index);
+		//! Adds a vertex color and return its index. The color will be applied
+		//! to the vertex with the same index as this color.
+		int addColor(const Color& c);
+		Color getColor(int index);
+		//! Replaces an existing color
+		void setColor(int index, const Color& c);
+	
 
-		byte* bind(const GpuContext* context);
-		void unbind();
+		//! Adds a primitive set
+		void addPrimitive(ProgramAsset::PrimitiveType type, int startIndex, int endIndex);
 
-		void resize(int width, int height);
+		//! Removes all vertices, colors and primitives from this object
+		void clear();
 
-		int getWidth() { return myWidth; }
-		int getHeight() { return myHeight; }
-		Format getFormat() { return myFormat; }
-		size_t getSize() { return mySize; }
-
-		int getPitch();
-		int getBpp();
-
-		uint getRedMask();
-		uint getGreenMask();
-		uint getBlueMask();
-		uint getAlphaMask();
-
-		void setDeleteDisabled(bool value) { myDeleteDisabled = value; }
-		bool isDeleteDisabled() { return myDeleteDisabled; }
-
-		//bool isDirty() { return myDirty; }
-		//void setDirty(bool value) { myDirty = value; }
-
-		bool checkUsage(UsageFlags flag) { return (myUsageFlags & flag) == flag; }
-
-		void copyFrom(PixelData* other);
-
-		//! Simple pixel access
-		//@{
-		void beginPixelAccess();
-		void setPixel(int x, int y, int r, int g, int b, int a);
-		int getPixelR(int x, int y);
-		int getPixelB(int x, int y);
-		int getPixelG(int x, int y);
-		int getPixelA(int x, int y);
-		void endPixelAccess();
-		//@}
-
-	protected:
-		void refreshTexture(Texture* texture, const DrawContext& context);
+		const String& getName() { return myName; }
+		osg::Geode* getOsgNode() { return myNode; }
 
 	private:
-		void updateSize();
-
-	private:
-		uint myUsageFlags;
-		bool myChangingPixels;
-
-		Lock myLock;
-		Format myFormat;
-		byte* myData;
-		int myWidth;
-		int myHeight;
-		size_t mySize;
-		bool myDeleteDisabled;
-
-		// PBO stuff
-		GLuint myPBOId;
+		String myName;
+		Ref<osg::Vec3Array> myVertices;
+		Ref<osg::Vec4Array> myColors;
+		Ref<osg::Geode> myNode;
+		Ref<osg::Geometry> myGeometry;
 	};
-}; // namespace omega
+};
 
 #endif

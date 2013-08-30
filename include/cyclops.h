@@ -28,6 +28,7 @@
 #include "cyclops/cyclopsConfig.h"
 #include "cyclops/Entity.h"
 #include "cyclops/LineSet.h"
+#include "cyclops/ModelGeometry.h"
 #include "cyclops/SceneManager.h"
 #include "cyclops/SceneLoader.h"
 #include "cyclops/AnimatedObject.h"

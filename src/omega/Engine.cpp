@@ -211,7 +211,7 @@ void Engine::initialize()
 				curTime = tb.millitm + (tb.time & 0xfffff) * 1000;
 				int timeSinceLastCheck = curTime-lastSoundServerCheck;
 
-				soundManager->startSoundServer();
+				//soundManager->startSoundServer();
 				if( timeSinceLastCheck > soundServerCheckDelay )
 				{
 					omsg("Engine: Failed to start sound server. Sound disabled.");

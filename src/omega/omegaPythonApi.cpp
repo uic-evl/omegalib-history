@@ -551,6 +551,30 @@ struct Quaternion_from_python
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+Quaternion quaternionFromEuler(float pitch, float yaw, float roll)
+{
+	return Math::quaternionFromEuler(Vector3f(pitch, yaw, roll));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Quaternion quaternionFromEulerDeg(float pitch, float yaw, float roll)
+{
+	return Math::quaternionFromEuler(Vector3f(pitch, yaw, roll) * Math::DegToRad);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Vector3f quaternionToEulerDeg(const Quaternion& q)
+{
+	return Math::quaternionToEuler(q) * Math::RadToDeg;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Vector3f quaternionToEuler(const Quaternion& q)
+{
+	return Math::quaternionToEuler(q);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void querySceneRay(
 	const Vector3f& origin, const Vector3f& dir, 
 	boost::python::object callback, uint flags = 0)
@@ -691,17 +715,6 @@ MissionControlClient* getMissionControlClient()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void overridePanopticStereo(bool value)
-{
-	SystemManager* sm = SystemManager::instance();
-	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
-	if(eqds != NULL)
-	{
-		eqds->getDisplayConfig().panopticStereoEnabled = value;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
 void toggleStereo()
 {
 	SystemManager* sm = SystemManager::instance();
@@ -710,6 +723,13 @@ void toggleStereo()
 	{
 		eqds->getDisplayConfig().forceMono = !eqds->getDisplayConfig().forceMono;
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+DisplayConfig* getDisplayConfig()
+{
+	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
+	return &ds->getDisplayConfig();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1049,6 +1069,7 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(Event, isKeyUp)
 		PYAPI_METHOD(Event, isButtonDown)
 		PYAPI_METHOD(Event, isButtonUp)
+		PYAPI_METHOD(Event, isFlagSet)
 		PYAPI_METHOD(Event, getAxis)
 		PYAPI_METHOD(Event, getSourceId)
 		PYAPI_METHOD(Event, getType)
@@ -1156,13 +1177,29 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(CameraController, reset)
 	;
 
+	PYAPI_ENUM(DisplayTileConfig::StereoMode, StereoMode)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, Mono)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, LineInterleaved)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, ColumnInterleaved)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, PixelInterleaved)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, SideBySide)
+			PYAPI_ENUM_VALUE(DisplayTileConfig, Default)
+			;
+
 	PYAPI_REF_BASE_CLASS(DisplayTileConfig)
 		.def_readwrite("enabled", &DisplayTileConfig::enabled)
 		.def_readwrite("topLeft", &DisplayTileConfig::topLeft)
 		.def_readwrite("bottomLeft", &DisplayTileConfig::bottomLeft)
 		.def_readwrite("bottomRight", &DisplayTileConfig::bottomRight)
+		.def_readwrite("stereoMode", &DisplayTileConfig::stereoMode)
 		PYAPI_METHOD(DisplayTileConfig, setCorners)
 		PYAPI_METHOD(DisplayTileConfig, setPixelSize)
+		;
+
+	PYAPI_REF_BASE_CLASS(DisplayConfig)
+		.def_readwrite("forceMono", &DisplayConfig::forceMono)
+		.def_readwrite("stereoMode", &DisplayConfig::stereoMode)
+		.def_readwrite("panopticStereoEnabled", &DisplayConfig::panopticStereoEnabled)
 		;
 
 	// Camera
@@ -1252,6 +1289,13 @@ BOOST_PYTHON_MODULE(omega)
 	PYAPI_REF_BASE_CLASS(PixelData)
 		PYAPI_METHOD(PixelData, getWidth)
 		PYAPI_METHOD(PixelData, getHeight)
+		PYAPI_METHOD(PixelData, beginPixelAccess)
+		PYAPI_METHOD(PixelData, setPixel)
+		PYAPI_METHOD(PixelData, getPixelR)
+		PYAPI_METHOD(PixelData, getPixelG)
+		PYAPI_METHOD(PixelData, getPixelB)
+		PYAPI_METHOD(PixelData, getPixelA)
+		PYAPI_METHOD(PixelData, endPixelAccess)
 		;
 
 	// SoundEnvironment
@@ -1352,7 +1396,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getBoolSetting", &getBoolSetting);
 	def("getStringSetting", &getStringSetting);
 	def("getButtonSetting", &getButtonSetting);
-	def("overridePanopticStereo", overridePanopticStereo);
+	def("getDisplayConfig", getDisplayConfig, PYAPI_RETURN_REF);
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);
 	def("setTileCamera", setTileCamera);
 	def("toggleStereo", toggleStereo);
@@ -1387,6 +1431,11 @@ BOOST_PYTHON_MODULE(omega)
 	def("getDisplayPixelSize", getDisplayPixelSize);
 
 	def("getMissionControlClient", getMissionControlClient, PYAPI_RETURN_REF);
+
+	def("quaternionToEuler", quaternionToEuler, PYAPI_RETURN_VALUE);
+	def("quaternionToEulerDeg", quaternionToEulerDeg, PYAPI_RETURN_VALUE);
+	def("quaternionFromEuler", quaternionFromEuler, PYAPI_RETURN_VALUE);
+	def("quaternionFromEulerDeg", quaternionFromEulerDeg, PYAPI_RETURN_VALUE);
 };
 
 // Black magic. Include the pyeuclid source code (saved as hex file using xdd -i)

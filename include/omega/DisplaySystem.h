@@ -90,7 +90,16 @@ public:
 	void setBackgroundColor(const Color& value) { myBackgroundColor = value; }
 
 protected:
-	DisplaySystem(): myBackgroundColor(0.2f, 0.2f, 0.2f) {}
+
+	DisplaySystem():
+		 myBackgroundColor(0.2f, 0.2f, 0.2f)
+	{
+		// Increase the display config reference count: this is done because 
+		// DisplayConfig may be accessed by reference (for instance through the
+		// getDIsplayConfig python API call), and releasing that reference would
+		// trigger an unwanted deallocation of this object.
+		myDisplayConfig.ref();
+	}
 
 	DisplayConfig myDisplayConfig;
 
