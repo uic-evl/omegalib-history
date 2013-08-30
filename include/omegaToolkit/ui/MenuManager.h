@@ -98,6 +98,8 @@ namespace omegaToolkit { namespace ui {
 		//float myAutoPlaceDistance;
 		//float myMenu3dScale;
 
+		int myMenuInteractorId;
+
 		// Menu sounds
 		Sound* myShowMenuSound;
 		Sound* myHideSoundMenu;

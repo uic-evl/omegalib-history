@@ -49,10 +49,6 @@ using namespace std;
 
 using namespace eq;
 
-// This static variable is used to signal local tiles visibility
-// This external variable is declared in EqualizerDisplaySystem.cpp
-extern bool sLocalTilesVisible;
-
 ///////////////////////////////////////////////////////////////////////////////
 ChannelImpl::ChannelImpl( eq::Window* parent ) 
     :eq::Channel( parent ), myWindow((WindowImpl*)parent), myDrawBuffer(NULL)
@@ -90,9 +86,6 @@ bool ChannelImpl::configInit(const eq::uint128_t& initID)
 ///////////////////////////////////////////////////////////////////////////////
 void ChannelImpl::frameDraw( const co::base::uint128_t& frameID )
 {
-	// If local tiles are hidden, we are done.
-	if(!sLocalTilesVisible) return;
-
 	// Pass the current tile to the draw context. The tile contains all the 
 	// properties of the current draw surface.
 	myDC.tile = myWindow->getTileConfig();

@@ -62,8 +62,8 @@ public:
 	// initializes the display system
 	virtual void initialize(SystemManager* sys) {}
 
-	// Starts display system rendering. This call does not return until the current omegalib application sends an
-	// exit request to the system manager.
+	//! Starts display system rendering. This call does not return until the 
+	//! current omegalib application sends an exit request to the system manager.
 	virtual void run() = 0;
 
 	virtual void cleanup() {}
@@ -89,14 +89,17 @@ public:
 	const Color& getBackgroundColor() { return myBackgroundColor; }
 	void setBackgroundColor(const Color& value) { myBackgroundColor = value; }
 
-	//! Hides all the tiles running on the machine where this method is executed.
-	virtual void hideLocalTiles() {}
-
-	//! Shows all the tiles running on the machine where this method is executed.
-	virtual void showLocalTiles() {}
-
 protected:
-	DisplaySystem(): myBackgroundColor(0.2f, 0.2f, 0.2f) {}
+
+	DisplaySystem():
+		 myBackgroundColor(0.2f, 0.2f, 0.2f)
+	{
+		// Increase the display config reference count: this is done because 
+		// DisplayConfig may be accessed by reference (for instance through the
+		// getDIsplayConfig python API call), and releasing that reference would
+		// trigger an unwanted deallocation of this object.
+		myDisplayConfig.ref();
+	}
 
 	DisplayConfig myDisplayConfig;
 

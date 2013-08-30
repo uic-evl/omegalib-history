@@ -147,9 +147,6 @@ void PythonInterpreter::addPythonPath(const char* dir)
 {
 	ofmsg("PythonInterpreter::addPythonPath: %1%", %dir);
 	
-	//PyEval_AcquireLock();
-	//PyThreadState_Swap(sMainThreadState);
-
 	// Convert slashes for this platform.
 	String out_dir = dir ? dir : "";
 #ifdef OMEGA_OS_WIN
@@ -161,9 +158,6 @@ void PythonInterpreter::addPythonPath(const char* dir)
 	PyObject* newpath = PyString_FromString(out_dir.c_str());
 	PyList_Insert(opath, 0, newpath);
 	Py_DECREF(newpath);
-
-	//PyThreadState_Swap(NULL);
-	//PyEval_ReleaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -229,12 +223,23 @@ void PythonInterpreter::initialize(const char* programName)
 	// Add a generic 'current working dir' to the module search paths, so modules
 	// in the current working directory will always load, regardless of where the
 	// current working dir is.
+	// NOTE: This is needed because when we run a script we switch to it's containing
+	// directory (so local files can be opened using their relative path). If we
+	// dont't add this to the module search paths we will not be able to import local
+	// modules.
 	addPythonPath("./");
+	
+	// Add the launching executable's directory to the module search path.  This will
+	// allow omegalib to find binary modules that are part of the distribution
+	// regardless of the directory from which the application has been launched. 
+	// Useful for system installs of omegalib, so users do not to be inside the bin
+	// folder to be able to launch and improt modules correclty.
+	String exePath = ogetexecpath();
+	String exeDir;
+	String exeName;
+	StringUtils::splitFilename(exePath, exeName, exeDir);
+	addPythonPath(exeDir.c_str());
 
-	// Add the current working directory to the python module search paths. This should
-	// be the directory containing the current executable (and all binary modules that
-	// get built with omegalib should be in the same dir)
-	addPythonPath(ogetcwd().c_str());
 #ifdef OMEGA_HARDCODE_DATA_PATHS
 	addPythonPath(OMEGA_DATA_PATH);
 #endif
@@ -254,6 +259,7 @@ void PythonInterpreter::initialize(const char* programName)
 
 	// Run initialization commands
 	PyRun_SimpleString("from omega import *");
+	PyRun_SimpleString("from euclid import *");
 	if(myInitCommand != "") PyRun_SimpleString(myInitCommand.c_str());
 	
 	omsg("Python Interpreter initialized.");
@@ -423,11 +429,9 @@ void PythonInterpreter::runFile(const String& filename, uint flags)
 			String cdcmd = "import os; os.chdir('" + scriptPath + "')";
 			PyRun_SimpleString(cdcmd.c_str());
 		}
-	
+
 		if(flags & AddScriptPathToModuleSearchPath)
 		{
-			// Add the path to the module lookup path for the interpreter, so 
-			// we can open modules in the same directory.
 			addPythonPath(scriptPath.c_str());
 		}
 
@@ -457,8 +461,9 @@ void PythonInterpreter::clean()
 		eval("for uniquevar in [var for var in globals().copy() if var[0] != \"_\" and var != 'clearall']: del globals()[uniquevar]");
 	}
 
-	// Import omega module by default
+	// Import omega and euclid modules by default
 	eval("from omega import *");
+	eval("from euclid import *");
 
 	// unregister callbacks
 	unregisterAllCallbacks();
@@ -479,7 +484,7 @@ void PythonInterpreter::cleanRun(const String& filename)
 	// through a :r! command. Also note how we explicitly import module omega, 
 	// since all global symbols have been unloaded by the previously mentioned 
 	// reset command.
-	queueCommand(ostr("from omega import *; orun(\"%1%\")", %filename), true);
+	queueCommand(ostr("from omega import *; from euclid import *; orun(\"%1%\")", %filename), true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

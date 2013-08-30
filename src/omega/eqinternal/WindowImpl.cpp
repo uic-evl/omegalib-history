@@ -44,10 +44,6 @@ using namespace omega;
 using namespace co::base;
 using namespace std;
     
-// This static variable is used to signal local tiles visibility
-// This external variable is declared in EqualizerDisplaySystem.cpp
-extern bool sLocalTilesVisible;
-
 ///////////////////////////////////////////////////////////////////////////////
 WindowImpl::WindowImpl(eq::Pipe* parent): 
     eq::Window(parent), myPipe((PipeImpl*)parent),
@@ -119,9 +115,9 @@ void WindowImpl::frameStart( const uint128_t& frameID, const uint32_t frameNumbe
 	eq::Window::frameStart(frameID, frameNumber);
 
 	// Did the local tile visibility state change?
-	if(myVisible != sLocalTilesVisible)
+	if(myVisible != myTile->enabled)
 	{
-		myVisible = sLocalTilesVisible;
+		myVisible = myTile->enabled;
 		if(myVisible) getSystemWindow()->show();
 		else getSystemWindow()->hide();
 	}
