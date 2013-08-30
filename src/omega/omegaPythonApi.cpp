@@ -1289,6 +1289,13 @@ BOOST_PYTHON_MODULE(omega)
 	PYAPI_REF_BASE_CLASS(PixelData)
 		PYAPI_METHOD(PixelData, getWidth)
 		PYAPI_METHOD(PixelData, getHeight)
+		PYAPI_METHOD(PixelData, beginPixelAccess)
+		PYAPI_METHOD(PixelData, setPixel)
+		PYAPI_METHOD(PixelData, getPixelR)
+		PYAPI_METHOD(PixelData, getPixelG)
+		PYAPI_METHOD(PixelData, getPixelB)
+		PYAPI_METHOD(PixelData, getPixelA)
+		PYAPI_METHOD(PixelData, endPixelAccess)
 		;
 
 	// SoundEnvironment
