@@ -181,6 +181,11 @@ void SystemManager::setup(Config* appcfg)
 			}
 		}
 
+		// Instantiate the service manager before initializing the interpreter,
+		// so the interpreter initialization command can register additional
+		// services.
+		myServiceManager = new ServiceManager();
+
 		// NOTE: We initialize the interpreter here (instead of the 
 		// SystemManager::initialize function) to allow it to load optional modules
 		// that may provide services that we then want do setup during
@@ -190,8 +195,6 @@ void SystemManager::setup(Config* appcfg)
 		// The display system needs to be set up before service manager, because it finishes setting up
 		// the multi instance configuration parameters that are used during service configuration.
 		setupDisplaySystem();
-
-		myServiceManager = new ServiceManager();
 
 		setupServiceManager();
 	}
