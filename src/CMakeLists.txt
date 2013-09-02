@@ -81,7 +81,7 @@ endif()
 # Options
 set(OMEGA_BUILD_OSG_LIB true CACHE BOOL "Enable build of OpenSceneGraph integration library")
 # Shi
-set(OMEGA_USE_OSGBULLET true CACHE BOOL "Enable osgBullet support")
+set(OMEGA_USE_OSGBULLET false CACHE BOOL "Enable osgBullet support")
 # Yin
 set(OMEGA_BUILD_VTK_LIB false CACHE BOOL "Enable build of vtk integration library (Vtk has to be compiled with Python support)")
 if(WIN32)
