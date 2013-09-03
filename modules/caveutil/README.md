@@ -1,11 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-  <head>
-    <meta content="text/html; charset=windows-1252"
-      http-equiv="Content-Type">
-    <title>CAVEutil</title>
-  </head>
-  <body>
     <h1 style="color: rgb(0, 0, 0); font-style: normal; font-variant:
       normal; letter-spacing: normal; line-height: normal; text-align:
       start; text-indent: 0px; text-transform: none; white-space:
@@ -161,5 +153,3 @@ href="html/classcaveutil_1_1caveutil.html#acd861a4964d547b1f77c5573a7a117fa">loa
     </ul>
     <font face="Helvetica, Arial, sans-serif"><br>
     </font>
-  </body>
-</html>
