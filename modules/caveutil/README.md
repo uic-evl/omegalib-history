@@ -38,30 +38,30 @@
   applications, which are missing in the core Omegalib library.<br>
   <br>
   There are three main classes- <a
-    href="html/classcaveutil_1_1caveutil.html">caveutil, </a><a
-    href="html/classcaveutil_1_1_interpol_actor.html">InterpolActor</a>.
-  and <a href="html/classcaveutil_1_1_flipbook_actor.html">FlipbookActor</a><br>
+    href="http://uic-evl.github.io/omegalib/caveutil/html/classcaveutil_1_1caveutil.html">caveutil, </a><a
+    href="http://uic-evl.github.io/omegalib/caveutil/html/classcaveutil_1_1_interpol_actor.html">InterpolActor</a>.
+  and <a href="http://uic-evl.github.io/omegalib/caveutil/html/classcaveutil_1_1_flipbook_actor.html">FlipbookActor</a><br>
   <br>
   CAVEUtil consists of static member functions whereas InterpolActor
   and FlipbookActor are bona fide class.<br>
   <br>
-  <a href="html/classcaveutil_1_1caveutil.html">CAVEutil</a>
+  <a href="http://uic-evl.github.io/omegalib/caveutil/html/classcaveutil_1_1caveutil.html">CAVEutil</a>
   includes a bunch of functions that condense things that normally
   take many lines of code in Omegalib to do, into single convenient
   API calls.<br>
   For example multiple lines of code for loading a scene object is
   condensed into a single <a
-href="html/classcaveutil_1_1caveutil.html#acd861a4964d547b1f77c5573a7a117fa">loadObject()</a>
+href="http://uic-evl.github.io/omegalib/caveutil/html/classcaveutil_1_1caveutil.html#acd861a4964d547b1f77c5573a7a117fa">loadObject()</a>
   with a bunch of input parameters.<br>
   <br>
-  <a href="html/classcaveutil_1_1_interpol_actor.html">InterpolActor
+  <a href="http://uic-evl.github.io/omegalib/caveutil/html/classcaveutil_1_1_interpol_actor.html">InterpolActor
   </a>is an Omegalib Actor to make it easier to do smooth
   interpolation of the position, orientation and scale of scene
   nodes such as 3D objects and CAVE camera. It is particularly
   convenient, for example for interpolating waypoints in the CAVE to
   create pre-recorded navigational paths.<br>
   <br>
-  <a href="html/classcaveutil_1_1_flipbook_actor.html">FlipbookActor
+  <a href="http://uic-evl.github.io/omegalib/caveutil/html/classcaveutil_1_1_flipbook_actor.html">FlipbookActor
   </a>is an Omegalib Actor that takes a SceneNode containing a
   number of children and cycles through them like a flipbook,
   showing only one child at a time.<br>
@@ -80,7 +80,7 @@ href="html/classcaveutil_1_1caveutil.html#acd861a4964d547b1f77c5573a7a117fa">loa
     line-height: normal; text-align: start; text-indent: 0px;
     text-transform: none; white-space: normal; word-spacing: 0px;
     display: inline ! important; float: none;">&nbsp;&nbsp;&nbsp; <a
-      href="html/classes.html">CAVEUtil Python API</a><br>
+      href="http://uic-evl.github.io/omegalib/caveutil/html/classes.html">CAVEUtil Python API</a><br>
     <br>
   </span><span style="color: rgb(0, 0, 0); font-size: medium;
     font-style: normal; font-variant: normal; font-weight: normal;
@@ -97,7 +97,7 @@ href="html/classcaveutil_1_1caveutil.html#acd861a4964d547b1f77c5573a7a117fa">loa
     scale under interpolation. Additional CAVEutil code for getting
     and attaching objects to one's wand and head are demonstrated.<br>
   </font></p>
-<img alt="" src="caveutil.png" height="461" width="818">
+<img alt="" src="http://uic-evl.github.io/omegalib/caveutil/caveutil.png" height="461" width="818">
 <h2><font face="Helvetica, Arial, sans-serif">Example 2</font></h2>
 <p><font face="Helvetica, Arial, sans-serif">waypointdemo.py is a
     simple demo to show how to use InterpolActor to interpolate
