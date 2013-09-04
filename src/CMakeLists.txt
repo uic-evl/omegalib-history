@@ -121,7 +121,10 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/examples/omegaSound ${CMAKE_BINARY_DIR}/exa
 add_subdirectory(omegaToolkit)
 
 # OSX uses its own glut, do not compile it internally (Should we do the same under linux?)
-set(OMEGA_USE_DISPLAY_GLUT true CACHE BOOL "Enable GLUT display system support")
+if(WIN32)
+    set(OMEGA_USE_DISPLAY_GLUT true CACHE BOOL "Enable GLUT display system support")
+endif()
+
 if(OMEGA_USE_DISPLAY_GLUT)
 	if(APPLE)
 		find_package(GLUT)
