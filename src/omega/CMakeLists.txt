@@ -205,7 +205,7 @@ endif(OMEGA_USE_DISPLAY_EQUALIZER)
 
 # Glut Display Module
 if( WIN32 )
-	set(OMEGA_USE_DISPLAY_GLUT true CACHE BOOL "Enable GLUT display system support")
+	#set(OMEGA_USE_DISPLAY_GLUT true CACHE BOOL "Enable GLUT display system support")
 	if(OMEGA_USE_DISPLAY_GLUT)
 		set( srcs ${srcs} GlutDisplaySystem.cpp)
 		set( headers ${headers} ${OmegaLib_SOURCE_DIR}/include/omega/GlutDisplaySystem.h) 
