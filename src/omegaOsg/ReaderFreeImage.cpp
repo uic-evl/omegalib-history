@@ -78,7 +78,7 @@ ReaderWriter::ReadResult ReaderFreeImage::readImage(std::istream& fin,const Opti
 {
 	omega::Ref<omega::PixelData> img = omega::ImageUtils::loadImageFromStream(fin, "STREAM");
 	if(img == NULL) return ReadResult::FILE_NOT_FOUND;
-	osg::Image* pOsgImage = omegaOsg::OsgModule::pixelDataToOsg(img);
+	osg::Image* pOsgImage = omegaOsg::OsgModule::pixelDataToOsg(img, true);
 
     ReadResult rr(pOsgImage);
     if(rr.validImage()) rr.getImage()->setFileName("STREAM");

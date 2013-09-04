@@ -86,7 +86,7 @@ namespace omegaOsg
 		//! If transferBufferOwnership is set to true, the underlying pixel buffer will be owned
 		//! by the osg image: deleting the PixelData object will not deallocate the buffer. By
 		//! default, PixelData retains ownership of the buffer.
-		static osg::Image* pixelDataToOsg(PixelData* img, bool transferBufferOwnership = true);
+		static osg::Image* pixelDataToOsg(PixelData* img, bool transferBufferOwnership = false);
 
 		
 	public:
