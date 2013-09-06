@@ -17,6 +17,13 @@ include_directories(
 )
 
 # Add external project osgBullet
+# Pro Trick here: we can't pass the string directly as a CMAKE_ARG in 
+# ExternalProject_Add, because it would keep the double quotes, and we
+# do not want them. Passing it as a variable removes the dobule quotes.
+
+# The OSGWORKS_STATIC preprocessor definition tells osgBullet that
+# we are using the static version of osgWorks.
+set(OSGBullet_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D\"OSGWORKS_STATIC\"")
 ExternalProject_Add(
 	osgBullet
 	URL ${CMAKE_SOURCE_DIR}/external/osgbullet.tar.gz
@@ -24,6 +31,7 @@ ExternalProject_Add(
 	CMAKE_ARGS 
 		-DCMAKE_SHARED_LINKER_FLAGS:STRING="${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:msvcprt.lib /NODEFAULTLIB:libcpmt.lib"
 		-DCMAKE_LINKER_FLAGS:STRING="${CMAKE_LINKER_FLAGS} /NODEFAULTLIB:libcpmt.lib /NODEFAULTLIB:msvcprt.lib"
+		-DCMAKE_CXX_FLAGS:STRING=${OSGBullet_CXX_FLAGS}
 		-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 		-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 		-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}
@@ -102,3 +110,5 @@ elseif(APPLE)
 		set(OSGBULLET_LIBS ${OSGBULLET_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 	endforeach()
 endif(OMEGA_OS_WIN)
+
+add_definitions(-DOSGBULLET_STATIC)

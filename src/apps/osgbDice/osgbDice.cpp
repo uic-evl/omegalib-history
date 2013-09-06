@@ -60,12 +60,13 @@ osg::MatrixTransform* makeDie( btDynamicsWorld* bw )
 {
     osg::MatrixTransform* root = new osg::MatrixTransform;
 	const std::string fileName( "dice.osg" );
-    osg::Node* node = osgDB::readNodeFile( fileName );
-	if( node == NULL )
+	String dicePath;
+	if(!DataManager::findFile("dice.osg", dicePath))
 	{
 		osg::notify( osg::FATAL ) << "Can't find \"" << fileName << "\". Make sure OSG_FILE_PATH includes the osgBullet data directory." << std::endl;
 		exit( 0 );
 	}
+    osg::Node* node = osgDB::readNodeFile( dicePath );
     root->addChild( node );
 
     btCollisionShape* cs = osgbCollision::btBoxCollisionShapeFromOSG( node );
