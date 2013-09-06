@@ -1,25 +1,17 @@
-# Extract bullet binaries
-set(EXTLIB_NAME bullet)
-set(EXTLIB_TGZ ${CMAKE_SOURCE_DIR}/external/${EXTLIB_NAME}.tar.gz)
-set(EXTLIB_DIR ${CMAKE_BINARY_DIR}/${EXTLIB_NAME})
-
-if(NOT EXISTS ${EXTLIB_DIR})
-  execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf
-    ${EXTLIB_TGZ} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-endif(NOT EXISTS ${EXTLIB_DIR})
-
+include(${CMAKE_CURRENT_LIST_DIR}/UseBullet.cmake)
 #find bullet
-include(FindBulletHelper)
-#include bullet
-include_directories(
-	${BULLET_INCLUDE_DIRS}
-    ${BULLET_EXTRAS_INCLUDE_DIR}
-)
+# include(FindBulletHelper)
+# #include bullet
+# include_directories(
+	# ${BULLET_INCLUDE_DIRS}
+    # ${BULLET_EXTRAS_INCLUDE_DIR}
+# )
 
 # Add external project osgBullet
 # Pro Trick here: we can't pass the string directly as a CMAKE_ARG in 
 # ExternalProject_Add, because it would keep the double quotes, and we
 # do not want them. Passing it as a variable removes the dobule quotes.
+set(BulletInstallType "Source And Build Tree")
 
 # The OSGWORKS_STATIC preprocessor definition tells osgBullet that
 # we are using the static version of osgWorks.
@@ -42,8 +34,9 @@ ExternalProject_Add(
 		-DOSGBULLET_BUILD_EXAMPLES=OFF
 		-DOSGBULLET_INSTALL_DATA=OFF
 		#Bullet
-		-DBulletInstallType:STRING="Alternate Install Location"
-		-DBulletInstallLocation:PATH=${CMAKE_BINARY_DIR}/${EXTLIB_NAME}
+		-DBulletInstallType:STRING=${BulletInstallType}
+		-DBulletSourceRoot:PATH=${CMAKE_BINARY_DIR}/src/bullet-prefix/src/bullet
+		-DBulletBuildRoot:PATH=${CMAKE_BINARY_DIR}/src/bullet-prefix/src/bullet-build
 		#osgWorks
 		-DosgWorks_DIR:PATH=${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib
 		#osg
@@ -84,7 +77,8 @@ ExternalProject_Add(
 		-DOPENTHREADS_LIBRARY_DEBUG:PATH=${OpenThreads_LIBRARY_DEBUG}
 		INSTALL_COMMAND ""
 	)
-add_dependencies(osgBullet osgWorks osg)
+set_target_properties(osgBullet PROPERTIES FOLDER "3rdparty")
+add_dependencies(osgBullet bullet osgWorks osg)
 
 set(OSGBULLET_BASE_DIR ${CMAKE_BINARY_DIR}/src/osgBullet-prefix/src)
 set(OSGBULLET_INCLUDES ${OSGBULLET_BASE_DIR}/osgBullet/include)
