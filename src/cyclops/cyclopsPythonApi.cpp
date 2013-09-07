@@ -271,6 +271,11 @@ BOOST_PYTHON_MODULE(cyclops)
 		.def("getAnimationLength", &AnimatedObject::getAnimationLength)
 		.def("getAnimationStart", &AnimatedObject::getAnimationStart)
 		.def("setAnimationStart", &AnimatedObject::setAnimationStart)
+		// These use the new python API macros. Convert all declaractions to
+		// use this
+		PYAPI_METHOD(AnimatedObject, setCurrentModelIndex)
+		PYAPI_METHOD(AnimatedObject, getCurrentModelIndex)
+		PYAPI_METHOD(AnimatedObject, getNumModels)
 		;
 
 	// LightType
