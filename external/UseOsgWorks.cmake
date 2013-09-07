@@ -136,6 +136,8 @@ else()
 			-DOPENTHREADS_INCLUDE_DIR:PATH=${OSG_INCLUDES}
 			-DOPENTHREADS_LIBRARY:PATH=${OpenThreads_LIBRARY}
 			-DOPENTHREADS_LIBRARY_DEBUG:PATH=${OpenThreads_LIBRARY_DEBUG}
+			#osgWorks
+			-DOSGWORKS_BUILD_APPS:BOOL=OFF
 			INSTALL_COMMAND ""
 		)
 endif()
@@ -169,7 +171,7 @@ elseif(APPLE)
 	endforeach()
 endif(OMEGA_OS_WIN)
 
-add_definitions(-DOSGWORKS_STATIC)
+#add_definitions(-DOSGWORKS_STATIC)
 
 set(OSGWORKS_INCLUDES ${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks/include)
 

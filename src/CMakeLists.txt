@@ -80,9 +80,7 @@ endif()
 ###################################################################################################
 # Options
 set(OMEGA_BUILD_OSG_LIB true CACHE BOOL "Enable build of OpenSceneGraph integration library")
-# Shi
-set(OMEGA_USE_OSGBULLET false CACHE BOOL "Enable osgBullet support")
-# Yin
+set(OMEGA_USE_OSGBULLET true CACHE BOOL "Enable osgBullet support")
 set(OMEGA_BUILD_VTK_LIB false CACHE BOOL "Enable build of vtk integration library (Vtk has to be compiled with Python support)")
 if(WIN32)
 	set(OMEGA_ENABLE_AUTO_UPDATE true CACHE BOOL "Enables the omegalib binaries auto updater (WinSparkle) for a windows build. Supported by 32bit builds only.")
@@ -152,20 +150,18 @@ if(OMEGA_BUILD_OSG_LIB)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/cyhello ${CMAKE_BINARY_DIR}/examples/cyhello)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/cyhello2 ${CMAKE_BINARY_DIR}/examples/cyhello2)
 	add_subdirectory(apps/osgviewer)
-	# Shi
 	if(OMEGA_USE_OSGBULLET)
     	#add osgBullet into include
     	include(${CMAKE_SOURCE_DIR}/external/UseOsgBullet.cmake)
 		include_directories(${OSGBULLET_INCLUDES})
 
 		add_subdirectory(apps/osgbCollision)
-		add_subdirectory(apps/osgbBCC)
-		add_subdirectory(apps/osgbCollisionWithoutOmega)
-		add_subdirectory(apps/osgbBasicDemo)
-		add_subdirectory(apps/osgbDice)
-		add_subdirectory(apps/osgbSlider)
+		#add_subdirectory(apps/osgbBCC)
+		#add_subdirectory(apps/osgbCollisionWithoutOmega)
+		#add_subdirectory(apps/osgbBasicDemo)
+		#add_subdirectory(apps/osgbDice)
+		#add_subdirectory(apps/osgbSlider)
 	endif()
-	# Yin
 	if(OMEGA_USE_PORTHOLE)
 		add_subdirectory(${CMAKE_SOURCE_DIR}/examples/portholeCustomDraw ${CMAKE_BINARY_DIR}/examples/portholeCustomDraw)
 	endif()
