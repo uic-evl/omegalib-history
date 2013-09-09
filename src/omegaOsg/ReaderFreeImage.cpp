@@ -33,7 +33,7 @@
  *	An OpenSceneGraph reader that uses the embedded omegalib image reader to
  *	load images.
  ******************************************************************************/
-#include<omega.h>
+#include <omega.h>
 #include <osg/Image>
 #include <osg/Notify>
 

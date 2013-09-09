@@ -1,4 +1,3 @@
-# Shi
 # Source files
 set(SRCS 
 		osgbSlider.cpp)
@@ -13,4 +12,3 @@ target_link_libraries(osgbSlider
 	omegaOsg
 	${BULLET_LIBS}
 	${OSGBULLET_LIBS})
-# Yin

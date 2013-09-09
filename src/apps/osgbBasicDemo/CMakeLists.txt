@@ -1,4 +1,3 @@
-# Shi
 # Source files
 set(SRCS 
 		osgbBasicDemo.cpp)
@@ -13,4 +12,3 @@ target_link_libraries(osgbBasicDemo
 	omegaOsg
 	${BULLET_LIBS}
 	${OSGBULLET_LIBS})
-# Yin

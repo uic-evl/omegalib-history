@@ -123,20 +123,16 @@ if(OMEGA_BUILD_OSG_LIB)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/cyhello ${CMAKE_BINARY_DIR}/examples/cyhello)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/cyhello2 ${CMAKE_BINARY_DIR}/examples/cyhello2)
 	add_subdirectory(apps/osgviewer)
-	# Shi
 	if(OMEGA_USE_OSGBULLET)
     	#add osgBullet into include
     	include(${CMAKE_SOURCE_DIR}/external/UseOsgBullet.cmake)
 		include_directories(${OSGBULLET_INCLUDES})
 
 		add_subdirectory(apps/osgbCollision)
-		add_subdirectory(apps/osgbBCC)
-		add_subdirectory(apps/osgbCollisionWithoutOmega)
 		add_subdirectory(apps/osgbBasicDemo)
 		add_subdirectory(apps/osgbDice)
 		add_subdirectory(apps/osgbSlider)
 	endif()
-	# Yin
 	if(OMEGA_USE_PORTHOLE)
 		add_subdirectory(${CMAKE_SOURCE_DIR}/examples/portholeCustomDraw ${CMAKE_BINARY_DIR}/examples/portholeCustomDraw)
 	endif()
