@@ -5,6 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/UseBullet.cmake)
 # ExternalProject_Add, because it would keep the double quotes, and we
 # do not want them. Passing it as a variable removes the dobule quotes.
 set(BulletInstallType "Source And Build Tree")
+set(OsgInstallType "Source And Build Tree")
 
 # The OSGWORKS_STATIC preprocessor definition tells osgBullet that
 # we are using the static version of osgWorks.
@@ -20,8 +21,11 @@ ExternalProject_Add(
 		-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 		-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
 		-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}
-		-DOSGInstallType:STRING="Alternate Install Location"
-		-DOSGInstallLocation:PATH=${OSG_BINARY_DIR}
+
+		-DOSGInstallType:STRING=${OsgInstallType}
+		-DOSGSourceRoot:STRING=${CMAKE_BINARY_DIR}/src/osg-prefix/src/osg
+		-DOSGBuildRoot:STRING=${CMAKE_BINARY_DIR}/src/osg-prefix/src/osg-build
+		
 		-DBUILD_SHARED_LIBS:BOOLEAN=false
 		-DOSGBULLET_BUILD_APPLICATIONS=OFF
 		-DOSGBULLET_BUILD_EXAMPLES=OFF
