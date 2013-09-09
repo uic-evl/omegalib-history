@@ -129,8 +129,6 @@ if(OMEGA_BUILD_OSG_LIB)
 		include_directories(${OSGBULLET_INCLUDES})
 
 		add_subdirectory(apps/osgbCollision)
-		add_subdirectory(apps/osgbBCC)
-		#add_subdirectory(apps/osgbCollisionWithoutOmega)
 		add_subdirectory(apps/osgbBasicDemo)
 		add_subdirectory(apps/osgbDice)
 		add_subdirectory(apps/osgbSlider)
