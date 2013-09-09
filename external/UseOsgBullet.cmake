@@ -1,11 +1,4 @@
 include(${CMAKE_CURRENT_LIST_DIR}/UseBullet.cmake)
-#find bullet
-# include(FindBulletHelper)
-# #include bullet
-# include_directories(
-	# ${BULLET_INCLUDE_DIRS}
-    # ${BULLET_EXTRAS_INCLUDE_DIR}
-# )
 
 # Add external project osgBullet
 # Pro Trick here: we can't pass the string directly as a CMAKE_ARG in 
@@ -105,4 +98,6 @@ elseif(APPLE)
 	endforeach()
 endif(OMEGA_OS_WIN)
 
+# Add the DOSGBULLET_STATIC to following projects, so we tell the header files 
+# we are not importing dll symbols.
 add_definitions(-DOSGBULLET_STATIC)
