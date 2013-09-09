@@ -1,5 +1,4 @@
 ###################################################################################################
-# Shi
 # Source files
 set(SRCS 
 		osgbCollision.cpp)
@@ -14,4 +13,3 @@ target_link_libraries(osgbCollision
 	omegaOsg
 	${BULLET_LIBS}
 	${OSGBULLET_LIBS})
-# Yin
