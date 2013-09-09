@@ -86,8 +86,8 @@ else()
 		URL ${CMAKE_SOURCE_DIR}/external/osgbullet.tar.gz
 		CMAKE_GENERATOR ${OSGWORKS_GENERATOR}
 		CMAKE_ARGS 
-			-DCMAKE_SHARED_LINKER_FLAGS:STRING="${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:msvcprt.lib /NODEFAULTLIB:libcpmt.lib"
-			-DCMAKE_LINKER_FLAGS:STRING="${CMAKE_LINKER_FLAGS} /NODEFAULTLIB:libcpmt.lib /NODEFAULTLIB:msvcprt.lib"
+			#-DCMAKE_SHARED_LINKER_FLAGS:STRING="${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:msvcprt.lib /NODEFAULTLIB:libcpmt.lib"
+			#-DCMAKE_LINKER_FLAGS:STRING="${CMAKE_LINKER_FLAGS} /NODEFAULTLIB:libcpmt.lib /NODEFAULTLIB:msvcprt.lib"
 			-DCMAKE_CXX_FLAGS:STRING=${OSGBullet_CXX_FLAGS}
 			-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 			-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
@@ -97,7 +97,9 @@ else()
 			-DOSGSourceRoot:STRING=${CMAKE_BINARY_DIR}/src/osg-prefix/src/osg
 			-DOSGBuildRoot:STRING=${CMAKE_BINARY_DIR}/src/osg-prefix/src/osg-build
 			
-			-DBUILD_SHARED_LIBS:BOOLEAN=false
+			# Bild a shared lib on linux, or linking with apps will fail (why? Because little
+			# gnomes live in your computer to make your life miserable)
+			-DBUILD_SHARED_LIBS:BOOLEAN=true
 			-DOSGBULLET_BUILD_APPLICATIONS=OFF
 			-DOSGBULLET_BUILD_EXAMPLES=OFF
 			-DOSGBULLET_INSTALL_DATA=OFF
@@ -147,6 +149,12 @@ else()
 			-DOPENTHREADS_INCLUDE_DIR:PATH=${OSG_INCLUDES}
 			-DOPENTHREADS_LIBRARY:PATH=${OpenThreads_LIBRARY}
 			-DOPENTHREADS_LIBRARY_DEBUG:PATH=${OpenThreads_LIBRARY_DEBUG}
+			
+			# bullet (linux does not find them automatically?)
+			-DBULLET_DYNAMICS_LIBRARY:PATH=${BulletDynamics_LIBRARY}
+			-DBULLET_COLLISION_LIBRARY:PATH=${BulletCollision_LIBRARY}
+			-DBULLET_SOFTBODY_LIBRARY:PATH=${BulletSoftBody_LIBRARY}
+			-DBULLET_MATH_LIBRARY:PATH=${LinearMath_LIBRARY}
 			INSTALL_COMMAND ""
 		)
 endif()
@@ -167,8 +175,8 @@ if(OMEGA_OS_WIN)
 	endforeach()
 elseif(OMEGA_OS_LINUX)
     foreach( C ${OSGBULLET_COMPONENTS} )
-		set(${C}_LIBRARY ${OSGBULLET_LIB_DIR}/lib${C}.a)
-		set(${C}_LIBRARY_DEBUG ${OSGBULLET_LIB_DIR}/lib${C}.a)
+		set(${C}_LIBRARY ${OSGBULLET_LIB_DIR}/lib${C}.so)
+		set(${C}_LIBRARY_DEBUG ${OSGBULLET_LIB_DIR}/lib${C}.so)
 		set(OSGBULLET_LIBS ${OSGBULLET_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 	endforeach()
 elseif(APPLE)
@@ -179,6 +187,8 @@ elseif(APPLE)
 	endforeach()
 endif(OMEGA_OS_WIN)
 
-# Add the DOSGBULLET_STATIC to following projects, so we tell the header files 
-# we are not importing dll symbols.
-add_definitions(-DOSGBULLET_STATIC)
+if(WIN32)
+	# Add the DOSGBULLET_STATIC to following projects, so we tell the header files 
+	# we are not importing dll symbols.
+	add_definitions(-DOSGBULLET_STATIC)
+endif()
