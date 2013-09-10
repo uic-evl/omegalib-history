@@ -1,4 +1,4 @@
-###############################################################################
+	###############################################################################
 # THE OMEGA LIB PROJECT
 #-----------------------------------------------------------------------------
 # Copyright 2010-2013		Electronic Visualization Laboratory, 
@@ -47,7 +47,7 @@ else()
 endif()
 
 if(NOT OSMEGA_USE_EXTERNAL_OSG)
-	if(WIN32)
+	if(MSVC OR CMAKE_GENERATOR STREQUAL "Xcode")
 		ExternalProject_Add(
 			osg
 			URL ${CMAKE_SOURCE_DIR}/external/osg.tar.gz
@@ -60,7 +60,7 @@ if(NOT OSMEGA_USE_EXTERNAL_OSG)
 				-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG}
 			INSTALL_COMMAND ""
 			)
-	else()
+	elseif(OMEGA_OS_LINUX)
 		ExternalProject_Add(
 			osg
 			URL ${CMAKE_SOURCE_DIR}/external/osg.tar.gz
@@ -71,6 +71,19 @@ if(NOT OSMEGA_USE_EXTERNAL_OSG)
 				-DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/osg
 				-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/osg
 				-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/osg
+			INSTALL_COMMAND ""
+			)
+	else()
+		ExternalProject_Add(
+			osg
+			URL ${CMAKE_SOURCE_DIR}/external/osg.tar.gz
+			CMAKE_ARGS 
+				-DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				-DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				-DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				-DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+				-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+				-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
 			INSTALL_COMMAND ""
 			)
 	endif()
@@ -112,7 +125,6 @@ if(OMEGA_OS_WIN)
 		#file(COPY ${OSG_BUILD_DIR}/bin/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG} PATTERN "*.dll")
 		#file(COPY ${EXTLIB_DIR}/bin/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} PATTERN "*.dll")
 	endif()
-	
 
 elseif(OMEGA_OS_LINUX)
     foreach( C ${OSG_COMPONENTS} )
@@ -131,8 +143,8 @@ elseif(OMEGA_OS_LINUX)
 	# endif()
 else()
 	foreach( C ${OSG_COMPONENTS} )
-		set(${C}_LIBRARY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/lib${C}.dylib)
-		set(${C}_LIBRARY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/lib${C}d.dylib)
+		set(${C}_LIBRARY ${OSG_BINARY_DIR}/lib${C}.dylib)
+		set(${C}_LIBRARY_DEBUG ${OSG_BINARY_DIR}/lib${C}d.dylib)
 		#set(${C}_INCLUDE_DIR ${OSG_INCLUDES})
 		set(OSG_LIBS ${OSG_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 	endforeach()
