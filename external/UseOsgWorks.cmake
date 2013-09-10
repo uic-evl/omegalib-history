@@ -57,7 +57,7 @@ else()
 	# do not want them. Passing it as a variable removes the dobule quotes.
 	set(OSGInstallType "Source And Build Tree")
 	set(OSGWorks_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fPIC)
-	# Windows and linux
+	# Mac and linux
 	ExternalProject_Add(
 		osgWorks
 		URL ${CMAKE_SOURCE_DIR}/external/osgw2.tar.gz
