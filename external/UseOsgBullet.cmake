@@ -167,7 +167,6 @@ set(OSGBULLET_INCLUDES ${OSGBULLET_BASE_DIR}/osgBullet/include)
 
 set(OSGBULLET_LIB_DIR ${OSGBULLET_BASE_DIR}/osgBullet-build/lib)
 set(OSGBULLET_COMPONENTS osgbCollision osgbDynamics osgbInteraction)
-
 if(OMEGA_OS_WIN)
 	foreach( C ${OSGBULLET_COMPONENTS})
 		set(${C}_LIBRARY ${OSGBULLET_LIB_DIR}/Release/${C}.lib)
