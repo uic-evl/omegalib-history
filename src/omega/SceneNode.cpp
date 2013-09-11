@@ -269,7 +269,9 @@ void SceneNode::updateTraversal(const UpdateContext& context)
 	// Reorient the node if a facing camera is set
 	if(myFacingCamera != NULL)
 	{
-		lookAt(myFacingCamera->getPosition() + myFacingCamera->getHeadOffset(), Vector3f::UnitY());
+		Vector3f up = myFacingCamera->getOrientation() * Vector3f::UnitY();
+		Vector3f pos = myFacingCamera->getPosition() + myFacingCamera->getHeadOffset();
+		lookAt(pos, up);
 	}
 
 	// Update attached components
