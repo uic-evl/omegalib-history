@@ -209,6 +209,17 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_GETTER(Widget, getUpdateCommand)
 		PYAPI_METHOD(Widget, isStereo)
 		PYAPI_METHOD(Widget, setStereo)
+		// Navigation
+		PYAPI_METHOD(Widget, isNavigationEnabled)
+		PYAPI_METHOD(Widget, setNavigationEnabled)
+		PYAPI_METHOD(Widget, setHorizontalNextWidget)
+		PYAPI_METHOD(Widget, setHorizontalPrevWidget)
+		PYAPI_METHOD(Widget, setVerticalNextWidget)
+		PYAPI_METHOD(Widget, setVerticalPrevWidget)
+		PYAPI_REF_GETTER(Widget, getHorizontalNextWidget)
+		PYAPI_REF_GETTER(Widget, getHorizontalPrevWidget)
+		PYAPI_REF_GETTER(Widget, getVerticalNextWidget)
+		PYAPI_REF_GETTER(Widget, getVerticalPrevWidget)
 		;
 
 	// Container
