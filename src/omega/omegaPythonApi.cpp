@@ -1312,6 +1312,8 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(SoundEnvironment, getVolumeScale)
 		PYAPI_METHOD(SoundEnvironment, setServerVolume)
 		PYAPI_METHOD(SoundEnvironment, getServerVolume)
+		PYAPI_METHOD(SoundEnvironment, setForceCacheOverwrite)
+		PYAPI_METHOD(SoundEnvironment, isForceCacheOverwriteEnabled)
 		;
 
 	// Sound
