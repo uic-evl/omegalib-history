@@ -260,10 +260,10 @@ void MenuManager::autoPlaceMenu(Menu* menu, const Event& evt)
 		Widget* menuWidget = menu->getContainer();
 
 		c3ds.scale = myDefaultMenuScale;
-		Vector3f offset = Vector3f(0, menuWidget->getHeight() * c3ds.scale, 0);
-		c3ds.position = menuPosition - offset;
+		Vector3f offset = Vector3f(0, menuWidget->getHeight() * c3ds.scale * 0.5f, 0);
+		c3ds.position = myDefaultMenuPosition + offset;
 
-		c3ds.normal = -obsForward;
+		//c3ds.normal = -obsForward;
 		c3ds.scale = myDefaultMenuScale;
 	}
 }
