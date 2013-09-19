@@ -789,7 +789,6 @@ boost::python::tuple getDisplayPixelSize()
 	return boost::python::make_tuple(size.x(), size.y());
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 void orun(const String& script)
 {
@@ -1161,6 +1160,8 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(SceneNode, getTag)
 		PYAPI_GETTER(SceneNode, setFacingCamera)
 		PYAPI_GETTER(SceneNode, getFacingCamera)
+		PYAPI_GETTER(SceneNode, setFacingCameraFixedY)
+		PYAPI_GETTER(SceneNode, isFacingCameraFixedY)
 		PYAPI_GETTER(SceneNode, getBoundMinimum)
 		PYAPI_GETTER(SceneNode, getBoundMaximum)
 		PYAPI_GETTER(SceneNode, getBoundCenter)
