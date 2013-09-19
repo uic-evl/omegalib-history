@@ -12,7 +12,7 @@ for i in range(0, 1000):
 	x = random.random() * 10 - 5
 	y = random.random() * 10 - 5
 	z = -random.random() * 10
-	star = sprite.createSprite('star.png', size, window_size)
+	star = sprite.createSprite('star.png', size, window_size, True)
 	
 	# just for fun: color each star randomly.
 	r = random.random()
