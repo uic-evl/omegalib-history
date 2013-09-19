@@ -768,14 +768,14 @@ void setNearFarZ(float nearZ, float farZ)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-float getNearZ(float near)
+float getNearZ()
 {
 	Camera* cam = getDefaultCamera();
 	return cam->getNearZ();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-float getFarZ(float near)
+float getFarZ()
 {
 	Camera* cam = getDefaultCamera();
 	return cam->getFarZ();
@@ -1236,6 +1236,9 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(Camera, setSceneEnabled)
 		PYAPI_METHOD(Camera, isOverlayEnabled)
 		PYAPI_METHOD(Camera, setOverlayEnabled)
+		PYAPI_METHOD(Camera, setNearFarZ)
+		PYAPI_METHOD(Camera, getNearZ)
+		PYAPI_METHOD(Camera, getFarZ)
 		;
 
 	// Color
