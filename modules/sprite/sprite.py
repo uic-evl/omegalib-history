@@ -38,8 +38,8 @@ uniform float size;
 uniform vec2 window_size;
 void main(void)
 {
-	float halfsize_x = size/window_size.x / 2.0;
-	float halfsize_y = size/window_size.y / 2.0;
+	float halfsize_x = size/window_size.x;
+	float halfsize_y = size/window_size.y;
 	
 	gl_FrontColor = gl_FrontColorIn[0];
 	
