@@ -557,7 +557,6 @@ void PythonInterpreter::update(const UpdateContext& context)
 		// BLAGH cast
 		PyObject* pyCallback =(PyObject*)cb;
 		PyObject_CallObject(pyCallback, arglist);
-
 	}
 
 	Py_DECREF(arglist);
