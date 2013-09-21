@@ -140,7 +140,7 @@ void DrawInterface::pushTransform(const AffineTransform3& transform)
 {
     glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glMultMatrixd(transform.data());
+	glLoadMatrixd(transform.data());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
