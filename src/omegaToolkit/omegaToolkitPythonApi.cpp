@@ -83,6 +83,20 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_ENUM_VALUE(Widget, BlendAdditive)
 		;
 
+	// Vertical Align
+	PYAPI_ENUM(Container::VerticalAlign, VAlign)
+		PYAPI_ENUM_VALUE(Container, AlignTop)
+		PYAPI_ENUM_VALUE(Container, AlignMiddle)
+		PYAPI_ENUM_VALUE(Container, AlignBottom)
+		;
+
+	// Horizontal Align
+	PYAPI_ENUM(Container::HorizontalAlign, HAlign)
+		PYAPI_ENUM_VALUE(Container, AlignLeft)
+		PYAPI_ENUM_VALUE(Container, AlignCenter)
+		PYAPI_ENUM_VALUE(Container, AlignRight)
+		;
+
 	PYAPI_BASE_CLASS(ToolkitUtils)
 		PYAPI_STATIC_REF_GETTER(ToolkitUtils, createInteractor)
 		PYAPI_STATIC_REF_GETTER(ToolkitUtils, setupInteractor)
@@ -241,6 +255,11 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_METHOD(Container, setPadding)
 		PYAPI_METHOD(Container, getMargin)
 		PYAPI_METHOD(Container, setMargin)
+		PYAPI_METHOD(Container, setHorizontalAlign)
+		PYAPI_METHOD(Container, getHorizontalAlign)
+		PYAPI_METHOD(Container, setVerticalAlign)
+		PYAPI_METHOD(Container, getVerticalAlign)
+
 		// Interaction
 		PYAPI_METHOD(Container, isEventInside)
 		;
