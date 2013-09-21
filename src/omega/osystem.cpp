@@ -295,7 +295,7 @@ namespace omega
 			dm->addSource(new FilesystemDataSource(OMEGA_DATA_PATH));
 			ofmsg("::: %1%", %OMEGA_DATA_PATH);
 			dm->addSource(new FilesystemDataSource(OMEGA_BINARY_PATH));
-			ofmsg("::: %1%", %OMEGA_DATA_PATH);
+			ofmsg("::: %1%", %OMEGA_BINARY_PATH);
 #endif
 			omsg("omegalib application config lookup:");
 			String curCfgFilename = ostr("%1%/%2%", %app.getName() %configFilename);
