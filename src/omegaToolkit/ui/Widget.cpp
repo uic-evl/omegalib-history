@@ -81,8 +81,8 @@ Widget::Widget(Engine* server):
 	myAlpha(1.0f),
 	myScale(1.0f),
 	myUserData(NULL),
-	myUserMoveEnabled(false),
-	myMoving(false),
+	myDraggable(false),
+	myDragging(false),
 	myPinned(false)
 {
 	myId = mysNameGenerator.getNext();
@@ -232,9 +232,9 @@ void Widget::handleEvent(const Event& evt)
 		}
 		// NOTE: Drag move and end does not depend on the pointer actually being on
 		// the controller
-		if(myUserMoveEnabled)
+		if(myDraggable)
 		{
-			if(evt.getType() == Event::Move && myMoving)
+			if(evt.getType() == Event::Move && myDragging)
 			{
 				Vector2f delta = pos2d - myUserMovePosition;
 				myUserMovePosition = pos2d;
@@ -242,9 +242,9 @@ void Widget::handleEvent(const Event& evt)
 				setPosition(myPosition + delta);
 				evt.setProcessed();
 			}
-			else if(myMoving && evt.getType() == Event::Up)
+			else if(myDragging && evt.getType() == Event::Up)
 			{
-				myMoving = false;
+				myDragging = false;
 				myActive = false;
 				evt.setProcessed();
 			}
@@ -268,13 +268,13 @@ void Widget::handleEvent(const Event& evt)
 					dispatchUIEvent(evt);
 				}
 
-				if(myUserMoveEnabled)
+				if(myDraggable)
 				{
 					if(evt.getType() == Event::Down)
 					{
 						myUserMovePosition = pos2d;
 						evt.setProcessed();
-						myMoving = true;
+						myDragging = true;
 						myActive = true;
 					}
 				}
@@ -282,7 +282,7 @@ void Widget::handleEvent(const Event& evt)
 		}
 		else
 		{
-			//myMoving = false;
+			//myDragging = false;
 			//myActive = false;
 		}
 	}

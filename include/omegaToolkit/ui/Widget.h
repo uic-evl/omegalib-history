@@ -190,8 +190,8 @@ namespace omegaToolkit {
 		void setUserData(void* data) { myUserData = data; }
 		void* getUserData() { return myUserData; }
 
-		bool isDraggable() { return myUserMoveEnabled; }
-		void setDraggable(bool value) { myUserMoveEnabled = value; }
+		bool isDraggable() { return myDraggable; }
+		void setDraggable(bool value) { myDraggable = value; }
 		//! When a widget is pinned, its position will remain fixed with 
 		//! respect to its container. Pinning widgets is useful to make 
 		//! container draggable only on a sub-section represented by the 
@@ -256,7 +256,7 @@ namespace omegaToolkit {
 		Widget* myVerticalNextWidget;
 
 		// User data.
-		void * myUserData;
+		void* myUserData;
 
         omega::String myName;
 
@@ -273,8 +273,8 @@ namespace omegaToolkit {
         omega::Color myDebugModeColor;
 
 		bool myPinned;
-        bool myUserMoveEnabled;
-        bool myMoving;
+        bool myDraggable;
+        bool myDragging;
         omega::Vector2f myUserMovePosition;
 
 		// When true, the widget is visible.

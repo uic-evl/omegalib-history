@@ -132,12 +132,12 @@ private:
 // WidgetApplication class.
 
 ///////////////////////////////////////////////////////////////////////////////
+// Container with examples of different font sizes
 class FontsExample
 {
 public:
 	void initialize(Container* ui)
 	{
-		// Container with examples of different font sizes
 		myFontsContainer = Container::create(Container::LayoutVertical, ui);
 		myFontsContainer->setPosition(Vector2f(5, 20));
 		//myFontsContainer->setStyle("border: 2 #ffffff; fill: #00000080");
@@ -154,6 +154,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Example of custom widget instantiation
 class CustomWidgetExample
 {
 public:
@@ -187,12 +188,12 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Example on how to create a movable window.
 class DragExample
 {
 public:
 	void initialize(Container* ui)
 	{
-		// Container with examples of different font sizes
 		myDraggableContainer = Container::create(Container::LayoutVertical, ui);
 		myDraggableContainer->setPosition(Vector2f(400, 20));
 		myDraggableContainer->setStyle("border: 2 #ffffff; fill: #00000080");
@@ -230,7 +231,6 @@ class LayoutExample: public IEventListener
 public:
 	void initialize(Container* ui)
 	{
-		// Container with examples of transformation
 		myLayoutContainer = Container::create(Container::LayoutVertical, ui);
 		myLayoutContainer->setPosition(Vector2f(200, 20));
 		myLayoutContainer->setStyle("border: 2 #ffffff; fill: #00030080");
