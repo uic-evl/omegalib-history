@@ -262,6 +262,17 @@ void Container::autosize(Renderer* r)
 			w->setActualSize(maxwidth, Horizontal);
 		}
 	}
+	else
+	{
+		width = 0;
+		height = 0;
+		foreach(Widget* w, myChildren)
+		{
+			const Vector2f& p = w->getPosition();
+			if(p[0] + w->getWidth() > width) width = p[0] + w->getWidth();
+			if(p[1] + w->getHeight() > height) height = p[1] + w->getHeight();
+		}
+	}
 
 	width += myMargin * 2;
 	height += myMargin * 2;
@@ -642,13 +653,19 @@ void Container::handleEvent(const Event& evt)
 				}
 			}
 		}
+		// If this container is draggable, let the widget base class handle
+		// events (the dragging code is its handleEvent function)
+		if(isDraggable()) Widget::handleEvent(evt);
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void Container::activate()
 {
-	if(isEnabled())
+	// Note: If this container is draggable, we let it intercept the activation
+	// and will not broadcast it to children. This is to let the container
+	// handle drag events when the pointer is outside of its area.
+	if(isEnabled() && !isDraggable())
 	{
 		// Activate is rerouted by default to first enabled child. If this container has no children,
 		// mark no widget as active.
