@@ -224,6 +224,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_GETTER(Widget, getUpdateCommand)
 		PYAPI_METHOD(Widget, isStereo)
 		PYAPI_METHOD(Widget, setStereo)
+		PYAPI_METHOD(Widget, requestLayoutRefresh)
 		// Navigation
 		PYAPI_METHOD(Widget, isNavigationEnabled)
 		PYAPI_METHOD(Widget, setNavigationEnabled)
