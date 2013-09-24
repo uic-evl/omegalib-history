@@ -87,7 +87,7 @@ void Button::autosize(Renderer* r)
 	//myImage.setHeight(size[1]);
 	if(myCheckable)
 	{
-		size += Vector2f(20, 4);
+		size += Vector2f(size[1] + 10, 4);
 	}
 	else
 	{
