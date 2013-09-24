@@ -1,29 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file:
+ *	Widget is the base class of the user interface utility toolkit.
+ ******************************************************************************/
 #ifndef __WIDGET_H__
 #define __WIDGET_H__
 
@@ -35,7 +43,7 @@ namespace omegaToolkit {
 	class UiScriptCommand;
 	namespace ui {
     class Container;
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     class OTK_API Widget: public RenderableFactory, IEventListener
     {
     friend class UiManager;
@@ -74,8 +82,8 @@ namespace omegaToolkit {
         //! Gets the widget position.
         const Vector2f& getPosition() { return myPosition; }
         //! Sets the widget position
-        void setPosition(const omega::Vector2f& value) { myPosition = value; }
-        void setPosition(int value, int dimension) { myPosition[dimension] = value; }
+        void setPosition(const omega::Vector2f& value);
+        void setPosition(int value, int dimension);
 		// Convenience method to center the widget around the specified point.
 		void setCenter(const omega::Vector2f& value);
 		Vector2f getCenter();
@@ -150,6 +158,7 @@ namespace omegaToolkit {
 
         virtual void autosize(Renderer* r) {}
         virtual void updateSize(Renderer* r);
+        void requestLayoutRefresh();
 
         //! Appearance
 		//@{
@@ -181,6 +190,15 @@ namespace omegaToolkit {
 		void setUserData(void* data) { myUserData = data; }
 		void* getUserData() { return myUserData; }
 
+		bool isDraggable() { return myDraggable; }
+		void setDraggable(bool value) { myDraggable = value; }
+		//! When a widget is pinned, its position will remain fixed with 
+		//! respect to its container. Pinning widgets is useful to make 
+		//! container draggable only on a sub-section represented by the 
+		//! pinned widget.
+		bool isPinned() { return myPinned; }
+		void setPinned(bool value) { myPinned = value; }
+
 		//! Debug mode
 		//@{
         //! Gets the color used when widget debug mode is enabled.
@@ -204,7 +222,6 @@ namespace omegaToolkit {
 
         //! internal layout management
         //@{
-        void requestLayoutRefresh();
         bool needLayoutRefresh();
         void setActualSize(int value, Orientation orientation, bool force = false);
         //@}
@@ -239,7 +256,7 @@ namespace omegaToolkit {
 		Widget* myVerticalNextWidget;
 
 		// User data.
-		void * myUserData;
+		void* myUserData;
 
         omega::String myName;
 
@@ -255,9 +272,10 @@ namespace omegaToolkit {
         bool myDebugModeEnabled;
         omega::Color myDebugModeColor;
 
-        //bool myUserMoveEnabled;
-        //bool myMoving;
-        //omega::Vector2f myUserMovePosition;
+		bool myPinned;
+        bool myDraggable;
+        bool myDragging;
+        omega::Vector2f myUserMovePosition;
 
 		// When true, the widget is visible.
         bool myVisible;
@@ -301,7 +319,7 @@ namespace omegaToolkit {
 		static ui::Widget* mysWidgets[MaxWidgets];
     };
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     class OTK_API WidgetRenderable: public Renderable
     {
     public:
@@ -323,52 +341,52 @@ namespace omegaToolkit {
         RenderState* myRenderState;
     };
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline const String& Widget::getName() 
     { return myName; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setName(const String& name)
     { myName = name; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline IEventListener* Widget::getUIEventHandler() 
     { return myEventHandler; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setUIEventHandler(IEventListener* value)
     { myEventHandler = value; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setAutosize(bool value)
     { 
         myAutosize = value; 
         requestLayoutRefresh();
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline bool Widget::getAutosize()
     { return myAutosize; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline const Vector2f& Widget::getSize() 
     { return mySize; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     //inline float Widget::getSize(Orientation orientation)
     //{
     //    return mySize[orientation];
     //}
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline float Widget::getWidth()
     { return mySize[0]; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline float Widget::getHeight() 
     { return mySize[1]; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setSize(const omega::Vector2f& value) 
     { 
 		if(value != mySize)
@@ -380,7 +398,7 @@ namespace omegaToolkit {
 		}
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setWidth(float value) 
     { 
         requestLayoutRefresh(); 
@@ -389,7 +407,7 @@ namespace omegaToolkit {
         myMaximumSize[0] = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setHeight(float value) 
     { 
         requestLayoutRefresh(); 
@@ -398,81 +416,81 @@ namespace omegaToolkit {
         myMaximumSize[1] = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline const Vector2f& Widget::getMinimumSize() 
     { return myMinimumSize; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline const Vector2f& Widget::getMaximumSize() 
     { return myMaximumSize; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setMinimumSize(const Vector2f& value) 
     {
         requestLayoutRefresh(); 
         myMinimumSize = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline int Widget::getMinimumWidth() 
     { return myMinimumSize[0]; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline int Widget::getMinimumHeight() 
     { return myMinimumSize[1]; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setMaximumSize(const Vector2f& value) 
     {
         requestLayoutRefresh(); 
         myMaximumSize = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline int Widget::getMaximumWidth() 
     { return myMaximumSize[0]; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline int Widget::getMaximumHeight() 
     { return myMaximumSize[1]; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setMinimumWidth(float value) 
     { 
         requestLayoutRefresh(); 
         myMinimumSize[0] = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setMinimumHeight(float value) 
     {
         requestLayoutRefresh(); 
         myMinimumSize[1] = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setMaximumWidth(float value) 
     { 
         requestLayoutRefresh(); 
         myMaximumSize[0] = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setMaximumHeight(float value) 
     { 
         requestLayoutRefresh(); 
         myMaximumSize[1] = value; 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline bool Widget::isVisible() 
     { return myVisible; }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     inline void Widget::setVisible(bool value) 
     { myVisible = value; }
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
 	inline void Widget::setActive(bool value) 
 	{
 		myActive = value; 
@@ -484,7 +502,46 @@ namespace omegaToolkit {
 		//ofmsg("Widget %1% active: %2%", %myId %value);
 	} 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
+    inline void Widget::setPosition(const omega::Vector2f& value) 
+	{ 
+		if(myPinned)
+		{
+			if(myContainer != NULL)
+			{
+				((Widget*)myContainer)->setPosition(
+					((Widget*)myContainer)->getPosition() + 
+					value - myPosition);
+			}
+		}
+		else 
+		{
+			myPosition = value; 
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+    inline void Widget::setPosition(int value, int dimension) 
+	{ 
+		if(myPinned)
+		{
+			if(myContainer != NULL)
+			{
+				if(myContainer != NULL)
+				{
+					((Widget*)myContainer)->setPosition(
+						((Widget*)myContainer)->getPosition()[dimension] + 
+						value - myPosition[dimension], dimension);
+				}
+			}
+		}
+		else
+		{
+			myPosition[dimension] = value; 
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
 	// NOTE: Widget::getSource is only used by UiScriptCommand. See if there is a way to get rid of this.
 	template<typename W> 
 	inline W* Widget::getSource(const Event& evt)

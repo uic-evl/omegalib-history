@@ -181,6 +181,10 @@ void LabelRenderable::drawContent(const DrawContext& context)
 		{
 			myFont = getRenderer()->getDefaultFont();
 		}
+		// We just set the font: tell our owner that the layout needs to be
+		// refreshed (font size may have changed).
+		myOwner->requestLayoutRefresh();
+
 	}
 
 	if(myFont)

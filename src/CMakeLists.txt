@@ -89,9 +89,14 @@ include_directories(
 if(NOT APPLE)
 	add_subdirectory(3rdparty/glew)
 endif(NOT APPLE)
+
+# Add several example applications
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/ohello ${CMAKE_BINARY_DIR}/examples/ohello)
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/ohello2 ${CMAKE_BINARY_DIR}/examples/ohello2)
+add_subdirectory(${CMAKE_SOURCE_DIR}/examples/ohelloWidgets ${CMAKE_BINARY_DIR}/examples/ohelloWidgets)
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/omegaSound ${CMAKE_BINARY_DIR}/examples/omegaSound)
+
+# Add the omegaToolkit library
 add_subdirectory(omegaToolkit)
 
 # OSX uses its own glut, do not compile it internally (Should we do the same under linux?)
@@ -155,9 +160,12 @@ endif()
 add_subdirectory(${CMAKE_SOURCE_DIR}/modules ${CMAKE_BINARY_DIR}/modules)
 
 configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/OmegalibConfig.cmake.in ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake)
+
+# Windows-specific config operations
 if(WIN32)
+	# Set up the MakeRelease script. It will be used to generate release packages on windows
 	configure_file(${CMAKE_SOURCE_DIR}/MakeRelease.bat.in ${CMAKE_BINARY_DIR}/MakeRelease.bat)
-	# Copy WinSparkle dll to output folder
+	# Copy The WinSparkle dll to output folder. WInsparkle is used to notify users of omegalib updates.
 	if(OMEGA_ENABLE_AUTO_UPDATE)
 		configure_file(${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG} COPYONLY)
 		configure_file(${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} COPYONLY)
