@@ -159,7 +159,11 @@ endif()
 # Add the modules subdirectory
 add_subdirectory(${CMAKE_SOURCE_DIR}/modules ${CMAKE_BINARY_DIR}/modules)
 
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/OmegalibConfig.cmake.in ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake)
+# Generate the Omegalib config fule used by external applications to find omegalib.
+# The @ONLY option is to substitute only variables in form @VAR@. This is because
+# OmegalibConfig.cmake uses ${VAR} variables that will be substituted by the
+# external application.
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/OmegalibConfig.cmake.in ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake @ONLY)
 
 # Windows-specific config operations
 if(WIN32)
@@ -171,5 +175,35 @@ if(WIN32)
 		configure_file(${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} COPYONLY)
 	endif()
 endif()
+
+###############################################################################
+# Install commands
+install(DIRECTORY ../include DESTINATION omegalib)
+install(DIRECTORY ../CMakeModules DESTINATION omegalib)
+
+# omicron
+install(DIRECTORY ../omicron/CMakeModules DESTINATION omegalib/omicron)
+install(DIRECTORY ../omicron/include DESTINATION omegalib)
+install(DIRECTORY ../omicron/external/include DESTINATION omegalib/external)
+install(FILES ${CMAKE_BINARY_DIR}/omicron/omicron/UseOmicron.cmake DESTINATION omegalib/omicron/omicron)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/omicron/omicron/include DESTINATION omegalib/omicron/omicron)
+
+install(DIRECTORY ${CMAKE_BINARY_DIR}/bin DESTINATION omegalib)
+# osgworks
+install(DIRECTORY ${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib/ DESTINATION omegalib/lib)
+
+# data
+install(DIRECTORY ../data/cubemaps DESTINATION omegalib)
+install(DIRECTORY ../data/cyclops DESTINATION omegalib)
+install(DIRECTORY ../data/evl DESTINATION omegalib)
+install(DIRECTORY ../data/fonts DESTINATION omegalib)
+install(DIRECTORY ../data/menu_sounds DESTINATION omegalib)
+install(DIRECTORY ../data/porthole DESTINATION omegalib)
+install(DIRECTORY ../data/system DESTINATION omegalib)
+install(FILES ../data/default.cfg DESTINATION omegalib)
+install(FILES ../data/default_init.py DESTINATION omegalib)
+install(FILES ../data/omegalib-transparent-white.png DESTINATION omegalib)
+install(FILES ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake DESTINATION omegalib)
+install(FILES ${CMAKE_BINARY_DIR}/include/omegaConfig.h DESTINATION omegalib/include)
 
 

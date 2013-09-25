@@ -277,3 +277,4 @@ include_directories(${CMAKE_BINARY_DIR}/omicron/omicron/include/boost)
 
 ###############################################################################
 configure_file(omegaConfig.h.in ${CMAKE_BINARY_DIR}/include/omegaConfig.h)
+

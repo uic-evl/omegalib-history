@@ -26,6 +26,30 @@
 ###################################################################################################
 find_package(OpenGL REQUIRED)
 
+# Detect whether we are setting up omegalib for a build or an 
+# install environment. Build environments always have a cmake 
+# cache file, so look for it.
+set(INSTALL_ENVIRONMENT true)
+if(EXISTS ${Omegalib_DIR}/CMakeCache.txt)
+	message(STATUS "Using an omegalib BUILD environment")
+else()
+	message(STATUS "Using an omegalib INSTALL environment")
+	# Adjust several config variables to work with an install environment
+
+	# fix OpenSceneGraph libs
+	string(REPLACE ${OMEGA_BINARY_DIR} ${Omegalib_DIR} OSG_LIBS "${OSG_LIBS}")
+	# fix osgWorks libs	
+	string(REPLACE ${Omegalib_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib ${Omegalib_DIR}/lib OSG_LIBS "${OSG_LIBS}")
+	#message("${OSG_LIBS}")
+	# fix osg include dir
+	string(REPLACE ${OMEGA_BINARY_DIR} ${Omegalib_DIR} OSG_INCLUDES "${OSG_INCLUDES}")
+	#message("${OSG_INCLUDES}")
+
+	#Finally, replace OMEGA_BINARY_DIR with Omegalib_DIR
+	set(OMEGA_BINARY_DIR ${Omegalib_DIR})
+	set(OMEGA_SOURCE_DIR ${Omegalib_DIR})
+endif()
+
 if(OMEGA_BINARY_DIR)
 	set(OMICRON_DEFAULT_BINARY_DIR ${OMEGA_BINARY_DIR}/omicron/omicron)
 	#set(OMICRON_BIN_DIR ${OMEGA_BINARY_DIR}/bin)
