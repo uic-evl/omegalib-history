@@ -6,6 +6,7 @@ find_package(OpenGL REQUIRED)
 set(INSTALL_ENVIRONMENT true)
 if(EXISTS ${Omegalib_DIR}/CMakeCache.txt)
 	message(STATUS "Using an omegalib BUILD environment")
+	set(INSTALL_ENVIRONMENT false)
 else()
 	message(STATUS "Using an omegalib INSTALL environment")
 	# Adjust several config variables to work with an install environment
@@ -36,12 +37,24 @@ if(OMEGA_BINARY_DIR)
 	# as include paths for your compiler.
 	set(OMEGA_INCLUDE_DIRS ${OMICRON_INCLUDE_DIRS} ${OMEGA_BINARY_DIR}/include ${OMEGA_SOURCE_DIR}/include ${OMEGA_SOURCE_DIR}/external/include ${OSG_INCLUDES} ${PYTHON_INCLUDES})
 
-	set(OMEGA_LIB_DIR_RELEASE ${OMEGA_BINARY_DIR}/lib/release)
-	set(OMEGA_LIB_DIR_DEBUG ${OMEGA_BINARY_DIR}/lib/debug)
+	# No debug libs in an install environment
+	if(INSTALL_ENVIRONMENT)
+		set(OMEGA_LIB_DIR_RELEASE ${OMEGA_BINARY_DIR}/lib)
+		set(OMEGA_LIB_DIR_DEBUG ${OMEGA_BINARY_DIR}/lib)
+	else()
+		set(OMEGA_LIB_DIR_RELEASE ${OMEGA_BINARY_DIR}/lib/release)
+		set(OMEGA_LIB_DIR_DEBUG ${OMEGA_BINARY_DIR}/lib/debug)
+	endif()
 	set(OMEGA_LIB_DIR ${OMEGA_BINARY_DIR}/lib)
 
-	set(OMEGA_BIN_DIR_RELEASE ${OMEGA_BINARY_DIR}/bin/release)
-	set(OMEGA_BIN_DIR_DEBUG ${OMEGA_BINARY_DIR}/bin/debug)
+	# No debug binaries in an install environment
+	if(INSTALL_ENVIRONMENT)
+		set(OMEGA_BIN_DIR_RELEASE ${OMEGA_BINARY_DIR}/bin)
+		set(OMEGA_BIN_DIR_DEBUG ${OMEGA_BINARY_DIR}/bin)
+	else()
+		set(OMEGA_BIN_DIR_RELEASE ${OMEGA_BINARY_DIR}/bin/release)
+		set(OMEGA_BIN_DIR_DEBUG ${OMEGA_BINARY_DIR}/bin/debug)
+	endif()
 	set(OMEGA_BIN_DIR ${OMEGA_BINARY_DIR}/bin)
 
 	###################################################################################################

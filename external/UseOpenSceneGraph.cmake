@@ -128,5 +128,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/UseOsgWorks.cmake)
 set(OSG_INCLUDES ${OSG_INCLUDES} ${OSGWORKS_INCLUDES})
 set(OSG_LIBS ${OSG_LIBS} ${OSGWORKS_LIBS})
 
-install(DIRECTORY ${EXTLIB_DIR} DESTINATION omegalib)
+# on windows, copy a subset of the OpenSceneGraph package, to trim some of the fat.
+if(WIN32)
+	install(DIRECTORY ${EXTLIB_DIR}/include DESTINATION omegalib/${EXTLIB_NAME})
+	install(DIRECTORY ${EXTLIB_DIR}/lib/release DESTINATION omegalib/${EXTLIB_NAME}/lib)
+else()
+	install(DIRECTORY ${EXTLIB_DIR} DESTINATION omegalib)
+endif()
 

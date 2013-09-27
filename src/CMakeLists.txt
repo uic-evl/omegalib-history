@@ -5,7 +5,7 @@ include(UsePch)
 
 include(${OmegaLib_SOURCE_DIR}/external/UseOmicron.cmake)
 
-set(OMEGA_HARDCODE_DATA_PATHS true CACHE BOOL "When set to true, the data and application paths will be hardcoded in macros and will be used default for file lookups")
+set(OMEGA_HARDCODE_DATA_PATHS false CACHE BOOL "When set to true, the data and application paths will be hardcoded in macros and will be used default for file lookups")
 
 ###################################################################################################
 # Visual Leak Detector Support
@@ -188,7 +188,13 @@ install(DIRECTORY ../omicron/external/include DESTINATION omegalib/external)
 install(FILES ${CMAKE_BINARY_DIR}/omicron/omicron/UseOmicron.cmake DESTINATION omegalib/omicron/omicron)
 install(DIRECTORY ${CMAKE_BINARY_DIR}/omicron/omicron/include DESTINATION omegalib/omicron/omicron)
 
-install(DIRECTORY ${CMAKE_BINARY_DIR}/bin DESTINATION omegalib)
+if(WIN32)
+	# on windows, install only the release dir, and also copy the export libs.
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/release/ DESTINATION omegalib/bin)
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/release/ DESTINATION omegalib/lib FILES_MATCHING PATTERN "*.lib")
+else()
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/bin DESTINATION omegalib)
+endif()
 # osgworks
 install(DIRECTORY ${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib/ DESTINATION omegalib/lib)
 
