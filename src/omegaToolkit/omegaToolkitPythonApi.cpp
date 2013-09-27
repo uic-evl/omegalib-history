@@ -249,6 +249,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_METHOD(Container, removeChild)
 		PYAPI_REF_GETTER(Container, getChildByIndex)
 		PYAPI_REF_GETTER(Container, getChildByName)
+		PYAPI_METHOD(Container, getNumChildren)
 		// Layout
 		PYAPI_METHOD(Container, setLayout)
 		PYAPI_GETTER(Container, getLayout)
