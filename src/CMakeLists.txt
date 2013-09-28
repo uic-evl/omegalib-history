@@ -199,6 +199,7 @@ endif()
 install(DIRECTORY ${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib/ DESTINATION omegalib/lib)
 
 # data
+install(DIRECTORY ../modules DESTINATION omegalib)
 install(DIRECTORY ../data/cubemaps DESTINATION omegalib)
 install(DIRECTORY ../data/cyclops DESTINATION omegalib)
 install(DIRECTORY ../data/evl DESTINATION omegalib)

@@ -248,6 +248,17 @@ void PythonInterpreter::initialize(const char* programName)
 	addPythonPath(OMEGA_APPROOT_DIRECTORY);
 #endif
 
+	// If we have an environment variable OMEGA_HOME, we use the modules directory
+	// from there as a module search path.
+	String dataPath = "";
+	char* omegaHome = getenv("OMEGA_HOME");
+	if(omegaHome != NULL) 
+	{
+		dataPath = ostr("%1%/modules", %omegaHome);
+		addPythonPath(dataPath.c_str());
+	}
+
+
 	if(myShellEnabled && SystemManager::instance()->isMaster())
 	{
 		omsg("PythonInterpreter: starting interactive shell thread.");
