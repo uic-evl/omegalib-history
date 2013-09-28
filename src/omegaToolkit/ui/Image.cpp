@@ -37,6 +37,8 @@
 #include "omega/DrawInterface.h"
 #include "omegaToolkit/ui/Container.h"
 
+#include "omega/glheaders.h"
+
 using namespace omega;
 using namespace omegaToolkit;
 using namespace omegaToolkit::ui;
@@ -58,6 +60,9 @@ Image::Image(Engine* srv):
 	// By default images are set to not enabled, and won't take part in navigation.
 	setEnabled(false);
 	setNavigationEnabled(false);
+
+	// Set the default shader.
+	setShaderName("ui/widget-image");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,17 +102,8 @@ void Image::flipY(bool value)
 ///////////////////////////////////////////////////////////////////////////////
 void ImageRenderable::refresh()
 {
-	//GpuManager* gpu = getClient()->getGpuContext()->getGpu();
-	//if(myOwner->myData != NULL)
-	//{
-	//	PixelData* pd = myOwner->myData;
-	//	if(myTexture == NULL)
-	//	{
-	//		myTexture = new Texture(getClient()->getGpuContext());
-	//		myTexture->initialize(pd->getWidth(), pd->getHeight());
-	//	}
-	//	myTexture->writePixels(pd);
-	//}
+	WidgetRenderable::refresh();
+	myTextureUniform = glGetUniformLocation(myShaderProgram, "unif_Texture");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,6 +122,11 @@ void ImageRenderable::drawContent(const DrawContext& context)
 		DrawInterface* di = getRenderer();
 		di->fillTexture(tex);
 		di->textureRegion(0, 0, 1, 1);
+
+		if(myTextureUniform != 0)
+		{
+			glUniform1i(myTextureUniform, 0);
+		}
 
 		if(myOwner->isStereo())
 		{

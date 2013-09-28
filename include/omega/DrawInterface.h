@@ -83,6 +83,10 @@ namespace omega {
 		//@{
 		GLuint makeShaderFromSource(const char* source, ShaderType Type);
 		GLuint createProgram(GLuint vertextShader, GLuint fragmentShader);
+		//! Returns a gpu program by name. If the program does not exists, it 
+		//! attempts to create it using the passed vertex and fragment shader
+		//! file names as sources.
+		GLuint getOrCreateProgram(const String& name, const String& vertexShaderFile, const String& fragmentShaderFile);
 		//@}
 
 		//! Drawing control
@@ -131,18 +135,16 @@ namespace omega {
 
 	private:
 		bool myDrawing;
-		//Texture* myTargetTexture;
 		Dictionary<String, Ref<Font> > myFonts;
 		Font* myDefaultFont;
 		Lock myLock;
-
-		//Color myColor;
 
 		const DrawContext* myContext;
 
 		Brush myBrush;
 
-		//bool myForceDiffuseColor;
+		// Program cache
+		Dictionary<String, GLuint> myPrograms;
 	};
 
 	///////////////////////////////////////////////////////////////////////////

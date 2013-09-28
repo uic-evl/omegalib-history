@@ -54,6 +54,7 @@ namespace omegaToolkit {
 		enum Layer { Back, Middle, Front, NumLayers };
 		enum BlendMode { BlendInherit, BlendNormal, BlendAdditive, BlendDisabled };
 		static const int MaxWidgets = 16384;
+
     public:
         Widget(Engine* server);
         virtual ~Widget();
@@ -168,11 +169,24 @@ namespace omegaToolkit {
 		void setScale(float value) { myScale = value; }
 		float getScale() { return myScale; }
 		void setAlpha(float value) { myAlpha = value; }
-		float getAlpha() { return myAlpha; }
+		float getAlpha();
 		void setBlendMode(BlendMode value) { myBlendMode = value; }
 		BlendMode getBlendMode() { return myBlendMode; }
 		void setFillColor(const Color& c) { myFillColor = c; }
 		void setFillEnabled(bool value) { myFillEnabled = value; }
+		//! Enables or disables shaders for this widget. Shaders are enabled
+		//! by default and are required to correctly render some widget features
+		//! like correct transparency. The shader used by the widget can be 
+		//! replaced using the setShaderName method.
+		void setShaderEnabled(bool value) { myShaderEnabled = value; }
+		bool isShaderEnabled() { return myShaderEnabled; }
+		//! Sets the name of the shader used by this widget. The widget will look
+		//! for a vertex and a fragment shader with this name. By default, widgets
+		//! use a shader named 'ui/widget-shader'. The default shaders will be
+		//! 'ui/widget-shader.vert' and 'ui/widget-shader.frag'. The shader
+		//! sources can be found in the omegalib data directory.
+		void setShaderName(const String& name);
+		const String& getShaderName() { return myShaderName; }
 		//@}
 
 		Layer getLayer() { return myLayer; }
@@ -312,6 +326,10 @@ namespace omegaToolkit {
 			int width;
 		};
 
+		// Shader data
+		bool myShaderEnabled;
+		String myShaderName;
+
 		String myUpdateCommand;
 
 		BorderStyle myBorders[4];
@@ -323,10 +341,13 @@ namespace omegaToolkit {
     class OTK_API WidgetRenderable: public Renderable
     {
     public:
-        WidgetRenderable(Widget* owner): myOwner(owner) {}
+        WidgetRenderable(Widget* owner): 
+		  myOwner(owner), 
+			  myShaderProgram(0) {}
+
         virtual void draw(const DrawContext& context);
         virtual void drawContent(const DrawContext& context);
-
+		virtual void refresh();
     protected:
         virtual void preDraw();
         virtual void postDraw();
@@ -334,11 +355,14 @@ namespace omegaToolkit {
 		void popDrawAttributes();
 
         //! Gets the current renderstate (accessible inside drawContent)
-        RenderState* getRenderState() { return myRenderState; }
+        //RenderState* getRenderState() { return myRenderState; }
+
+		GLuint myShaderProgram;
+		GLuint myAlphaUniform;
 
     private:
         Widget* myOwner;
-        RenderState* myRenderState;
+        //RenderState* myRenderState;
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -539,6 +563,14 @@ namespace omegaToolkit {
 		{
 			myPosition[dimension] = value; 
 		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void Widget::setShaderName(const String& name)
+	{
+		myShaderName = name;
+		// Refresh the widget, so its renderables will load the new shader.
+		refresh();
 	}
 
 	///////////////////////////////////////////////////////////////////////////

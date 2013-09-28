@@ -83,7 +83,8 @@ Widget::Widget(Engine* server):
 	myUserData(NULL),
 	myDraggable(false),
 	myDragging(false),
-	myPinned(false)
+	myPinned(false),
+	myShaderEnabled(true)
 {
 	myId = mysNameGenerator.getNext();
 	myName = mysNameGenerator.generate();
@@ -92,6 +93,9 @@ Widget::Widget(Engine* server):
 	memset(myBorders, 0, sizeof(BorderStyle) * 4);
 
 	mysWidgets[myId] = this;
+
+	// Set the default shader.
+	setShaderName("ui/widget-base");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,6 +107,14 @@ Widget::~Widget()
 	}
 	ofmsg("~Widget %1%", %myName);
 	mysWidgets[myId] = NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+float Widget::getAlpha() 
+{ 
+	// Alpha is modulated by alpha from container of this widget.
+	if(myContainer == NULL) return myAlpha;
+	return myAlpha * myContainer->getAlpha(); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,6 +157,9 @@ void Widget::update(const omega::UpdateContext& context)
 		//ofmsg("Initializing Widget: %1%", %getName());
 		initialize(myServer);
 		myInitialized = true;
+		// Force a refresh, to make sure all renderables end up initialized
+		// correctly.
+		refresh();
 	}
 	if(myUpdateCommand.size() > 0)
 	{
@@ -535,6 +550,32 @@ void Widget::updateStyle()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void WidgetRenderable::refresh()
+{
+	if(myOwner->myShaderEnabled)
+	{
+		String progName = myOwner->getShaderName();
+		String vsName = progName + ".vert";
+		String fsName = progName + ".frag";
+		myShaderProgram = getRenderer()->getOrCreateProgram(progName, vsName, fsName);
+		if(oglError)
+		{
+			myShaderProgram = 0;
+			return;
+		}
+		if(myShaderProgram != 0)
+		{
+			myAlphaUniform = glGetUniformLocation(myShaderProgram, "unif_Alpha");
+			if(oglError)
+			{
+				myShaderProgram = 0;
+				return;
+			}
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::preDraw()
 {
 	glPushMatrix();
@@ -565,6 +606,14 @@ void WidgetRenderable::postDraw()
 ///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::pushDrawAttributes()
 {
+	if(myShaderProgram != 0)
+	{
+		glUseProgram(myShaderProgram);
+		glUniform1f(myAlphaUniform, myOwner->getAlpha());
+	}
+	// Set default color to white.
+	glColor4ub(255,255,255,255);
+
 	Widget::BlendMode bm = myOwner->getBlendMode();
 	if(bm != Widget::BlendInherit)
 	{
@@ -584,7 +633,6 @@ void WidgetRenderable::pushDrawAttributes()
 			{
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
-			glColor4f(1.0f, 1.0f, 1.0f, myOwner->getAlpha());
 		}
 	}
 }
@@ -592,6 +640,10 @@ void WidgetRenderable::pushDrawAttributes()
 ///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::popDrawAttributes()
 {
+	if(myShaderProgram != 0)
+	{
+		glUseProgram(0);
+	}
 	if(myOwner->getBlendMode() != Widget::BlendInherit)
 	{
 		glDisable(GL_BLEND);
