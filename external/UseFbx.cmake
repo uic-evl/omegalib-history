@@ -25,7 +25,7 @@ endif()
 set(FBX_DEFAULT_ROOT ${EXTLIB_DIR})
 
 # Setup the Fbx Sdk
-set(FBX_ROOT ${FBX_DEFAULT_ROOT} CACHE PATH "The Fbx SDK Root Directory")
+set(FBX_ROOT ${FBX_DEFAULT_ROOT} )
 
 set(FBX_INCLUDE_DIR ${FBX_ROOT}/include)
 include_directories(${FBX_INCLUDE_DIR})
