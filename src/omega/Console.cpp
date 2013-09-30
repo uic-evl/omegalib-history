@@ -185,7 +185,7 @@ void ConsoleRenderPass::render(Renderer* renderer, const DrawContext& context)
 {
 	if(context.task == DrawContext::OverlayDrawTask && 
 		context.eye == DrawContext::EyeCyclop &&
-		myOwner->getDrawFags() != Console::DrawNone)
+		myOwner->getDrawFlags() != Console::DrawNone)
 	{
 		DrawInterface* di = getClient()->getRenderer();
 		di->beginDraw2D(context);
@@ -203,7 +203,7 @@ void ConsoleRenderPass::render(Renderer* renderer, const DrawContext& context)
 		float lineHeight = fi.size + 4;
 		float lineWidth = fi.size * 100; //SystemManager::instance()->getDisplaySystem()->getCanvasSize().x(); 
 
-		if(myOwner->getDrawFags() & Console::DrawLog)
+		if(myOwner->getDrawFlags() & Console::DrawLog)
 		{
 			drawLog(
 				Vector2f(x, y), 
@@ -211,9 +211,9 @@ void ConsoleRenderPass::render(Renderer* renderer, const DrawContext& context)
 				context);
 		}
 
-		if(myOwner->getDrawFags() & Console::DrawStats)
+		if(myOwner->getDrawFlags() & Console::DrawStats)
 		{
-			if(myOwner->getDrawFags() & Console::DrawLog) y += lineHeight * myOwner->getNumLines() + 10;
+			if(myOwner->getDrawFlags() & Console::DrawLog) y += lineHeight * myOwner->getNumLines() + 10;
 			drawStats(Vector2f(x, y), Vector2f(lineWidth, 100), context);
 		}
 
