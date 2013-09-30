@@ -117,21 +117,24 @@ if(OMEGA_OS_WIN)
 	
 
 elseif(OMEGA_OS_LINUX)
-    foreach( C ${OSG_COMPONENTS} )
+	# Linux
+	foreach( C ${OSG_COMPONENTS} )
 			set(${C}_LIBRARY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/osg/lib${C}.so)
 			set(${C}_LIBRARY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/osg/lib${C}d.so)
 		#set(${C}_INCLUDE_DIR ${OSG_INCLUDES})
 		set(OSG_LIBS ${OSG_LIBS} optimized ${${C}_LIBRARY} debug ${${C}_LIBRARY_DEBUG})
 	endforeach()
 
-	# if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		# file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-		# file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-	# else()
-		# file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-		# file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-	# endif()
+	# On linux the .so files do not need to be copied to the bin folder
+	#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	#	file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	#	file(COPY ${EXTLIB_DIR}/lib/debug/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	#else(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	#	file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	#	file(COPY ${EXTLIB_DIR}/lib/release/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	#endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
+	# OSX
 	foreach( C ${OSG_COMPONENTS} )
 		set(${C}_LIBRARY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/osg/lib${C}.dylib)
 		set(${C}_LIBRARY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/osg/lib${C}d.dylib)
@@ -147,3 +150,12 @@ include(${CMAKE_CURRENT_LIST_DIR}/UseOsgWorks.cmake)
 # we consider osg and osgWorks as a single package.
 set(OSG_INCLUDES ${OSG_INCLUDES} ${OSGWORKS_INCLUDES})
 set(OSG_LIBS ${OSG_LIBS} ${OSGWORKS_LIBS})
+
+# on windows, copy a subset of the OpenSceneGraph package, to trim some of the fat.
+if(WIN32)
+	install(DIRECTORY ${EXTLIB_DIR}/include DESTINATION omegalib/${EXTLIB_NAME})
+	install(DIRECTORY ${EXTLIB_DIR}/lib/release DESTINATION omegalib/${EXTLIB_NAME}/lib)
+else()
+	install(DIRECTORY ${EXTLIB_DIR} DESTINATION omegalib)
+endif()
+

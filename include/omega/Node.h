@@ -32,6 +32,9 @@
  * Original code taken from OGRE
  * Copyright (c) 2000-2009 Torus Knot Software Ltd
  *  For the latest info, see http://www.ogre3d.org/
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	A generic node in a transformation hierarchy
  ******************************************************************************/
 #ifndef _Node_H__
 #define _Node_H__

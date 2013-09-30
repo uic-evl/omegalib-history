@@ -1,29 +1,37 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file:
+ *	Widget is the base class of the user interface utility toolkit.
+ ******************************************************************************/
 #include "omegaToolkit/UiModule.h"
 #include "omegaToolkit/ui/Widget.h"
 #include "omegaToolkit/ui/Container.h"
@@ -45,7 +53,7 @@ NameGenerator Widget::mysNameGenerator("Widget_");
 // Table of widgets by Id (used by getSource)
 ui::Widget* Widget::mysWidgets[Widget::MaxWidgets];
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Widget::Widget(Engine* server):
 	myLayer(Middle),
 	myStereo(false),
@@ -60,8 +68,6 @@ Widget::Widget(Engine* server):
 	myDebugModeEnabled(false),
 	myAutosize(false),
 	myRotation(0),
-	//myUserMoveEnabled(false),
-	//myMoving(false),
 	myMaximumSize(FLT_MAX, FLT_MAX),
 	myMinimumSize(0, 0),
 	myActive(false),
@@ -74,7 +80,11 @@ Widget::Widget(Engine* server):
 	myBlendMode(BlendInherit),
 	myAlpha(1.0f),
 	myScale(1.0f),
-	myUserData(NULL)
+	myUserData(NULL),
+	myDraggable(false),
+	myDragging(false),
+	myPinned(false),
+	myShaderEnabled(true)
 {
 	myId = mysNameGenerator.getNext();
 	myName = mysNameGenerator.generate();
@@ -83,9 +93,12 @@ Widget::Widget(Engine* server):
 	memset(myBorders, 0, sizeof(BorderStyle) * 4);
 
 	mysWidgets[myId] = this;
+
+	// Set the default shader.
+	setShaderName("ui/widget-base");
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Widget::~Widget()
 {
 	if(myInitialized)
@@ -96,19 +109,27 @@ Widget::~Widget()
 	mysWidgets[myId] = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+float Widget::getAlpha() 
+{ 
+	// Alpha is modulated by alpha from container of this widget.
+	if(myContainer == NULL) return myAlpha;
+	return myAlpha * myContainer->getAlpha(); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void Widget::setCenter(const omega::Vector2f& value)
 {
 	setPosition(value - mySize / 2);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Vector2f Widget::getCenter()
 {
 	return myPosition + mySize / 2;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::setUIEventCommand(const String& command)
 {
 	if(myUiEventCommand == NULL) myUiEventCommand = new UiScriptCommand();
@@ -116,19 +137,19 @@ void Widget::setUIEventCommand(const String& command)
 	myEventHandler = myUiEventCommand;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Widget::isGamepadInteractionEnabled()
 {
 	return UiModule::instance()->getGamepadInteractionEnabled();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Widget::isPointerInteractionEnabled()
 {
 	return UiModule::instance()->getPointerInteractionEnabled();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::update(const omega::UpdateContext& context) 
 {
 	if(!myInitialized)
@@ -136,6 +157,9 @@ void Widget::update(const omega::UpdateContext& context)
 		//ofmsg("Initializing Widget: %1%", %getName());
 		initialize(myServer);
 		myInitialized = true;
+		// Force a refresh, to make sure all renderables end up initialized
+		// correctly.
+		refresh();
 	}
 	if(myUpdateCommand.size() > 0)
 	{
@@ -144,7 +168,7 @@ void Widget::update(const omega::UpdateContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::handleEvent(const Event& evt) 
 {
 	UiModule* ui = UiModule::instance();
@@ -221,6 +245,25 @@ void Widget::handleEvent(const Event& evt)
 			//	}
 			//}
 		}
+		// NOTE: Drag move and end does not depend on the pointer actually being on
+		// the controller
+		if(myDraggable)
+		{
+			if(evt.getType() == Event::Move && myDragging)
+			{
+				Vector2f delta = pos2d - myUserMovePosition;
+				myUserMovePosition = pos2d;
+
+				setPosition(myPosition + delta);
+				evt.setProcessed();
+			}
+			else if(myDragging && evt.getType() == Event::Up)
+			{
+				myDragging = false;
+				myActive = false;
+				evt.setProcessed();
+			}
+		}
 		if(simpleHitTest(transformPoint(pos2d)))
 		{
 			if(!evt.isProcessed())
@@ -240,61 +283,47 @@ void Widget::handleEvent(const Event& evt)
 					dispatchUIEvent(evt);
 				}
 
-				//if(myUserMoveEnabled)
-				//{
-				//	if(evt.getType() == Event::Down)
-				//	{
-				//		myUserMovePosition = pos2d;
-				//		evt.setProcessed();
-				//		myMoving = true;
-				//		myActive = true;
-				//	}
-				//	else if(evt.getType() == Event::Move && myMoving)
-				//	{
-				//		Vector2f delta = pos2d - myUserMovePosition;
-				//		myUserMovePosition = pos2d;
-
-				//		myPosition += delta;
-				//		evt.setProcessed();
-				//	}
-				//	else if(myMoving && evt.getType() == Event::Up)
-				//	{
-				//		myMoving = false;
-				//		myActive = false;
-				//		evt.setProcessed();
-				//	}
-				//}
+				if(myDraggable)
+				{
+					if(evt.getType() == Event::Down)
+					{
+						myUserMovePosition = pos2d;
+						evt.setProcessed();
+						myDragging = true;
+						myActive = true;
+					}
+				}
 			}
 		}
 		else
 		{
-			//myMoving = false;
+			//myDragging = false;
 			//myActive = false;
 		}
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::clearSizeConstaints()
 {
 	myMaximumSize = Vector2f(FLT_MAX, FLT_MAX);
 	myMinimumSize = Vector2f(0, 0);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::setContainer(Container* value) 
 { 
 	//oassert(value && value->getManager() == myManager);
 	myContainer = value; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Widget::hitTest(const Vector2f& point)
 {
 	return simpleHitTest(transformPoint(point));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Widget::simpleHitTest(const Vector2f& point)
 {
 	float x1 = 0; //myPosition[0];
@@ -306,7 +335,7 @@ bool Widget::simpleHitTest(const Vector2f& point)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Widget::simpleHitTest(const Vector2f& point, const Vector2f& pos, const Vector2f& size)
 {
 	float x1 = pos[0];
@@ -318,7 +347,7 @@ bool Widget::simpleHitTest(const Vector2f& point, const Vector2f& pos, const Vec
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Vector2f Widget::transformPoint(const Vector2f& point)
 {
 	Vector2f res = point;
@@ -343,7 +372,7 @@ Vector2f Widget::transformPoint(const Vector2f& point)
 	return res;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::dispatchUIEvent(const Event& evt)
 {
 	if(myEventHandler != NULL) 
@@ -362,7 +391,7 @@ void Widget::dispatchUIEvent(const Event& evt)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::playMenuScrollSound()
 {
 	if(getEngine()->getSoundEnvironment() != NULL)
@@ -380,7 +409,7 @@ void Widget::playMenuScrollSound()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::requestLayoutRefresh() 
 { 
 	myNeedLayoutRefresh = true; 
@@ -388,25 +417,25 @@ void Widget::requestLayoutRefresh()
 		myContainer->requestLayoutRefresh(); 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Widget::needLayoutRefresh() 
 { 
 	return myNeedLayoutRefresh; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::layout()
 { 
 	myNeedLayoutRefresh = false; 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::updateSize(Renderer* r)
 {
 	if(myAutosize && needLayoutRefresh()) autosize(r);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::setActualSize(int value, Orientation orientation, bool force) 
 {
 	if(mySize[orientation] != value)
@@ -421,26 +450,26 @@ void Widget::setActualSize(int value, Orientation orientation, bool force)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::setNavigationEnabled(bool value)
 {
 	myNavigationEnabled = value;
 	if(myContainer != NULL) myContainer->updateChildrenNavigation();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int Widget::getId()
 {
 	return myId;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Renderable* Widget::createRenderable()
 {
 	return new WidgetRenderable(this);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::setStyle(const String& style)
 {
 	String nnstyle = StringUtils::replaceAll(style, "\n", "");
@@ -460,7 +489,7 @@ void Widget::setStyle(const String& style)
 	updateStyle();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 String Widget::getStyleValue(const String& key, const String& defaultValue)
 {
 	Dictionary<String, String>::iterator it = myStyleDictionary.find(key);
@@ -468,7 +497,7 @@ String Widget::getStyleValue(const String& key, const String& defaultValue)
 	return it->second;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::setStyleValue(const String& key, const String& value)
 {
 	String pk = key;
@@ -479,7 +508,7 @@ void Widget::setStyleValue(const String& key, const String& value)
 	updateStyle();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::BorderStyle::fromString(const String& str)
 {
 	Vector<String> args = StringUtils::split(str, " ");
@@ -487,7 +516,7 @@ void Widget::BorderStyle::fromString(const String& str)
 	if(args.size() == 2) color = Color(args[1]);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Widget::updateStyle()
 {
 	String bkstyle = getStyleValue("fill");
@@ -520,7 +549,33 @@ void Widget::updateStyle()
 	if(bdstyle != "") myBorders[3].fromString(bdstyle);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void WidgetRenderable::refresh()
+{
+	if(myOwner->myShaderEnabled)
+	{
+		String progName = myOwner->getShaderName();
+		String vsName = progName + ".vert";
+		String fsName = progName + ".frag";
+		myShaderProgram = getRenderer()->getOrCreateProgram(progName, vsName, fsName);
+		if(oglError)
+		{
+			myShaderProgram = 0;
+			return;
+		}
+		if(myShaderProgram != 0)
+		{
+			myAlphaUniform = glGetUniformLocation(myShaderProgram, "unif_Alpha");
+			if(oglError)
+			{
+				myShaderProgram = 0;
+				return;
+			}
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::preDraw()
 {
 	glPushMatrix();
@@ -540,7 +595,7 @@ void WidgetRenderable::preDraw()
 	pushDrawAttributes();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::postDraw()
 {
 	// reset transform.
@@ -548,9 +603,17 @@ void WidgetRenderable::postDraw()
 	popDrawAttributes();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::pushDrawAttributes()
 {
+	if(myShaderProgram != 0)
+	{
+		glUseProgram(myShaderProgram);
+		glUniform1f(myAlphaUniform, myOwner->getAlpha());
+	}
+	// Set default color to white.
+	glColor4ub(255,255,255,255);
+
 	Widget::BlendMode bm = myOwner->getBlendMode();
 	if(bm != Widget::BlendInherit)
 	{
@@ -570,14 +633,17 @@ void WidgetRenderable::pushDrawAttributes()
 			{
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
-			glColor4f(1.0f, 1.0f, 1.0f, myOwner->getAlpha());
 		}
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::popDrawAttributes()
 {
+	if(myShaderProgram != 0)
+	{
+		glUseProgram(0);
+	}
 	if(myOwner->getBlendMode() != Widget::BlendInherit)
 	{
 		glDisable(GL_BLEND);
@@ -585,7 +651,7 @@ void WidgetRenderable::popDrawAttributes()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::draw(const DrawContext& context)
 {
 	if(myOwner->isVisible())
@@ -611,7 +677,7 @@ void WidgetRenderable::draw(const DrawContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void WidgetRenderable::drawContent(const DrawContext& context)
 {
 	DrawInterface* di = getRenderer();

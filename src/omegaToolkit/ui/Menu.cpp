@@ -1,36 +1,44 @@
-/**************************************************************************************************
+/******************************************************************************
  * THE OMEGA LIB PROJECT
- *-------------------------------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
- *-------------------------------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
+ *-----------------------------------------------------------------------------
+ * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * University of Illinois at Chicago
  * All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are permitted 
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
  * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions 
- * and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the documentation and/or other 
- * materials provided with the distribution. 
+ * Redistributions of source code must retain the above copyright notice, this 
+ * list of conditions and the following disclaimer. Redistributions in binary 
+ * form must reproduce the above copyright notice, this list of conditions and 
+ * the following disclaimer in the documentation and/or other materials provided 
+ * with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *************************************************************************************************/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	A 2D or 3D menu, containing buttons, sliders, etc.
+ ******************************************************************************/
 #include "omegaToolkit/ui/Menu.h"
 #include "omegaToolkit/ui/MenuManager.h"
 #include "omega/DisplaySystem.h"
 
 using namespace omegaToolkit::ui;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MenuItem::MenuItem(Type type, Menu* owner):
 	myMenu(owner),
 	myType(type),
@@ -93,7 +101,7 @@ MenuItem::MenuItem(Type type, Menu* owner):
 	myWidget->setAutosize(true);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MenuItem::setText(const String& value) 
 { 
 	myText = value; 
@@ -111,7 +119,7 @@ void MenuItem::setText(const String& value)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MenuItem::setDescription(const String& value) 
 { 
 	myDescription = value; 
@@ -124,14 +132,14 @@ void MenuItem::setDescription(const String& value)
 	}
 }
 		
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MenuItem::setImage(PixelData* image)
 {
 	if(myButton != NULL) myButton->setIcon(image);
 	else if(myImage != NULL) myImage->setData(image);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MenuItem::setChecked(bool value)
 {
 	if(myType == MenuItem::Checkbox)
@@ -140,7 +148,7 @@ void MenuItem::setChecked(bool value)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool MenuItem::isChecked()
 {
 	if(myType == MenuItem::Checkbox)
@@ -150,7 +158,7 @@ bool MenuItem::isChecked()
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MenuItem::setCommand(const String& command)
 {
 	if(myCommand == NULL)
@@ -165,7 +173,7 @@ void MenuItem::setCommand(const String& command)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 const String& MenuItem::getCommand()
 {
 	static String emptyString("");
@@ -177,7 +185,7 @@ const String& MenuItem::getCommand()
 	return emptyString;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MenuItem::setListener(IMenuItemListener* value) 
 {
 	myListener = value; 
@@ -187,7 +195,7 @@ void MenuItem::setListener(IMenuItemListener* value)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void MenuItem::handleEvent(const Event& evt)
 {
 	if(evt.isFrom(Service::Ui, myWidget->getId()))
@@ -200,7 +208,7 @@ void MenuItem::handleEvent(const Event& evt)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Menu::Menu(const String& name, MenuManager* manager): 
 	myName(name),
 	myManager(manager),
@@ -222,7 +230,7 @@ Menu::Menu(const String& name, MenuManager* manager):
 	my3dSettings.node = manager->getEngine()->getDefaultCamera();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Menu::~Menu()
 {
 	ofmsg("~Menu %1%", %myName);
@@ -233,7 +241,7 @@ Menu::~Menu()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MenuItem* Menu::addItem(MenuItem::Type type)
 {
 	MenuItem* item = new MenuItem(type, this);
@@ -241,7 +249,7 @@ MenuItem* Menu::addItem(MenuItem::Type type)
 	return item;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MenuItem* Menu::addButton(const String& label, const String& command)
 {
 	MenuItem* item = addItem(MenuItem::Button);
@@ -250,7 +258,7 @@ MenuItem* Menu::addButton(const String& label, const String& command)
 	return item;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MenuItem* Menu::addLabel(const String& text)
 {
 	MenuItem* item = addItem(MenuItem::Label);
@@ -258,7 +266,7 @@ MenuItem* Menu::addLabel(const String& text)
 	return item;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MenuItem* Menu::addSlider(int ticks, const String& command)
 {
 	MenuItem* item = addItem(MenuItem::Slider);
@@ -267,7 +275,7 @@ MenuItem* Menu::addSlider(int ticks, const String& command)
 	return item;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MenuItem* Menu::addImage(PixelData* image)
 {
 	MenuItem* item = addItem(MenuItem::Image);
@@ -276,14 +284,14 @@ MenuItem* Menu::addImage(PixelData* image)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 MenuItem* Menu::addContainer()
 {
 	MenuItem* item = addItem(MenuItem::Container);
 	return item;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Menu* Menu::addSubMenu(const String& label)
 {
 	MenuItem* item = addItem(MenuItem::SubMenu);
@@ -291,7 +299,7 @@ Menu* Menu::addSubMenu(const String& label)
 	return item->getSubMenu();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::update(const UpdateContext& context)
 {
 	float speed = context.dt * 10;
@@ -332,7 +340,7 @@ void Menu::update(const UpdateContext& context)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::setActiveSubMenu(Menu* submenu)
 {
 	if(submenu == NULL)
@@ -369,7 +377,7 @@ void Menu::setActiveSubMenu(Menu* submenu)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::onPopMenuStack()
 {
 	if(myActiveSubMenu != NULL)
@@ -382,7 +390,7 @@ void Menu::onPopMenuStack()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::onPushMenuStack()
 {
 	if(myActiveSubMenu != NULL)
@@ -408,20 +416,20 @@ void Menu::onPushMenuStack()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 Menu* Menu::getTopActiveSubMenu()
 {
 	if(myActiveSubMenu != NULL) return myActiveSubMenu->getTopActiveSubMenu();
 	return this;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::focus()
 {
 	UiModule::instance()->activateWidget(myContainer);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::show()
 {
 	myVisible = true;
@@ -444,7 +452,7 @@ void Menu::show()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::hide()
 {
 	//omsg("Menu hide");
@@ -472,7 +480,7 @@ void Menu::hide()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::placeOnWand(const Event& evt)
 {
 	MenuManager* mm = MenuManager::instance();
@@ -529,14 +537,14 @@ void Menu::placeOnWand(const Event& evt)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 void Menu::toggle()
 {
 	if(myContainer->isVisible()) hide();
 	else show();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 bool Menu::isVisible()
 {
 	return myVisible;

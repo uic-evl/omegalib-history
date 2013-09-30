@@ -94,7 +94,8 @@ namespace omega {
 			mySelected(false),
 			myFacingCamera(NULL),
 			myTracker(NULL),
-			myNeedsBoundingBoxUpdate(false)
+			myNeedsBoundingBoxUpdate(false),
+			myFacingCameraFixedY(false)
 			{}
 
 		SceneNode(Engine* server, const String& name):
@@ -108,7 +109,8 @@ namespace omega {
 			mySelected(false),
 			myFacingCamera(NULL),
 			myTracker(NULL),
-			myNeedsBoundingBoxUpdate(false)
+			myNeedsBoundingBoxUpdate(false),
+			myFacingCameraFixedY(false)
 			{}
 
 		Engine* getEngine();
@@ -178,6 +180,11 @@ namespace omega {
 		//@{
 		void setFacingCamera(Camera* cam);
 		Camera* getFacingCamera();
+		//! When set to true, Y axis for nodes facing camera will be fixed to the
+		//! world Y axis. When set to false, the Y axis will follow the camera
+		//! Y axis.
+		void setFacingCameraFixedY(bool value);
+		bool isFacingCameraFixedY();
 		//@}
 
 		//! Trackable object
@@ -223,6 +230,9 @@ namespace omega {
 
 		// Target camera for billboard mode. Can't use Ref due to circular dependency.
 		Camera* myFacingCamera;
+		// When set to true, Y axis for nodes facing camera will be fixed to the
+		// world Y axis. 
+		bool myFacingCameraFixedY;
 		// Tracked object. This is internally managed and does not need Ref. 
 		TrackedObject* myTracker;
 	};
@@ -278,6 +288,14 @@ namespace omega {
 	///////////////////////////////////////////////////////////////////////////
 	inline Camera* SceneNode::getFacingCamera()
 	{ return myFacingCamera; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline void SceneNode::setFacingCameraFixedY(bool value)
+	{ myFacingCameraFixedY = value; }
+
+	///////////////////////////////////////////////////////////////////////////
+	inline bool SceneNode::isFacingCameraFixedY()
+	{ return myFacingCameraFixedY; }
 
 	// This is a definition from NodeComponent. Doing it here because we need
 	// SceneNode.

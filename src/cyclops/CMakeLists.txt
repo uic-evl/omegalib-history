@@ -39,11 +39,7 @@ set(HEADERS
 		
 ###############################################################################
 # Setup compile info
-if(OMEGA_BUILD_STATIC)
-	add_library( cyclops ${SRCS} ${HEADERS})
-else(OMEGA_BUILD_STATIC)
-	add_library( cyclops SHARED ${SRCS} ${HEADERS})
-endif(OMEGA_BUILD_STATIC)
+add_library( cyclops SHARED ${SRCS} ${HEADERS})
 
 source_group(osg REGULAR_EXPRESSION osg/)		
 target_link_libraries(cyclops

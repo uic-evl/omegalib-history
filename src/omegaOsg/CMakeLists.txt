@@ -1,7 +1,5 @@
-# Compile definitions
 add_definitions( -D_CRT_SECURE_NO_WARNINGS -DOOSG_EXPORTING)
 
-# Source files
 set( srcs 
 		OsgModule.cpp
 		OsgRenderPass.cpp
@@ -10,7 +8,7 @@ set( srcs
 		ReaderFreeImage.cpp
 		)
 		
-set( headers 
+SET( headers 
 		# omega
 		${CMAKE_SOURCE_DIR}/include/omegaOsg/oosgbase.h
 		${CMAKE_SOURCE_DIR}/include/omegaOsg/OsgModule.h
@@ -57,6 +55,7 @@ if(OMEGAOSG_USE_FBX)
 			) 
 endif()
 
+###############################################################################
 set(OMEGAOSG_USE_INVENTOR false CACHE BOOL "Enables Inventor (.vrml, .iv) support for omegaOsg. Needs the Coin3d library installed")
 if(OMEGAOSG_USE_INVENTOR)
     find_package(Inventor)
@@ -81,7 +80,6 @@ if(OMEGAOSG_USE_INVENTOR)
 	endif()
 endif()
 
-# setup some platform-specific options
 source_group(omegaOsg REGULAR_EXPRESSION omegaOsg/)		
 source_group(fbx REGULAR_EXPRESSION omegaOsg/fbx/)		
 source_group(Inventor REGULAR_EXPRESSION omegaOsg/Inventor/)		
@@ -97,14 +95,12 @@ IF(APPLE)
     SET(TARGET_EXTERNAL_LIBRARIES iconv ${SYS_CONFIG_LIBRARY})
 endif(APPLE)
 
+###############################################################################
 # Setup compile info
-if(OMEGA_BUILD_STATIC)
-	add_library( omegaOsg ${srcs} ${freetypeSrcs} ${headers})
-else(OMEGA_BUILD_STATIC)
-	add_library( omegaOsg SHARED ${srcs} ${freetypeSrcs} ${headers})
-endif(OMEGA_BUILD_STATIC)
+add_library( omegaOsg SHARED ${srcs} ${headers})
 add_dependencies(omegaOsg osg osgWorks)
 
+###############################################################################
 # Setup link info.
 target_link_libraries(omegaOsg 
 	omega freetype ${OSG_LIBS} ${FBX_LIBNAME} ${TARGET_EXTERNAL_LIBRARIES})

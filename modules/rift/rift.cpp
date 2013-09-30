@@ -169,7 +169,7 @@ void OculusRiftService::initialize()
 	// Set default lens offset parameter
 	myLensOffset =  0.0f;
 
-	myScaleFactor = 1;
+	myScaleFactor = 0.8;
 	myAspectRatio = 1.6f;
 
 	// Initialize the Oculus Rift
@@ -264,15 +264,18 @@ void OculusRiftService::poll()
 #ifndef RIFT_EMULATE
 	// Update head orientation;
 	OVR::Quatf o = mySFusion.GetOrientation();
-	myCamera->setHeadOrientation(Quaternion(o.w, o.x, o.y, o.z));
+	Quaternion q = Quaternion(o.w, o.x, o.y, o.z);
+	//q = q * Math::quaternionFromEuler(Vector3f(0, 0, Math::Pi));
+	myCamera->setOrientation(q);
+	myCamera->setHeadOrientation(Math::quaternionFromEuler(Vector3f(0, 0, Math::Pi)));
 	/*if(myCamera->getController() != NULL)
 	{
 		myCamera->getController()->reset();
 	}*/
-	if(myCamera == NULL)
+	if(myCamera != NULL)
 	{
 		// Match the projection eye separation with the lens separation.
-		myCamera->setEyeSeparation(myHMDInfo.LensSeparationDistance);
+		myCamera->setEyeSeparation(-myHMDInfo.LensSeparationDistance / 2);
 	}
 #endif
 }
@@ -323,40 +326,32 @@ void OculusRiftService::beginDraw(Camera* cam, DrawContext& context)
 	// Do we need to do rift postprocessing on this tile?
 	if(context.tile->flags & RiftEnabledFlag)
 	{
-		if(context.eye == DrawContext::EyeLeft)
+		if(context.task == DrawContext::SceneDrawTask)
 		{
-			context.viewport.min[0] = 0;
-			context.viewport.max[0] = myViewportSize[0] / 2;
-			context.viewport.min[1] = 0;
-			context.viewport.max[1] = myViewportSize[1];
-		}
-		else if(context.eye == DrawContext::EyeRight)
-		{
-			context.viewport.min[0] = myViewportSize[0] / 2;
-			context.viewport.max[0] = myViewportSize[0];
-			context.viewport.min[1] = 0;
-			context.viewport.max[1] = myViewportSize[1];
-		}
+			if(context.eye == DrawContext::EyeLeft)
+			{
+				context.viewport.min[0] = 0;
+				context.viewport.max[0] = myViewportSize[0] / 2;
+				context.viewport.min[1] = 0;
+				context.viewport.max[1] = myViewportSize[1];
+			}
+			else if(context.eye == DrawContext::EyeRight)
+			{
+				context.viewport.min[0] = myViewportSize[0] / 2;
+				context.viewport.max[0] = myViewportSize[0];
+				context.viewport.min[1] = 0;
+				context.viewport.max[1] = myViewportSize[1];
+			}
 			
-		// Create a render target if we have not done it yet.
-		if(!myInitialized) initializeGraphics(cam, context);
+			// Create a render target if we have not done it yet.
+			if(!myInitialized) initializeGraphics(cam, context);
 
-		myRenderTarget->bind();
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void OculusRiftService::endDraw(Camera* cam, DrawContext& context)
-{
-	// Do we need to do rift postprocessing on this tile?
-	if(context.tile->flags & RiftEnabledFlag)
-	{
-		myRenderTarget->unbind();
-
+			myRenderTarget->bind();
+		}
 		// After all overlay rendering is done we have our full side-by-side
 		// picture in the target texture. Now render it to the output framebuffer
 		// performing barrel distortion postprocessing.
-		if(context.task == DrawContext::OverlayDrawTask && 
+		else if(context.task == DrawContext::OverlayDrawTask && 
 			context.eye == DrawContext::EyeCyclop)
 		{
 			DrawInterface* di = context.renderer->getRenderer();
@@ -397,6 +392,19 @@ void OculusRiftService::endDraw(Camera* cam, DrawContext& context)
 			endEyeDraw();
 
 			myRenderTarget->clear();
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void OculusRiftService::endDraw(Camera* cam, DrawContext& context)
+{
+	if(context.task == DrawContext::SceneDrawTask)
+	{
+		// Do we need to do rift postprocessing on this tile?
+		if(context.tile->flags & RiftEnabledFlag)
+		{
+			myRenderTarget->unbind();
 		}
 	}
 }

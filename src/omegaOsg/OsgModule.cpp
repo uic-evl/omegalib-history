@@ -206,7 +206,7 @@ void OsgModule::update(const UpdateContext& context)
 bool OsgModule::handleCommand(const String& command)
 {
 	Vector<String> args = StringUtils::split(command);
-	if(args[0] == "?")
+	if(args[0] == "?"  && args.size() == 1)
 	{
 		// ?: print help
 		omsg("OsgModule");

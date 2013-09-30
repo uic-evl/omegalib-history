@@ -205,6 +205,8 @@ BOOST_PYTHON_MODULE(cyclops)
 		PYAPI_METHOD(Entity, deleteContextMenu)
 		PYAPI_GETTER(Entity, listPieces)
 		PYAPI_REF_GETTER(Entity, getPiece)
+		PYAPI_METHOD(Entity, setCullingActive)
+		PYAPI_METHOD(Entity, isCullingActive)
 		;
 
 	// SphereShape

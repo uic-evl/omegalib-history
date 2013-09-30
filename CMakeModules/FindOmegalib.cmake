@@ -1,30 +1,29 @@
-###################################################################################################
-# THE OMEGA LIB PROJECT
-#-------------------------------------------------------------------------------------------------
-# Copyright 2010-2012		Electronic Visualization Laboratory, University of Illinois at Chicago
-# Authors:										
-#  Alessandro Febretti		febret@gmail.com
-#-------------------------------------------------------------------------------------------------
-# Copyright (c) 2010-2011, Electronic Visualization Laboratory, University of Illinois at Chicago
-# All rights reserved.
-# Redistribution and use in source and binary forms, with or without modification, are permitted 
-# provided that the following conditions are met:
-# 
-# Redistributions of source code must retain the above copyright notice, this list of conditions 
-# and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
-# notice, this list of conditions and the following disclaimer in the documentation and/or other 
-# materials provided with the distribution. 
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
-# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################################
 find_package(OpenGL REQUIRED)
+
+# Detect whether we are setting up omegalib for a build or an 
+# install environment. Build environments always have a cmake 
+# cache file, so look for it.
+set(INSTALL_ENVIRONMENT true)
+if(EXISTS ${Omegalib_DIR}/CMakeCache.txt)
+	message(STATUS "Using an omegalib BUILD environment")
+	set(INSTALL_ENVIRONMENT false)
+else()
+	message(STATUS "Using an omegalib INSTALL environment")
+	# Adjust several config variables to work with an install environment
+
+	# fix OpenSceneGraph libs
+	string(REPLACE ${OMEGA_BINARY_DIR} ${Omegalib_DIR} OSG_LIBS "${OSG_LIBS}")
+	# fix osgWorks libs	
+	string(REPLACE ${Omegalib_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib ${Omegalib_DIR}/lib OSG_LIBS "${OSG_LIBS}")
+	#message("${OSG_LIBS}")
+	# fix osg include dir
+	string(REPLACE ${OMEGA_BINARY_DIR} ${Omegalib_DIR} OSG_INCLUDES "${OSG_INCLUDES}")
+	#message("${OSG_INCLUDES}")
+
+	#Finally, replace OMEGA_BINARY_DIR with Omegalib_DIR
+	set(OMEGA_BINARY_DIR ${Omegalib_DIR})
+	set(OMEGA_SOURCE_DIR ${Omegalib_DIR})
+endif()
 
 if(OMEGA_BINARY_DIR)
 	set(OMICRON_DEFAULT_BINARY_DIR ${OMEGA_BINARY_DIR}/omicron/omicron)
@@ -38,12 +37,24 @@ if(OMEGA_BINARY_DIR)
 	# as include paths for your compiler.
 	set(OMEGA_INCLUDE_DIRS ${OMICRON_INCLUDE_DIRS} ${OMEGA_BINARY_DIR}/include ${OMEGA_SOURCE_DIR}/include ${OMEGA_SOURCE_DIR}/external/include ${OSG_INCLUDES} ${PYTHON_INCLUDES})
 
-	set(OMEGA_LIB_DIR_RELEASE ${OMEGA_BINARY_DIR}/lib/release)
-	set(OMEGA_LIB_DIR_DEBUG ${OMEGA_BINARY_DIR}/lib/debug)
+	# No debug libs in an install environment
+	if(INSTALL_ENVIRONMENT)
+		set(OMEGA_LIB_DIR_RELEASE ${OMEGA_BINARY_DIR}/lib)
+		set(OMEGA_LIB_DIR_DEBUG ${OMEGA_BINARY_DIR}/lib)
+	else()
+		set(OMEGA_LIB_DIR_RELEASE ${OMEGA_BINARY_DIR}/lib/release)
+		set(OMEGA_LIB_DIR_DEBUG ${OMEGA_BINARY_DIR}/lib/debug)
+	endif()
 	set(OMEGA_LIB_DIR ${OMEGA_BINARY_DIR}/lib)
 
-	set(OMEGA_BIN_DIR_RELEASE ${OMEGA_BINARY_DIR}/bin/release)
-	set(OMEGA_BIN_DIR_DEBUG ${OMEGA_BINARY_DIR}/bin/debug)
+	# No debug binaries in an install environment
+	if(INSTALL_ENVIRONMENT)
+		set(OMEGA_BIN_DIR_RELEASE ${OMEGA_BINARY_DIR}/bin)
+		set(OMEGA_BIN_DIR_DEBUG ${OMEGA_BINARY_DIR}/bin)
+	else()
+		set(OMEGA_BIN_DIR_RELEASE ${OMEGA_BINARY_DIR}/bin/release)
+		set(OMEGA_BIN_DIR_DEBUG ${OMEGA_BINARY_DIR}/bin/debug)
+	endif()
 	set(OMEGA_BIN_DIR ${OMEGA_BINARY_DIR}/bin)
 
 	###################################################################################################
