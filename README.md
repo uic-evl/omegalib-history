@@ -4,6 +4,7 @@ A creative framework for virtual reality and cluster-driven display systems.
 
 - Intro page: http://uic-evl.github.io/omegalib/
 - Wiki: https://github.com/uic-evl/omegalib/wiki
+- Omegalib modules hub: https://github.com/omega-hub
 
 ## If you are in a rush:
 - **Download a Windows precompiled version**: https://github.com/febret/omegalib-windows/archive/master.zip

@@ -768,14 +768,14 @@ void setNearFarZ(float nearZ, float farZ)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-float getNearZ(float near)
+float getNearZ()
 {
 	Camera* cam = getDefaultCamera();
 	return cam->getNearZ();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-float getFarZ(float near)
+float getFarZ()
 {
 	Camera* cam = getDefaultCamera();
 	return cam->getFarZ();
@@ -788,7 +788,6 @@ boost::python::tuple getDisplayPixelSize()
 	Vector2i size = ds->getCanvasSize();
 	return boost::python::make_tuple(size.x(), size.y());
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 void orun(const String& script)
@@ -1161,6 +1160,8 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_GETTER(SceneNode, getTag)
 		PYAPI_GETTER(SceneNode, setFacingCamera)
 		PYAPI_GETTER(SceneNode, getFacingCamera)
+		PYAPI_GETTER(SceneNode, setFacingCameraFixedY)
+		PYAPI_GETTER(SceneNode, isFacingCameraFixedY)
 		PYAPI_GETTER(SceneNode, getBoundMinimum)
 		PYAPI_GETTER(SceneNode, getBoundMaximum)
 		PYAPI_GETTER(SceneNode, getBoundCenter)
@@ -1236,6 +1237,9 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(Camera, setSceneEnabled)
 		PYAPI_METHOD(Camera, isOverlayEnabled)
 		PYAPI_METHOD(Camera, setOverlayEnabled)
+		PYAPI_METHOD(Camera, setNearFarZ)
+		PYAPI_METHOD(Camera, getNearZ)
+		PYAPI_METHOD(Camera, getFarZ)
 		;
 
 	// Color
@@ -1312,6 +1316,8 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(SoundEnvironment, getVolumeScale)
 		PYAPI_METHOD(SoundEnvironment, setServerVolume)
 		PYAPI_METHOD(SoundEnvironment, getServerVolume)
+		PYAPI_METHOD(SoundEnvironment, setForceCacheOverwrite)
+		PYAPI_METHOD(SoundEnvironment, isForceCacheOverwriteEnabled)
 		;
 
 	// Sound

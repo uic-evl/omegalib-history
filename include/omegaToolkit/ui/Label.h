@@ -104,7 +104,8 @@ namespace omegaToolkit { namespace ui {
 		LabelRenderable(Label* owner): 
 		  WidgetRenderable(owner), 
 			myOwner(owner),
-			myFont(NULL) {}
+			myFont(NULL),
+			myTextureUniform(0) {}
 
 		virtual void refresh();
 		virtual void drawContent(const DrawContext& context);
@@ -112,6 +113,7 @@ namespace omegaToolkit { namespace ui {
 	private:
 		Label* myOwner;
 		Font* myFont;
+		GLuint myTextureUniform;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,7 +133,7 @@ namespace omegaToolkit { namespace ui {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	inline void Label::setFont(const String& value)
-	{ myFont = value; refresh(); }
+	{ myFont = value; refresh(); requestLayoutRefresh(); }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	inline Color Label::getColor()

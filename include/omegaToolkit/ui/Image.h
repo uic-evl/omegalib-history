@@ -68,13 +68,18 @@ namespace omegaToolkit { namespace ui {
 	class OTK_API ImageRenderable: public WidgetRenderable
 	{
 	public:
-		ImageRenderable(Image* owner): WidgetRenderable(owner), myOwner(owner) {}
+		ImageRenderable(Image* owner): 
+		  WidgetRenderable(owner), 
+		  myOwner(owner),
+		  myTextureUniform(0) {}
+
 		virtual ~ImageRenderable();
 		virtual void refresh();
 		virtual void drawContent(const DrawContext& context);
 
 	private:
 		Image* myOwner;
+		GLuint myTextureUniform;
 	};
 
 	///////////////////////////////////////////////////////////////////////////

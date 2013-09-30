@@ -54,7 +54,7 @@ Label* Label::create(Container* container)
 ///////////////////////////////////////////////////////////////////////////////
 Label::Label(Engine* srv):
 	Widget(srv),
-	myColor(255, 255, 255),
+	myColor(1, 1, 1),
 	myVerticalAlign(AlignMiddle),
 	myHorizontalAlign(AlignCenter),
 	myAutosizeHorizontalPadding(6),
@@ -65,6 +65,9 @@ Label::Label(Engine* srv):
 	setNavigationEnabled(false);
 	// By default labels are autosize widgets - their size is determined by their content.
 	setAutosize(true);
+
+	// Set the default shader.
+	setShaderName("ui/widget-label");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,7 +165,16 @@ Renderable* Label::createRenderable()
 ///////////////////////////////////////////////////////////////////////////////
 void LabelRenderable::refresh()
 {
-	myFont = getRenderer()->getFont(myOwner->getFont());
+	WidgetRenderable::refresh();
+	if(myOwner->getFont() != "")
+	{
+		myFont = getRenderer()->getFont(myOwner->getFont());
+	}
+	else
+	{
+		myFont = getRenderer()->getDefaultFont();
+	}
+	myTextureUniform = glGetUniformLocation(myShaderProgram, "unif_Texture");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -173,18 +185,28 @@ void LabelRenderable::drawContent(const DrawContext& context)
 	// If not font has been set, use default ui font.
 	if(!myFont)
 	{
-		if(myOwner->getFont() != "")
+		/*if(myOwner->getFont() != "")
 		{
 			myFont = getRenderer()->getFont(myOwner->getFont());
 		}
 		else
 		{
 			myFont = getRenderer()->getDefaultFont();
-		}
+		}*/
+		// We just set the font: tell our owner that the layout needs to be
+		// refreshed (font size may have changed).
+		myOwner->requestLayoutRefresh();
+
 	}
 
 	if(myFont)
 	{
+		// Set the texture uniform used by label
+		if(myTextureUniform != 0)
+		{
+			glUniform1i(myTextureUniform, 0);
+		}
+
 		unsigned int alignFlags = myOwner->getFontAlignFlags();
 		Vector2f textPos = Vector2f::Zero();
 

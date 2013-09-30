@@ -6,6 +6,12 @@ Right now the only exported classes are point cloud loaders for cyclops
 ## TextPointsLoader and BinaryPointsLoader
 These classes can be used to load models containing point cloud data in ASCII or binary xyz + RGB format.
 
+### Text data format
+Each line should contain 7 space-separated numbers represending 3D position and RGBA color
+
+### Binary data format
+Each record contains 7 double precision numbers (8 bytes each) represending 3D position and RGBA color.
+
 To use `TextPointsLoader`:
 ```python
 from omega import *
