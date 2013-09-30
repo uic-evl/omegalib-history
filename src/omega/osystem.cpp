@@ -151,15 +151,13 @@ namespace omega
 			String configFilename = ostr("%1%.cfg", %app.getName());
 			String multiAppString = "";
 			String mcmode = "default";
-#ifdef OMEGA_APPROOT_DIRECTORY
-			String dataPath = OMEGA_APPROOT_DIRECTORY;
-#else
+
 			// If we have an environment variable OMEGA_HOME, use it as the
-			// default data path
-			String dataPath = "";
+			// default data path. The OMEGA_HOME macro is set to the
+			// source code directory of omegalib.
+			String dataPath = OMEGA_HOME;
 			char* omegaHome = getenv("OMEGA_HOME");
 			if(omegaHome != NULL) dataPath = omegaHome;
-#endif
 			String logFilename = ostr("%1%.log", %app.getName());
 
 			bool kill = false;
@@ -236,6 +234,13 @@ namespace omega
 			{
 				return -1;
 			}
+
+			// Entering - as the path will force omegalib to use the source 
+			// directory as the data directory, even if the OMEGA_HOME 
+			// environment variable is present. 
+			if(dataPath != "-")
+			{
+			}
 			
 			if(!disableSIGINTHandler)
 			{
@@ -284,19 +289,12 @@ namespace omega
 			// Add some default filesystem search paths: 
 			// - an empty search path for absolute paths
 			// - the current directory
-			// - the omegalib applications root path (if exists)
 			// - the default omegalib data path
 			dm->addSource(new FilesystemDataSource("./"));
 			dm->addSource(new FilesystemDataSource(""));
 			dm->addSource(new FilesystemDataSource(dataPath));
+			
 			ofmsg("::: %1%", %dataPath);
-
-#ifdef OMEGA_HARDCODE_DATA_PATHS
-			dm->addSource(new FilesystemDataSource(OMEGA_DATA_PATH));
-			ofmsg("::: %1%", %OMEGA_DATA_PATH);
-			dm->addSource(new FilesystemDataSource(OMEGA_BINARY_PATH));
-			ofmsg("::: %1%", %OMEGA_BINARY_PATH);
-#endif
 			omsg("omegalib application config lookup:");
 			String curCfgFilename = ostr("%1%/%2%", %app.getName() %configFilename);
 			ofmsg("::: trying %1%", %curCfgFilename);

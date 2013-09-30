@@ -65,7 +65,9 @@ elseif(CMAKE_GENERATOR STREQUAL "Xcode")
 	set(OMEGA_TOOL_GCC 1)
 endif(CMAKE_GENERATOR STREQUAL "Visual Studio 9 2008")
 
-set(OMEGA_DATA_PATH "${OmegaLib_SOURCE_DIR}/data")
+# The default home directory is the omegalib source directoy. At runtime this
+# will be replaced by the OMEGA_HOME environment variable when available.
+set(OMEGA_HOME "${OmegaLib_SOURCE_DIR}")
 
 if(OMEGA_OS_WIN)
 	add_definitions(-D_WIN32_WINNT=0x0600)

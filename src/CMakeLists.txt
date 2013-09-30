@@ -153,16 +153,6 @@ if(OMEGA_BUILD_VTK_LIB)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/vtkhello ${CMAKE_BINARY_DIR}/examples/vtkhello)
 endif(OMEGA_BUILD_VTK_LIB)
 
-# Sets the path to the omega applications source root (if present)
-set(OMEGA_APP_DIR CACHE PATH "omegalib application directory")
-if(OMEGA_APP_DIR)
-	add_subdirectory(${OMEGA_APP_DIR} ${CMAKE_BINARY_DIR}/apps)
-	file(TO_CMAKE_PATH ${OMEGA_APP_DIR} OMEGA_FIXED_APP_DIR)
-	# Set the OMEGA_APPROOT_DIRECTORY to the app directory root
-	# (it will be used to set a data lookup path)
-	add_definitions(-DOMEGA_APPROOT_DIRECTORY="${OMEGA_FIXED_APP_DIR}")
-endif()
-
 # Add the core omega project
 add_subdirectory(omega)
 

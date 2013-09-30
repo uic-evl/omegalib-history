@@ -240,17 +240,9 @@ void PythonInterpreter::initialize(const char* programName)
 	StringUtils::splitFilename(exePath, exeName, exeDir);
 	addPythonPath(exeDir.c_str());
 
-#ifdef OMEGA_HARDCODE_DATA_PATHS
-	addPythonPath(OMEGA_DATA_PATH);
-#endif
-
-#ifdef OMEGA_APPROOT_DIRECTORY
-	addPythonPath(OMEGA_APPROOT_DIRECTORY);
-#endif
-
 	// If we have an environment variable OMEGA_HOME, we use the modules directory
 	// from there as a module search path.
-	String dataPath = "";
+	String dataPath = OMEGA_HOME;
 	char* omegaHome = getenv("OMEGA_HOME");
 	if(omegaHome != NULL) 
 	{
@@ -400,12 +392,6 @@ void PythonInterpreter::runFile(const String& filename, uint flags)
 	ofmsg("PythonInterpreter::runFile: running %1%", %filename);
 	// Substitute the OMEGA_DATA_ROOT and OMEGA_APP_ROOT macros in the path.
 	String path = filename;
-#ifdef OMEGA_HARDCODE_DATA_PATHS
-	path = StringUtils::replaceAll(path, "OMEGA_DATA_ROOT", OMEGA_DATA_PATH);
-#endif
-#ifdef OMEGA_APPROOT_DIRECTORY
-	path = StringUtils::replaceAll(path, "OMEGA_APP_ROOT", OMEGA_APPROOT_DIRECTORY);
-#endif
 	
 	String fullPath;
 	if(DataManager::findFile(path, fullPath))
