@@ -238,8 +238,9 @@ namespace omega
 			// Entering - as the path will force omegalib to use the source 
 			// directory as the data directory, even if the OMEGA_HOME 
 			// environment variable is present. 
-			if(dataPath != "-")
+			if(dataPath == "-")
 			{
+				dataPath = OMEGA_HOME;
 			}
 			
 			if(!disableSIGINTHandler)
