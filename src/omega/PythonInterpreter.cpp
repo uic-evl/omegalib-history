@@ -240,16 +240,10 @@ void PythonInterpreter::initialize(const char* programName)
 	StringUtils::splitFilename(exePath, exeName, exeDir);
 	addPythonPath(exeDir.c_str());
 
-	// If we have an environment variable OMEGA_HOME, we use the modules directory
-	// from there as a module search path.
-	String dataPath = OMEGA_HOME;
-	char* omegaHome = getenv("OMEGA_HOME");
-	if(omegaHome != NULL) 
-	{
-		dataPath = ostr("%1%/modules", %omegaHome);
-		addPythonPath(dataPath.c_str());
-	}
-
+	// The data prexif string is set by omain to point to the data directory 
+	// used by this omegalib instance.
+	String modulePath = ogetdataprefix() + "/modules";
+	addPythonPath(modulePath.c_str());
 
 	if(myShellEnabled && SystemManager::instance()->isMaster())
 	{

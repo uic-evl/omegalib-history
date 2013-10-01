@@ -291,9 +291,12 @@ namespace omega
 			// - an empty search path for absolute paths
 			// - the current directory
 			// - the default omegalib data path
+			// - the modules path
 			dm->addSource(new FilesystemDataSource("./"));
 			dm->addSource(new FilesystemDataSource(""));
 			dm->addSource(new FilesystemDataSource(dataPath));
+			dm->addSource(new FilesystemDataSource(dataPath + "/modules"));
+			osetdataprefix(dataPath);
 			
 			ofmsg("::: %1%", %dataPath);
 			omsg("omegalib application config lookup:");
