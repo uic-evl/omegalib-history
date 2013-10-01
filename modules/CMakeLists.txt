@@ -1,7 +1,6 @@
 # List native modules here
 add_subdirectory(native/rift)
 add_subdirectory(native/porthole)
-add_subdirectory(native/flipbookPlayer)
 add_subdirectory(native/sage)
 add_subdirectory(native/mvi)
 
