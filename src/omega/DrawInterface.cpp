@@ -502,7 +502,11 @@ GLuint DrawInterface::makeShaderFromSource(const char* source, ShaderType Type)
     {
         infoLog = new char[infologLength];
         glGetShaderInfoLog(shaderId, infologLength, &charsWritten, infoLog);
-        omsg(infoLog);
+		// Print log only when it contains error messages.
+		if(strncmp(infoLog, "No errors.", 8))
+		{
+			omsg(infoLog);
+		}
         delete [] infoLog;
     }
 
@@ -527,7 +531,11 @@ GLuint DrawInterface::createProgram(GLuint vertextShader, GLuint fragmentShader)
     {
         infoLog = new char[infologLength];
         glGetProgramInfoLog(program, infologLength, &charsWritten, infoLog);
-        omsg(infoLog);
+		// Print log only when it contains error messages.
+		if(strncmp(infoLog, "No errors.", 8))
+		{
+			omsg(infoLog);
+		}
         delete [] infoLog;
     }
 
