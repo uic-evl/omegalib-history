@@ -1,4 +1,3 @@
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 include(ExternalProject)
 #include(OmegaAddTutorial)
 include(UsePch)
@@ -162,9 +161,6 @@ if(OMEGA_USE_PYTHON)
 	add_subdirectory(apps/mcsend)
 	add_subdirectory(apps/mcserver)
 endif()
-
-# Add the modules subdirectory
-add_subdirectory(${CMAKE_SOURCE_DIR}/modules ${CMAKE_BINARY_DIR}/modules)
 
 # Generate the Omegalib config fule used by external applications to find omegalib.
 # The @ONLY option is to substitute only variables in form @VAR@. This is because

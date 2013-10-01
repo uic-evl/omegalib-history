@@ -1,1 +1,0 @@
-# MVI - Multiview Immersion support module
