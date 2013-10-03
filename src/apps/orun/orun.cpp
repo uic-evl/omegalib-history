@@ -39,8 +39,9 @@
 #include <omegaVtk.h>
 #endif
 
-#ifdef OMEGA_BUILD_OSG_LIB
-#include <cyclops.h>
+#ifdef cyclops_ENABLED
+#include <cyclops/cyclops.h>
+using namespace cyclops;
 #endif
 
 #ifdef OMEGA_OS_WIN
@@ -55,10 +56,6 @@ using namespace omegaToolkit::ui;
 
 #ifdef OMEGA_BUILD_VTK_LIB
 using namespace omegaVtk;
-#endif
-
-#ifdef OMEGA_BUILD_OSG_LIB
-using namespace cyclops;
 #endif
 
 // The name of the script to launch automatically at startup
@@ -125,7 +122,7 @@ void OmegaViewer::initialize()
 
 	omegaToolkitPythonApiInit();
 
-#ifdef OMEGA_BUILD_OSG_LIB
+#ifdef cyclops_ENABLED
 	cyclopsPythonApiInit();
 #endif
 
