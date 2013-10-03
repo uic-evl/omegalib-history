@@ -919,6 +919,9 @@ void ContainerRenderable::draw(const DrawContext& context)
 			}
 			else
 			{
+				// The true makes drawChildren iterate only through container
+				// renderables. We are doing this to give all containers that have
+				// 3D mode enabled 
 				drawChildren(context, true);
 			}
 		}
