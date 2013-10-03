@@ -1,3 +1,4 @@
+include(FileInformation)
 include(ExternalProject)
 #include(OmegaAddTutorial)
 include(UsePch)
@@ -175,8 +176,16 @@ if(GIT_EXECUTABLE)
 	file(REMOVE ${MODULES_CONFIG_FILE})
 	file(APPEND ${MODULES_CONFIG_FILE} "//auto-generated file\n")
 	
-	# download the index CMakeLists file
-	file(DOWNLOAD ${OMEGA_HUB_URL}/raw/master/CMakeLists.txt ${CMAKE_BINARY_DIR}/modules/CMakeLists.txt SHOW_PROGRESS)
+	# download the index CMakeLists file. Download the file to a secondary location, so if the
+	# download fails, we can still use the previous copy of the module list
+	file(DOWNLOAD ${OMEGA_HUB_URL}/raw/master/CMakeLists.txt ${CMAKE_BINARY_DIR}/moduleList/CMakeLists.txt SHOW_PROGRESS)
+	# If the newly-downloaded file contains something, copy it over the old module list.
+	filestat(SIZE ${CMAKE_BINARY_DIR}/moduleList/CMakeLists.txt MODULE_LIST_SIZE)
+	if(NOT ${MODULE_LIST_SIZE} EQUAL 0)
+		file(COPY ${CMAKE_BINARY_DIR}/moduleList/CMakeLists.txt DESTINATION ${CMAKE_BINARY_DIR}/modules)
+	else()
+		message("Module list download failed, using cached copy")
+	endif()
 	if(EXISTS ${CMAKE_BINARY_DIR}/modules/CMakeLists.txt)
 		# Add the CMakeLists with the module index. Need to specify a binary 
 		# output path since the file is not in the source tree.
