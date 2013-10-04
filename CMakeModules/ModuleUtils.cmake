@@ -1,5 +1,11 @@
 function(module_def MODULE_NAME URL OPTIONS DESCRIPTION)
 	set(MODULES_${MODULE_NAME} false CACHE BOOL ${DESCRIPTION})
+	
+	list(FIND MODULES_LIST ${MODULE_NAME} found)
+	if(NOT ${found} EQUAL -1)
+		set(MODULES_${MODULE_NAME} true)
+	endif()
+	
 	if(MODULES_${MODULE_NAME})
 		if(${OPTIONS} STREQUAL NATIVE)
 			message("MODULE ${MODULE_NAME} is NATIVE")
