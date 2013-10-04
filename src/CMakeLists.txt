@@ -118,18 +118,6 @@ if(OMEGA_USE_DISPLAY_GLUT)
     endif()
 endif()
 
-# vtk configuration, libraries and applications
-if(OMEGA_BUILD_VTK_LIB)
-	find_package(VTK)
-	if(NOT VTK_DIR)
-	  message(FATAL_ERROR "Please set VTK_DIR.")
-	endif(NOT VTK_DIR)
-	include(${VTK_USE_FILE})
-	
-	add_subdirectory(omegaVtk)
-	add_subdirectory(${CMAKE_SOURCE_DIR}/examples/vtkhello ${CMAKE_BINARY_DIR}/examples/vtkhello)
-endif(OMEGA_BUILD_VTK_LIB)
-
 # Add the core omega project
 add_subdirectory(omega)
 
