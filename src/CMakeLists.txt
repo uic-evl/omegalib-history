@@ -149,7 +149,7 @@ endif()
 # Setup the module loader
 include(ModuleUtils)
 find_package(Git)
-set(REGENERATE_REQUESTED false CACHE INTERNAL "")
+set(REGENERATE_REQUESTED false CACHE BOOL "")
 if(GIT_EXECUTABLE)
 	set(OMEGA_HUB_URL "http://github.com/omega-hub/hub" CACHE STRING "url to git repository containing the module index")
 	# the modules variable is a list of enabled modues, used to simplify configuration.
@@ -187,12 +187,12 @@ if(GIT_EXECUTABLE)
 	endif()
 endif()
 
+# Add the modules subdirectory. This will include cmake scripts for all native modules
+add_subdirectory(${CMAKE_SOURCE_DIR}/modules ${CMAKE_BINARY_DIR}/modules)
+
 if(${REGENERATE_REQUESTED})
 	message(SEND_ERROR "Please run Configure again to install missing modules.")
 endif()
-
-# Add the modules subdirectory. This will include cmake scripts for all native modules
-add_subdirectory(${CMAKE_SOURCE_DIR}/modules ${CMAKE_BINARY_DIR}/modules)
 
 ###############################################################################
 # Install commands
