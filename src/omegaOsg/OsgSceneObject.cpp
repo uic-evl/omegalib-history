@@ -158,7 +158,12 @@ void OsgSceneObject::onSelectedChanged(SceneNode* source, bool value)
 bool OsgSceneObject::intersectRay(const Ray& ray, Vector3f* hitPoint)
 {
 	Vector3f rstart = ray.getOrigin();
-	Vector3f rend = ray.getPoint(1000);
+	
+	// Compute reasonable ray length based on distance between ray origin and
+	// owner scene node center.
+	Vector3f center = getOwner()->getBoundCenter();
+	float dir = (ray.getOrigin() - center).norm();
+	Vector3f rend = ray.getPoint(dir * 2);
 
 	osg::Vec3d orig(rstart[0], rstart[1], rstart[2]);
 	osg::Vec3d end(rend[0], rend[1], rend[2]);

@@ -123,7 +123,7 @@ void Console::handleEvent(const Event& evt)
 bool Console::handleCommand(const String& cmd) 
 { 
 	Vector<String> args = StringUtils::split(cmd);
-	if(args[0] == "?")
+	if(args[0] == "?"  && args.size() == 1)
 	{
 		omsg("Console");
 		omsg("\t c [ls]      - toggle console. l toggles log, s toggles stats.");

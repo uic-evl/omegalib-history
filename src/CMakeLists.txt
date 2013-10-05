@@ -1,29 +1,3 @@
-###################################################################################################
-# THE OMEGA LIB PROJECT
-#-------------------------------------------------------------------------------------------------
-# Copyright 2010-2013		Electronic Visualization Laboratory, University of Illinois at Chicago
-# Authors:										
-#  Alessandro Febretti		febret@gmail.com
-#-------------------------------------------------------------------------------------------------
-# Copyright (c) 2010-2013, Electronic Visualization Laboratory, University of Illinois at Chicago
-# All rights reserved.
-# Redistribution and use in source and binary forms, with or without modification, are permitted 
-# provided that the following conditions are met:
-# 
-# Redistributions of source code must retain the above copyright notice, this list of conditions 
-# and the following disclaimer. Redistributions in binary form must reproduce the above copyright 
-# notice, this list of conditions and the following disclaimer in the documentation and/or other 
-# materials provided with the distribution. 
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF 
-# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-###################################################################################################
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 include(ExternalProject)
 #include(OmegaAddTutorial)
@@ -31,7 +5,7 @@ include(UsePch)
 
 include(${OmegaLib_SOURCE_DIR}/external/UseOmicron.cmake)
 
-set(OMEGA_HARDCODE_DATA_PATHS true CACHE BOOL "When set to true, the data and application paths will be hardcoded in macros and will be used default for file lookups")
+set(OMEGA_HARDCODE_DATA_PATHS false CACHE BOOL "When set to true, the data and application paths will be hardcoded in macros and will be used default for file lookups")
 
 ###################################################################################################
 # Visual Leak Detector Support
@@ -115,12 +89,21 @@ include_directories(
 if(NOT APPLE)
 	add_subdirectory(3rdparty/glew)
 endif(NOT APPLE)
+
+# Add several example applications
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/ohello ${CMAKE_BINARY_DIR}/examples/ohello)
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/ohello2 ${CMAKE_BINARY_DIR}/examples/ohello2)
+add_subdirectory(${CMAKE_SOURCE_DIR}/examples/ohelloWidgets ${CMAKE_BINARY_DIR}/examples/ohelloWidgets)
 add_subdirectory(${CMAKE_SOURCE_DIR}/examples/omegaSound ${CMAKE_BINARY_DIR}/examples/omegaSound)
+
+# Add the omegaToolkit library
 add_subdirectory(omegaToolkit)
 
 # OSX uses its own glut, do not compile it internally (Should we do the same under linux?)
+if(WIN32)
+    set(OMEGA_USE_DISPLAY_GLUT true CACHE BOOL "Enable GLUT display system support")
+endif()
+
 if(OMEGA_USE_DISPLAY_GLUT)
 	if(APPLE)
 		find_package(GLUT)
@@ -176,14 +159,62 @@ endif()
 # Add the modules subdirectory
 add_subdirectory(${CMAKE_SOURCE_DIR}/modules ${CMAKE_BINARY_DIR}/modules)
 
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/OmegalibConfig.cmake.in ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake)
+# Generate the Omegalib config fule used by external applications to find omegalib.
+# The @ONLY option is to substitute only variables in form @VAR@. This is because
+# OmegalibConfig.cmake uses ${VAR} variables that will be substituted by the
+# external application.
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/OmegalibConfig.cmake.in ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake @ONLY)
+
+# Windows-specific config operations
 if(WIN32)
+	# Set up the MakeRelease script. It will be used to generate release packages on windows
 	configure_file(${CMAKE_SOURCE_DIR}/MakeRelease.bat.in ${CMAKE_BINARY_DIR}/MakeRelease.bat)
-	# Copy WinSparkle dll to output folder
+	# Copy The WinSparkle dll to output folder. WInsparkle is used to notify users of omegalib updates.
 	if(OMEGA_ENABLE_AUTO_UPDATE)
 		configure_file(${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG} COPYONLY)
 		configure_file(${CMAKE_SOURCE_DIR}/external/libs32/WinSparkle.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE} COPYONLY)
 	endif()
 endif()
+
+###############################################################################
+# Install commands
+install(DIRECTORY ../include DESTINATION omegalib)
+install(DIRECTORY ../CMakeModules DESTINATION omegalib)
+
+# omicron
+install(DIRECTORY ../omicron/CMakeModules DESTINATION omegalib/omicron)
+install(DIRECTORY ../omicron/include DESTINATION omegalib)
+install(DIRECTORY ../omicron/external/include DESTINATION omegalib/external)
+install(FILES ${CMAKE_BINARY_DIR}/omicron/omicron/UseOmicron.cmake DESTINATION omegalib/omicron/omicron)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/omicron/omicron/include DESTINATION omegalib/omicron/omicron)
+
+if(WIN32)
+	# on windows, install only the release dir, and also copy the export libs.
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/release/ DESTINATION omegalib/bin)
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/release/ DESTINATION omegalib/lib FILES_MATCHING PATTERN "*.lib")
+else()
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/bin DESTINATION omegalib)
+endif()
+# osgworks
+install(DIRECTORY ${CMAKE_BINARY_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib/ DESTINATION omegalib/lib)
+
+# modules and examples
+install(DIRECTORY ../modules DESTINATION omegalib)
+install(DIRECTORY ../examples/python/ DESTINATION omegalib/examples)
+
+# data
+install(DIRECTORY ../data/cubemaps DESTINATION omegalib)
+install(DIRECTORY ../data/cyclops DESTINATION omegalib)
+install(DIRECTORY ../data/evl DESTINATION omegalib)
+install(DIRECTORY ../data/fonts DESTINATION omegalib)
+install(DIRECTORY ../data/menu_sounds DESTINATION omegalib)
+install(DIRECTORY ../data/ui DESTINATION omegalib)
+install(DIRECTORY ../data/porthole DESTINATION omegalib)
+install(DIRECTORY ../data/system DESTINATION omegalib)
+install(FILES ../data/default.cfg DESTINATION omegalib)
+install(FILES ../data/default_init.py DESTINATION omegalib)
+install(FILES ../data/omegalib-transparent-white.png DESTINATION omegalib)
+install(FILES ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake DESTINATION omegalib)
+install(FILES ${CMAKE_BINARY_DIR}/include/omegaConfig.h DESTINATION omegalib/include)
 
 

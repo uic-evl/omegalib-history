@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *-----------------------------------------------------------------------------
  * What's in this file
- *	The omegalib entry point (main), initialization and shutdown code, plus a
+ *	The omegalib entry point (omain), initialization and shutdown code, plus a
  *	set of system utility functions.
  ******************************************************************************/
 #include "omega/osystem.h"
@@ -42,6 +42,9 @@
 #include "omega/MissionControl.h"
 
 #include <iostream>
+
+// for getenv()
+#include <stdlib.h>
 
 #ifndef WIN32
 	#include <unistd.h>
@@ -157,14 +160,17 @@ namespace omega
 #ifdef OMEGA_APPROOT_DIRECTORY
 			String dataPath = OMEGA_APPROOT_DIRECTORY;
 #else
+			// If we have an environment variable OMEGA_HOME, use it as the
+			// default data path
 			String dataPath = "";
+			char* omegaHome = getenv("OMEGA_HOME");
+			if(omegaHome != NULL) dataPath = omegaHome;
 #endif
 			String logFilename = ostr("%1%.log", %app.getName());
 
 			bool kill = false;
 			bool help = false;
 			bool disableSIGINTHandler = false;
-
 			bool logRemoteNodes = false;
 
 			sArgs.newNamedString(
@@ -288,12 +294,14 @@ namespace omega
 			// - the default omegalib data path
 			dm->addSource(new FilesystemDataSource("./"));
 			dm->addSource(new FilesystemDataSource(""));
-
-#ifdef OMEGA_HARDCODE_DATA_PATHS
 			dm->addSource(new FilesystemDataSource(dataPath));
 			ofmsg("::: %1%", %dataPath);
+
+#ifdef OMEGA_HARDCODE_DATA_PATHS
 			dm->addSource(new FilesystemDataSource(OMEGA_DATA_PATH));
 			ofmsg("::: %1%", %OMEGA_DATA_PATH);
+			dm->addSource(new FilesystemDataSource(OMEGA_BINARY_PATH));
+			ofmsg("::: %1%", %OMEGA_BINARY_PATH);
 #endif
 			omsg("omegalib application config lookup:");
 			String curCfgFilename = ostr("%1%/%2%", %app.getName() %configFilename);

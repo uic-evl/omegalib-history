@@ -82,17 +82,18 @@ else(WIN32)
 	if(APPLE)
 		set(EQUALIZER_EQ_LIB_DEBUG ${EQUALIZER_BINARY_DIR}/libs/client/libEqualizer.dylib)
 		set(EQUALIZER_CO_LIB_DEBUG ${EQUALIZER_BINARY_DIR}/libs/collage/libCollage.dylib)
+		install(DIRECTORY ${EQUALIZER_BINARY_DIR}/libs/client/ DESTINATION omegalib/bin FILES_MATCHING PATTERN "*.dylib")
+		install(DIRECTORY ${EQUALIZER_BINARY_DIR}/libs/server/ DESTINATION omegalib/bin FILES_MATCHING PATTERN "*.dylib")
+		install(DIRECTORY ${EQUALIZER_BINARY_DIR}/libs/collage/ DESTINATION omegalib/bin FILES_MATCHING PATTERN "*.dylib")
 	else(APPLE)
 		set(EQUALIZER_EQ_LIB_DEBUG ${EQUALIZER_BINARY_DIR}/libs/client/libEqualizer.so)
 		set(EQUALIZER_CO_LIB_DEBUG ${EQUALIZER_BINARY_DIR}/libs/collage/libCollage.so)
+		install(DIRECTORY ${EQUALIZER_BINARY_DIR}/libs/client/ DESTINATION omegalib/bin FILES_MATCHING PATTERN "*.so*")
+		install(DIRECTORY ${EQUALIZER_BINARY_DIR}/libs/server/ DESTINATION omegalib/bin FILES_MATCHING PATTERN "*.so*")
+		install(DIRECTORY ${EQUALIZER_BINARY_DIR}/libs/collage/ DESTINATION omegalib/bin FILES_MATCHING PATTERN "*.so*")
 	endif(APPLE)	
 	set(EQUALIZER_LIBS_DEBUG ${EQUALIZER_EQ_LIB_DEBUG} ${EQUALIZER_CO_LIB_DEBUG})
 	set(EQUALIZER_LIBS_RELEASE ${EQUALIZER_EQ_LIB_DEBUG} ${EQUALIZER_CO_LIB_DEBUG})
-	# install(
-		# FILES ${EQUALIZER_CLIENT_LIBS_RELEASE}
-		# DESTINATION lib
-		# COMPONENT omegalib
-	# )
 endif(WIN32)
 set(EQUALIZER_LIBS ${EQUALIZER_LIBS_DEBUG} ${EQUALIZER_LIBS_RELEASE})
 set(EQUALIZER_INCLUDES ${CMAKE_BINARY_DIR}/src/omega/equalizer-prefix/src/equalizer-build/include)

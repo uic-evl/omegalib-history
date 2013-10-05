@@ -52,7 +52,8 @@ Entity::Entity(SceneManager* scene):
 		myOsgNode(NULL),
 		myEffect(NULL),
 		myOsgSceneObject(NULL),
-		myCastShadow(true)
+		myCastShadow(true),
+		myCullingActive(true)
 {
 	// By default attach new entities to the root node of the scene.
 	myEffect = new EffectNode(scene);
@@ -74,6 +75,7 @@ Entity::~Entity()
 void Entity::initialize(osg::Node* node)
 {
 	myOsgNode = node;
+	myOsgNode->setCullingActive(myCullingActive);
 
 	// Make sure the shadow caster flags are up to date.
 	castShadow(myCastShadow);
@@ -95,6 +97,22 @@ void Entity::initialize(osg::Node* node)
 	// Now add this drawable object to the scene.
 	addListener(mySceneManager);
 	getEngine()->getScene()->addChild(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void Entity::setCullingActive(bool value)
+{ 
+	myCullingActive = value; 
+	if(myOsgNode != NULL)
+	{
+		myOsgNode->setCullingActive(value);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool Entity::isCullingActive()
+{ 
+	return myCullingActive; 
 }
 
 ///////////////////////////////////////////////////////////////////////////////

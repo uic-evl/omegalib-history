@@ -32,6 +32,9 @@
  * Original code taken from OGRE
  * Copyright (c) 2000-2009 Torus Knot Software Ltd
  *  For the latest info, see http://www.ogre3d.org/
+ *-----------------------------------------------------------------------------
+ * What's in this file
+ *	A generic node in a transformation hierarchy
  ******************************************************************************/
 #ifndef _Node_H__
 #define _Node_H__
@@ -317,17 +320,23 @@ namespace omega {
         */
         virtual void translate(const Matrix3f& axes, float x, float y, float z, TransformSpace relativeTo = TransformParent);
 
-        /** PYAPI Rotate the node around the Z-axis.
-        */
+        //! Rotate the node around the Z-axis.
         virtual void roll(const float& angle, TransformSpace relativeTo = TransformLocal);
+        //! Rotate the node around the Z-axis, The angle is specified in degrees.
+        void rollDeg(const float& angle, TransformSpace relativeTo = TransformLocal)
+		{ roll(angle * Math::DegToRad, relativeTo); }
 
-        /** PYAPI Rotate the node around the X-axis.
-        */
+        //! Rotate the node around the X-axis.
         virtual void pitch(const float& angle, TransformSpace relativeTo = TransformLocal);
+        //! Rotate the node around the X-axis, The angle is specified in degrees.
+        virtual void pitchDeg(const float& angle, TransformSpace relativeTo = TransformLocal)
+		{ pitch(angle * Math::DegToRad, relativeTo); }
 
-        /** PYAPI Rotate the node around the Y-axis.
-        */
+        //! Rotate the node around the Y-axis.
         virtual void yaw(const float& angle, TransformSpace relativeTo = TransformLocal);
+        //! Rotate the node around the Y-axis, The angle is specified in degrees.
+        virtual void yawDeg(const float& angle, TransformSpace relativeTo = TransformLocal)
+		{ yaw(angle * Math::DegToRad, relativeTo); }
 
         /** Rotate the node around an arbitrary axis.
         */

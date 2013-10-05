@@ -205,6 +205,8 @@ BOOST_PYTHON_MODULE(cyclops)
 		PYAPI_METHOD(Entity, deleteContextMenu)
 		PYAPI_GETTER(Entity, listPieces)
 		PYAPI_REF_GETTER(Entity, getPiece)
+		PYAPI_METHOD(Entity, setCullingActive)
+		PYAPI_METHOD(Entity, isCullingActive)
 		;
 
 	// SphereShape
@@ -271,6 +273,11 @@ BOOST_PYTHON_MODULE(cyclops)
 		.def("getAnimationLength", &AnimatedObject::getAnimationLength)
 		.def("getAnimationStart", &AnimatedObject::getAnimationStart)
 		.def("setAnimationStart", &AnimatedObject::setAnimationStart)
+		// These use the new python API macros. Convert all declaractions to
+		// use this
+		PYAPI_METHOD(AnimatedObject, setCurrentModelIndex)
+		PYAPI_METHOD(AnimatedObject, getCurrentModelIndex)
+		PYAPI_METHOD(AnimatedObject, getNumModels)
 		;
 
 	// LightType

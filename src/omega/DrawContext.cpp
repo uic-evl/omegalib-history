@@ -358,6 +358,13 @@ void DrawContext::updateTransforms(
 	Vector3f pb = tile->bottomRight;
 	Vector3f pc = tile->topLeft;
 	
+	if(tile->isHMD)
+	{
+		pa = head * pa;
+		pb = head * pb;
+		pc = head * pc;
+	}
+
 	// half eye separation
 	float hes = eyeSeparation / 2;
 	Vector3f pe = Vector3f::Zero();

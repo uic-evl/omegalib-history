@@ -79,6 +79,11 @@ namespace cyclops {
 
 		void castShadow(bool value);
 		bool doesCastShadow();
+		//! Enables or disables frustum culling for this entity. If culling is
+		//! enabled (the default state), this entity will be culled when its
+		//! bounding box does not intersect the camera frustum.
+		void setCullingActive(bool value);
+		bool isCullingActive();
 
 		//! Context Menu
 		//@{
@@ -110,6 +115,7 @@ namespace cyclops {
 		Ref<omegaToolkit::ui::Menu> myContextMenu;
 
 		bool myCastShadow;
+		bool myCullingActive;
 	};
 };
 

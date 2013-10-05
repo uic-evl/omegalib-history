@@ -140,7 +140,7 @@ void DrawInterface::pushTransform(const AffineTransform3& transform)
 {
     glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glMultMatrixd(transform.data());
+	glLoadMatrixd(transform.data());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -533,4 +533,34 @@ GLuint DrawInterface::createProgram(GLuint vertextShader, GLuint fragmentShader)
 
     glUseProgram(0);
     return program;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+GLuint DrawInterface::getOrCreateProgram(
+	const String& name, 
+	const String& vertexShaderFile, 
+	const String& fragmentShaderFile)
+{
+	// If the program is already in the cache, return it.
+	if(myPrograms.find(name) != myPrograms.end()) return myPrograms[name];
+
+	//! Program is not in the cache. Let's create it now.
+	String vertexShaderSource = DataManager::readTextFile(vertexShaderFile);
+	if(vertexShaderSource.empty())
+	{
+		ofwarn("DrawInterface::getOrCreateProgram: source file %1% not found or empty", %vertexShaderFile);
+		return 0;
+	}
+	String fragmentShaderSource = DataManager::readTextFile(fragmentShaderFile);
+	if(fragmentShaderSource.empty())
+	{
+		ofwarn("DrawInterface::getOrCreateProgram: source file %1% not found or empty", %fragmentShaderFile);
+		return 0;
+	}
+
+	GLuint vs = makeShaderFromSource(vertexShaderSource.c_str(), VertexShader);
+	GLuint fs = makeShaderFromSource(fragmentShaderSource.c_str(), FragmentShader);
+	GLuint program = createProgram(vs, fs);
+	myPrograms[name] = program;
+	return program;
 }

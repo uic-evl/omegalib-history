@@ -29,6 +29,7 @@ REM copy data and scripts
 xcopy "${CMAKE_SOURCE_DIR}\data\cyclops" .\cyclops\ /S /Y
 xcopy "${CMAKE_SOURCE_DIR}\data\system" .\system\ /S /Y
 xcopy "${CMAKE_SOURCE_DIR}\data\fonts" .\fonts\ /S /Y
+xcopy "${CMAKE_SOURCE_DIR}\data\ui" .\ui\ /S /Y
 
 copy "${CMAKE_SOURCE_DIR}\data\default.cfg" .\ /Y
 copy "${CMAKE_SOURCE_DIR}\data\default_init.py" .\ /Y

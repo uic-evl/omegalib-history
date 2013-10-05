@@ -83,6 +83,20 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_ENUM_VALUE(Widget, BlendAdditive)
 		;
 
+	// Vertical Align
+	PYAPI_ENUM(Container::VerticalAlign, VAlign)
+		PYAPI_ENUM_VALUE(Container, AlignTop)
+		PYAPI_ENUM_VALUE(Container, AlignMiddle)
+		PYAPI_ENUM_VALUE(Container, AlignBottom)
+		;
+
+	// Horizontal Align
+	PYAPI_ENUM(Container::HorizontalAlign, HAlign)
+		PYAPI_ENUM_VALUE(Container, AlignLeft)
+		PYAPI_ENUM_VALUE(Container, AlignCenter)
+		PYAPI_ENUM_VALUE(Container, AlignRight)
+		;
+
 	PYAPI_BASE_CLASS(ToolkitUtils)
 		PYAPI_STATIC_REF_GETTER(ToolkitUtils, createInteractor)
 		PYAPI_STATIC_REF_GETTER(ToolkitUtils, setupInteractor)
@@ -107,6 +121,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_REF_GETTER(Menu, addImage)
 		PYAPI_REF_GETTER(Menu, addContainer)
 		PYAPI_REF_GETTER(Menu, getContainer)
+		.def("get3dSettings", &Menu::get3dSettings, PYAPI_RETURN_INTERNAL_REF)
 		PYAPI_METHOD(Menu, show)
 		PYAPI_METHOD(Menu, hide)
 		PYAPI_METHOD(Menu, isVisible)
@@ -209,6 +224,18 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_GETTER(Widget, getUpdateCommand)
 		PYAPI_METHOD(Widget, isStereo)
 		PYAPI_METHOD(Widget, setStereo)
+		PYAPI_METHOD(Widget, requestLayoutRefresh)
+		// Navigation
+		PYAPI_METHOD(Widget, isNavigationEnabled)
+		PYAPI_METHOD(Widget, setNavigationEnabled)
+		PYAPI_METHOD(Widget, setHorizontalNextWidget)
+		PYAPI_METHOD(Widget, setHorizontalPrevWidget)
+		PYAPI_METHOD(Widget, setVerticalNextWidget)
+		PYAPI_METHOD(Widget, setVerticalPrevWidget)
+		PYAPI_REF_GETTER(Widget, getHorizontalNextWidget)
+		PYAPI_REF_GETTER(Widget, getHorizontalPrevWidget)
+		PYAPI_REF_GETTER(Widget, getVerticalNextWidget)
+		PYAPI_REF_GETTER(Widget, getVerticalPrevWidget)
 		;
 
 	// Container
@@ -222,6 +249,7 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_METHOD(Container, removeChild)
 		PYAPI_REF_GETTER(Container, getChildByIndex)
 		PYAPI_REF_GETTER(Container, getChildByName)
+		PYAPI_METHOD(Container, getNumChildren)
 		// Layout
 		PYAPI_METHOD(Container, setLayout)
 		PYAPI_GETTER(Container, getLayout)
@@ -229,6 +257,11 @@ BOOST_PYTHON_MODULE(omegaToolkit)
 		PYAPI_METHOD(Container, setPadding)
 		PYAPI_METHOD(Container, getMargin)
 		PYAPI_METHOD(Container, setMargin)
+		PYAPI_METHOD(Container, setHorizontalAlign)
+		PYAPI_METHOD(Container, getHorizontalAlign)
+		PYAPI_METHOD(Container, setVerticalAlign)
+		PYAPI_METHOD(Container, getVerticalAlign)
+
 		// Interaction
 		PYAPI_METHOD(Container, isEventInside)
 		;
