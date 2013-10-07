@@ -65,7 +65,16 @@ void DrawInterface::beginDraw3D(const DrawContext& context)
 
     glMatrixMode(GL_MODELVIEW);
 
-	glViewport(context.viewport.x(), context.viewport.y(), context.viewport.width(), context.viewport.height());
+	const Rect& vp = context.viewport;
+
+	if(vp.max[0] < vp.min[0] || vp.max[1] < vp.min[1])
+	{
+		ofwarn("DrawInterface::beginDraw3D: invalid viewport %1% - %2%", %vp.min %vp.max);
+	}
+	else
+	{
+		glViewport(vp.x(), vp.y(), vp.width(), vp.height());
+	}
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_DEPTH_TEST);
