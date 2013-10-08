@@ -8,19 +8,21 @@ if(WIN32)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500")
 endif()
 
-
 include(${OmegaLib_SOURCE_DIR}/external/UseOmicron.cmake)
 
 include_directories(../modules)
 
+# devlib installing is not supported yet on omegalib 5, so force this to false
+#set(OMEGA_INSTALL_DEVLIBS false CACHE BOOL "When set to true, and install will include C++ development libraries in addition to the python interpreter")
+set(OMEGA_INSTALL_DEVLIBS false)
 
-###################################################################################################
+###############################################################################
 # Visual Leak Detector Support
 if(OMEGA_OS_WIN)
 	set(OMEGA_ENABLE_VLD false CACHE BOOL "Enables Visual Leak Detector support for this build.")
 endif()
 
-###################################################################################################
+###############################################################################
 # See if we can setup Python support for this build
 set(OMEGA_ENABLE_PYTHON true CACHE BOOL "Enables python support if available.")
 if(OMEGA_ENABLE_PYTHON)
@@ -52,7 +54,7 @@ else()
 	set(OMEGA_USE_PYTHON false)
 endif()
 
-###################################################################################################
+###############################################################################
 # Options
 set(OMEGA_BUILD_OSG_LIB true CACHE BOOL "Enable build of OpenSceneGraph integration library")
 set(OMEGA_USE_OSGBULLET true CACHE BOOL "Enable osgBullet support")
@@ -61,7 +63,7 @@ if(WIN32)
 	set(OMEGA_ENABLE_AUTO_UPDATE true CACHE BOOL "Enables the omegalib binaries auto updater (WinSparkle) for a windows build. Supported by 32bit builds only.")
 endif()
 
-###################################################################################################
+###############################################################################
 # Set include paths
 if(APPLE)
 	include_directories(
@@ -80,7 +82,7 @@ else(APPLE)
 	  )
 endif(APPLE)
 
-###################################################################################################
+###############################################################################
 # Add libraries and applications to the project.
 
 # Add some libraries used for display support.
@@ -196,40 +198,40 @@ endif()
 
 ###############################################################################
 # Install commands
-install(DIRECTORY ../include DESTINATION omegalib)
-install(DIRECTORY ../CMakeModules DESTINATION omegalib)
+if(${OMEGA_INSTALL_DEVLIBS})
+	install(DIRECTORY ../include DESTINATION omegalib)
+	install(DIRECTORY ../CMakeModules DESTINATION omegalib)
+endif()
 
 # omicron
-install(DIRECTORY ../omicron/CMakeModules DESTINATION omegalib/omicron)
-install(DIRECTORY ../omicron/include DESTINATION omegalib)
-install(DIRECTORY ../omicron/external/include DESTINATION omegalib/external)
-install(FILES ${CMAKE_BINARY_DIR}/omicron/omicron/UseOmicron.cmake DESTINATION omegalib/omicron/omicron)
-install(DIRECTORY ${CMAKE_BINARY_DIR}/omicron/omicron/include DESTINATION omegalib/omicron/omicron)
+if(${OMEGA_INSTALL_DEVLIBS})
+	install(DIRECTORY ../omicron/CMakeModules DESTINATION omegalib/omicron)
+	install(DIRECTORY ../omicron/include DESTINATION omegalib)
+	install(DIRECTORY ../omicron/external/include DESTINATION omegalib/external)
+	install(FILES ${CMAKE_BINARY_DIR}/omicron/omicron/UseOmicron.cmake DESTINATION omegalib/omicron/omicron)
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/omicron/omicron/include DESTINATION omegalib/omicron/omicron)
+endif()
 
 if(WIN32)
 	# on windows, install only the release dir, and also copy the export libs.
 	install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/release/ DESTINATION omegalib/bin)
-	install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/release/ DESTINATION omegalib/lib FILES_MATCHING PATTERN "*.lib")
+	if(${OMEGA_INSTALL_DEVLIBS})
+		install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/release/ DESTINATION omegalib/lib FILES_MATCHING PATTERN "*.lib")
+	endif()
 else()
 	install(DIRECTORY ${CMAKE_BINARY_DIR}/bin DESTINATION omegalib)
 endif()
 
-# modules and examples
-install(DIRECTORY ../modules DESTINATION omegalib)
-install(DIRECTORY ../examples/python/ DESTINATION omegalib/examples)
-
 # data
-install(DIRECTORY ../cubemaps DESTINATION omegalib)
-install(DIRECTORY ../evl DESTINATION omegalib)
 install(DIRECTORY ../fonts DESTINATION omegalib)
 install(DIRECTORY ../menu_sounds DESTINATION omegalib)
 install(DIRECTORY ../ui DESTINATION omegalib)
-install(DIRECTORY ../porthole DESTINATION omegalib)
 install(DIRECTORY ../system DESTINATION omegalib)
 install(FILES ../default.cfg DESTINATION omegalib)
 install(FILES ../default_init.py DESTINATION omegalib)
 install(FILES ../omegalib-transparent-white.png DESTINATION omegalib)
-install(FILES ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake DESTINATION omegalib)
-install(FILES ${CMAKE_BINARY_DIR}/include/omegaConfig.h DESTINATION omegalib/include)
-
+if(${OMEGA_INSTALL_DEVLIBS})
+	install(FILES ${CMAKE_BINARY_DIR}/OmegalibConfig.cmake DESTINATION omegalib)
+	install(FILES ${CMAKE_BINARY_DIR}/include/omegaConfig.h DESTINATION omegalib/include)
+endif()
 
