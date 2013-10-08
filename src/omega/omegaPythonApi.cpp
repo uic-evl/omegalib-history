@@ -726,6 +726,18 @@ void toggleStereo()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+bool isStereoEnabled()
+{
+	SystemManager* sm = SystemManager::instance();
+	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
+	if(eqds != NULL)
+	{
+		return !(eqds->getDisplayConfig().forceMono || eqds->getDisplayConfig().stereoMode == DisplayTileConfig::StereoMode::Mono);
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 DisplayConfig* getDisplayConfig()
 {
 	DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
@@ -1356,6 +1368,17 @@ BOOST_PYTHON_MODULE(omega)
 		PYAPI_METHOD(SoundInstance, fade)
 		PYAPI_METHOD(SoundInstance, setPitch)
 		PYAPI_METHOD(SoundInstance, getPitch)
+		PYAPI_METHOD(SoundInstance, setMaxDistance)
+		PYAPI_METHOD(SoundInstance, getMaxDistance)
+		PYAPI_METHOD(SoundInstance, setMinRolloffDistance)
+		PYAPI_METHOD(SoundInstance, getMinRolloffDistance)
+		PYAPI_METHOD(SoundInstance, setDistanceRange)
+		PYAPI_METHOD(SoundInstance, setNoRolloff)
+		PYAPI_METHOD(SoundInstance, setLinearRolloff)
+		PYAPI_METHOD(SoundInstance, setLogarthmicRolloff)
+		PYAPI_METHOD(SoundInstance, isRolloffEnabled)
+		PYAPI_METHOD(SoundInstance, isRolloffLinear)
+		PYAPI_METHOD(SoundInstance, isRolloffLogarithmic)
 		;
 
 	// MissionControlClient
@@ -1406,6 +1429,7 @@ BOOST_PYTHON_MODULE(omega)
 	def("getTiles", getTiles, PYAPI_RETURN_VALUE);
 	def("setTileCamera", setTileCamera);
 	def("toggleStereo", toggleStereo);
+	def("isStereoEnabled", isStereoEnabled);
 	def("queueCommand", queueCommand);
 	def("broadcastCommand", broadcastCommand);
 	def("ogetdataprefix", ogetdataprefix);
