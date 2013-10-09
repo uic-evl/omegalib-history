@@ -26,7 +26,7 @@ else()
 		include_directories(${SAGE_INCLUDE_DIR})
 	
 		# Set module name and source files here
-		add_library(${MODULE_NAME} SHARED 
+		add_library(${MODULE_NAME} MODULE 
 			SageManager.h
 			SageManager.cpp
 			sage.cpp)
