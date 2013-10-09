@@ -732,7 +732,7 @@ bool isStereoEnabled()
 	EqualizerDisplaySystem* eqds = dynamic_cast<EqualizerDisplaySystem*>(sm->getDisplaySystem());
 	if(eqds != NULL)
 	{
-		return !(eqds->getDisplayConfig().forceMono || eqds->getDisplayConfig().stereoMode == DisplayTileConfig::StereoMode::Mono);
+		return !(eqds->getDisplayConfig().forceMono || eqds->getDisplayConfig().stereoMode == DisplayTileConfig::Mono);
 	}
 	return false;
 }

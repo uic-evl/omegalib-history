@@ -208,6 +208,9 @@ namespace omegaToolkit { namespace ui {
 		//Ref<omegaToolkit::ui::Label> myLabelWidget;
 		Ref<omegaToolkit::ui::Container> myContainer;
 		omegaToolkit::ui::Container3dSettings my3dSettings;
+
+		// Flag to disable sound on first hide
+		bool firstHide;
 	};
 }; };
 

@@ -282,20 +282,8 @@ Menu* MenuManager::createMenu(const String& name)
 	Menu* menu = new Menu(name, this);
 	myMenuList.push_back(menu);
 	
-	if(myHideSoundMenu != NULL)
-	{
-		// Mutes menu sound for default hide
-		myHideSoundMenu->setVolumeScale(0);
-	}
-	
 	// Set not visible by default.
 	menu->hide();
-	
-	if(myHideSoundMenu != NULL)
-	{
-		// Reenables menu sound
-		myHideSoundMenu->setVolumeScale(1.0);
-	}
 	
 	return menu;
 }
