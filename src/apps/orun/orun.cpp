@@ -290,7 +290,6 @@ int main(int argc, char** argv)
 	oargs().newNamedString('s', "script", "script", "script to launch at startup", sDefaultScript);
 
 	Application<OmegaViewer> app(applicationName);
-	app.setExecutableName(argv[0]);
 
 #ifdef OMEGA_ENABLE_AUTO_UPDATE
 // Convert the omegalib version to wide char (two macros needed for the substitution to work)

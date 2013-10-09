@@ -11,7 +11,7 @@ if(MODULES_ENABLE_PORTHOLE)
 	add_subdirectory(websockets)
 	
 	# Set module name and source files here
-	add_library(${MODULE_NAME} SHARED 
+	add_library(${MODULE_NAME} MODULE 
 		PortholeService.h
 		PortholeGUI.h
 		porthole.cpp
