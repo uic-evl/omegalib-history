@@ -912,7 +912,7 @@ void ContainerRenderable::beginDraw(const DrawContext& context)
 			glStencilFunc(GL_NEVER, 0x1, 0x1);
 			glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
  
-			//glClear(GL_STENCIL_BUFFER_BIT);
+			glClear(GL_STENCIL_BUFFER_BIT);
 			glColor4f(1.0, 1.0, 1.0, 1.0);
 			glBegin(GL_QUADS);
 				glVertex2f(0.0, 0.0);
