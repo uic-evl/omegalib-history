@@ -218,17 +218,18 @@ void DrawContext::setupInterleaver()
 		if(dcfg.forceMono || eye == DrawContext::EyeCyclop)
 		{
 			// Disable stencil
-			glStencilFunc(GL_ALWAYS,1,1); // to avoid interaction with stencil content
+			glStencilFunc(GL_ALWAYS,0x2,0x2); // to avoid interaction with stencil content
 		}
 		else
 		{
+			//glStencilMask(0x2);
 			if(eye == DrawContext::EyeLeft)
 			{
-				glStencilFunc(GL_NOTEQUAL,1,1); // draws if stencil <> 1
+				glStencilFunc(GL_NOTEQUAL,0x2,0x2); // draws if stencil <> 1
 			}
 			else if(eye == DrawContext::EyeRight)
 			{
-				glStencilFunc(GL_EQUAL,1,1); // draws if stencil <> 0
+				glStencilFunc(GL_EQUAL,0x2,0x2); // draws if stencil <> 0
  			}
 		}
 	}
@@ -261,11 +262,12 @@ void DrawContext::initializeStencilInterleaver(int gliWindowWidth, int gliWindow
 	// clearing and configuring stencil drawing
 	glDrawBuffer(GL_BACK);
 	glEnable(GL_STENCIL_TEST);
+	glStencilMask(0x2);
 	glClearStencil(0);
 	glClear(GL_STENCIL_BUFFER_BIT);
 	glStencilOp (GL_REPLACE, GL_REPLACE, GL_REPLACE); // colorbuffer is copied to stencil
 	glDisable(GL_DEPTH_TEST);
-	glStencilFunc(GL_ALWAYS,1,1); // to avoid interaction with stencil content
+	glStencilFunc(GL_ALWAYS,0xFF,0xFF); // to avoid interaction with stencil content
 	
 	// drawing stencil pattern
 	glColor4f(1,1,1,0);	// alpha is 0 not to interfere with alpha tests

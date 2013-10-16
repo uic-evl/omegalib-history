@@ -128,6 +128,8 @@ namespace omegaToolkit { namespace ui {
 		int getGridColumns();
 		void setGridRows(int value);
 		void setGridColumns(int value);
+		bool isClippingEnabled();
+		void setClippingEnabled(bool value);
 		//@}
 
 		//! Returns true if the event happens within the container boundaries. This method
@@ -176,6 +178,7 @@ namespace omegaToolkit { namespace ui {
 		int myGridColumns;
 		HorizontalAlign myHorizontalAlign;
 		VerticalAlign myVerticalAlign;
+		bool myClipping;
 
 		Container3dSettings my3dSettings;
 

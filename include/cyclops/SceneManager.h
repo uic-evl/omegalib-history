@@ -118,7 +118,7 @@ namespace cyclops {
 	///////////////////////////////////////////////////////////////////////////
 	//! The scene manager contains all the main features used to handle a 
 	//! cyclops scene and its assets.
-	class CY_API SceneManager: public EngineModule, SceneNodeListener
+	class CY_API SceneManager: public EngineModule, public SceneNodeListener
 	{
 	friend class Entity;
 	friend class Light;

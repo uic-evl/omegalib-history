@@ -166,17 +166,18 @@ public:
 		myCustomWidgetContainer->setStyle("border: 2 #ffffff; fill: #00000080");
 		myCustomWidgetContainer->setSize(Vector2f(400,140));
 		myCustomWidgetContainer->setAutosize(false);
+		myCustomWidgetContainer->setClippingEnabled(true);
 
 		myPlot1 = AnimatedPlot::create(myCustomWidgetContainer);
-		myPlot1->setPlotOptions(0, 20, 0.4, Color::Red);
+		myPlot1->setPlotOptions(0, 40, 0.4, Color::Red);
 		myPlot1->setSize(Vector2f(400,140));
 
 		myPlot2 = AnimatedPlot::create(myCustomWidgetContainer);
-		myPlot2->setPlotOptions(7, 40, 0.3, Color::Green);
+		myPlot2->setPlotOptions(7, 80, 0.3, Color::Green);
 		myPlot2->setSize(Vector2f(400,140));
 
 		myPlot3 = AnimatedPlot::create(myCustomWidgetContainer);
-		myPlot3->setPlotOptions(13, 60, 0.1, Color::Blue);
+		myPlot3->setPlotOptions(13, 120, 0.1, Color::Blue);
 		myPlot3->setSize(Vector2f(400,140));
 	}
 
