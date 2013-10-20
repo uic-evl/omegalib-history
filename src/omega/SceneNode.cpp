@@ -255,12 +255,20 @@ void SceneNode::update(bool updateChildren, bool parentHasChanged)
 ///////////////////////////////////////////////////////////////////////////////
 void SceneNode::update(const UpdateContext& context)
 {
-	// Step 1: traverse the scene graph and invoke update on all attached node components.
-	// Node components will have the change to change the owner node transforms.
+	// Step 1: traverse the scene graph and invoke update on all nodes.
+	// Nodes will have the chance to modify their own transform in this phase.
+	// For instance, nodes that have to face cameras update transforms in this
+	// step. User-defined updateTraversal methods for custom SceneNode classes
+	// may perform other operations in this step.
 	updateTraversal(context);
 
 	// Step 2: update all needed transforms in the node hierarchy
     update(true, false);
+
+	// Step 3: update all node components. In this step, all nodes have 
+	// up-to-date transforms, so we can consistently update all attached node
+	// components
+	updateComponents(context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,6 +285,17 @@ void SceneNode::updateTraversal(const UpdateContext& context)
 		lookAt(pos, up);
 	}
 
+	// Update children
+	foreach(Node* child, getChildren())
+	{
+		SceneNode* n = dynamic_cast<SceneNode*>(child);
+		if(n) n->updateTraversal(context);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void SceneNode::updateComponents(const UpdateContext& context)
+{
 	// Update attached components
 	foreach(NodeComponent* d, myObjects)
 	{
@@ -286,7 +305,7 @@ void SceneNode::updateTraversal(const UpdateContext& context)
 	foreach(Node* child, getChildren())
 	{
 		SceneNode* n = dynamic_cast<SceneNode*>(child);
-		if(n) n->updateTraversal(context);
+		if(n) n->updateComponents(context);
 	}
 }
 
