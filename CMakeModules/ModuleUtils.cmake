@@ -3,7 +3,7 @@ function(module_def MODULE_NAME URL DESCRIPTION)
 	
 	list(FIND MODULES_LIST ${MODULE_NAME} found)
 	if(NOT ${found} EQUAL -1)
-		set(MODULES_${MODULE_NAME} true)
+		set(MODULES_${MODULE_NAME} true CACHE BOOL " " FORCE)
 	endif()
 	
 	if(MODULES_${MODULE_NAME})
