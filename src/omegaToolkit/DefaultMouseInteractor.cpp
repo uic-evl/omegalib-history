@@ -97,6 +97,11 @@ void DefaultMouseInteractor::updateNode()
 			if(myPointerButton1Pressed)
 			{
 				Vector3f newPos = myPointerRay.getPoint(myHandleDistance); //- (myHandlePosition - myStartBSphere.getCenter());
+
+				// If node has a parent, covernt world-space coordinates to 
+				// local space coordinates.
+				Node* parent = myNode->getParent();
+				if(parent) newPos = parent->convertWorldToLocalPosition(newPos);
 				myNode->setPosition(newPos);
 			}
 			else if(myPointerButton2Pressed)
