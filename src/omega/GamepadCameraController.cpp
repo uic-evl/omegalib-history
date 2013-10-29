@@ -32,7 +32,7 @@ using namespace omega;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 GamepadCameraController::GamepadCameraController():
 	myStrafeMultiplier(1.0f),
-	myYawMultiplier(1.0f),
+	myYawMultiplier(-1.0f),
 	myPitchMultiplier(1.0f),
 	myTorque(Quaternion::Identity()),
 	myPitch(0),
