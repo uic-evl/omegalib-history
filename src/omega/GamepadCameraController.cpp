@@ -44,13 +44,12 @@ void GamepadCameraController::handleEvent(const Event& evt)
 	if(!isEnabled() || evt.isProcessed()) return;
 	if(evt.getServiceType() == Service::Controller)
 	{
-		float n = 1000;
-		float x = evt.getExtraDataFloat(1) / n;
-		float y = evt.getExtraDataFloat(2) / n;
-		float z = evt.getExtraDataFloat(5) / n;
-		float yaw = evt.getExtraDataFloat(3) / n;
-		float pitch = evt.getExtraDataFloat(4) / n;
-		float tresh = 0.2f;
+		float x = evt.getExtraDataFloat(0);
+		float y = evt.getExtraDataFloat(1);
+		float z = evt.getExtraDataFloat(4);
+		float yaw = evt.getExtraDataFloat(2);
+		float pitch = evt.getExtraDataFloat(3);
+		float tresh = 0.01f;
 
 		if(x < tresh && x > -tresh) x = 0;
 		if(y < tresh && y > -tresh) y = 0;
