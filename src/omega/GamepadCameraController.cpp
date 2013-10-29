@@ -31,17 +31,19 @@ using namespace omega;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 GamepadCameraController::GamepadCameraController():
-	mySpeed(2.0f),
 	myStrafeMultiplier(1.0f),
-	myYawMultiplier(0.002f),
-	myPitchMultiplier(0.002f)
+	myYawMultiplier(1.0f),
+	myPitchMultiplier(1.0f),
+	myTorque(Quaternion::Identity()),
+	myPitch(0),
+	myYaw(0)
 {
 }
 	
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void GamepadCameraController::handleEvent(const Event& evt)
 {
-	if(!isEnabled() || evt.isProcessed()) return;
+	//if(!isEnabled() || evt.isProcessed()) return;
 	if(evt.getServiceType() == Service::Controller)
 	{
 		float x = evt.getExtraDataFloat(0);
@@ -49,16 +51,17 @@ void GamepadCameraController::handleEvent(const Event& evt)
 		float z = evt.getExtraDataFloat(4);
 		float yaw = evt.getExtraDataFloat(2);
 		float pitch = evt.getExtraDataFloat(3);
-		float tresh = 0.01f;
+		float tresh = 0.2f;
 
-		if(x < tresh && x > -tresh) x = 0;
-		if(y < tresh && y > -tresh) y = 0;
-		if(z < tresh && z > -tresh) z = 0;
-			
-		if(myYaw < tresh && myYaw > -tresh) myYaw = 0;
-		if(myPitch < tresh && myPitch > -tresh) myPitch = 0;
-
-		mySpeedVector = Vector3f(x, y, z) * mySpeed;
+		if(abs(x) < tresh) x = 0;
+		if(abs(y) < tresh) y = 0;
+		if(abs(z) < tresh) z = 0;
+		if(abs(yaw) < tresh) yaw = 0;
+		if(abs(pitch) < tresh) pitch = 0;
+		
+		myYaw = yaw * myYawMultiplier;
+		myPitch = pitch * myPitchMultiplier;
+		mySpeedVector = Vector3f(x, z, y) *  CameraController::mySpeed;
 	}
 }
 
@@ -66,6 +69,17 @@ void GamepadCameraController::handleEvent(const Event& evt)
 void GamepadCameraController::update(const UpdateContext& context)
 {
 	if(!isEnabled()) return;
-	//updateCamera(mySpeedVector, myYaw, myPitch, 0, context.dt);
+	Camera* c = getCamera();
+	
+	if(c != NULL)
+	{
+		c->translate(mySpeedVector * context.dt, Node::TransformLocal);
+		c->rotate(Math::quaternionFromEuler(Vector3f(myPitch * context.dt, myYaw * context.dt, 0)), Node::TransformLocal);
+		//c->setOrientation(Math::quaternionFromEuler(Vector3f(myPitch, myYaw, 0)));
+	}
+	
+	// Perform speed damping only if we run at least 10fps
+	//if(context.dt < 0.1f) mySpeedVector -= mySpeedVector * context.dt * 5;
+	//else mySpeedVector = Vector3f::Zero();
 }
 
