@@ -97,7 +97,7 @@ void DefaultMouseInteractor::updateNode()
 			if(myPointerButton1Pressed)
 			{
 				Vector3f newPos = myPointerRay.getPoint(myHandleDistance); //- (myHandlePosition - myStartBSphere.getCenter());
-
+				newPos = - myHandlePosition + myStartBSphere.getCenter() + newPos;
 				// If node has a parent, covernt world-space coordinates to 
 				// local space coordinates.
 				Node* parent = myNode->getParent();
@@ -106,17 +106,6 @@ void DefaultMouseInteractor::updateNode()
 			}
 			else if(myPointerButton2Pressed)
 			{
-				// Intersect the ray with the bounding sphere. 
-				// If the point is outside the bounding sphere, perform no rotation.
-				//std::pair<bool, omicron::real> p = myPointerRay.intersects(myStartBSphere);
-				//if(p.first)
-				//{
-				//	Vector3f pt = myPointerRay.getPoint(p.second);
-				//	pt -= myStartBSphere.getCenter();
-				//	Quaternion rot = Math::buildRotation(myHandlePosition, pt , Vector3f::Zero() );
-				//	myNode->setOrientation(myStartOrientation * rot);
-				//}
-
 				Vector3f dir1 = myPointerRay.getPoint(myHandleDistance) - myStartBSphere.getCenter();
 				Vector3f dir2 = myHandlePosition - myStartBSphere.getCenter();
 				dir1.normalize();
