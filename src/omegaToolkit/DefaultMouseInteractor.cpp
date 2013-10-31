@@ -108,14 +108,22 @@ void DefaultMouseInteractor::updateNode()
 			{
 				// Intersect the ray with the bounding sphere. 
 				// If the point is outside the bounding sphere, perform no rotation.
-				std::pair<bool, omicron::real> p = myPointerRay.intersects(myStartBSphere);
-				if(p.first)
-				{
-					Vector3f pt = myPointerRay.getPoint(p.second);
-					pt -= myStartBSphere.getCenter();
-					Quaternion rot = Math::buildRotation(myHandlePosition, pt , Vector3f::Zero() );
-					myNode->setOrientation(rot * myStartOrientation);
-				}
+				//std::pair<bool, omicron::real> p = myPointerRay.intersects(myStartBSphere);
+				//if(p.first)
+				//{
+				//	Vector3f pt = myPointerRay.getPoint(p.second);
+				//	pt -= myStartBSphere.getCenter();
+				//	Quaternion rot = Math::buildRotation(myHandlePosition, pt , Vector3f::Zero() );
+				//	myNode->setOrientation(myStartOrientation * rot);
+				//}
+
+				Vector3f dir1 = myPointerRay.getPoint(myHandleDistance) - myStartBSphere.getCenter();
+				Vector3f dir2 = myHandlePosition - myStartBSphere.getCenter();
+				dir1.normalize();
+				dir2.normalize();
+				Quaternion rot = Math::buildRotation(-dir2, -dir1, Vector3f::Zero() );
+				myNode->setOrientation(rot * myStartOrientation);
+
 			}
 		}
 	}
