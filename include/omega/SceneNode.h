@@ -169,6 +169,8 @@ namespace omega {
 		void update(const UpdateContext& context);
 		//! @internal Updates all transforms from this node down in the hierarchy.
 		virtual void update(bool updateChildren, bool parentHasChanged);
+		//! @internal Updates all node components from this node down in the hierarchy.
+		virtual void updateComponents(const UpdateContext& context);
         virtual void needUpdate(bool forceParentUpdate = true);
 
 		void draw(const DrawContext& context);

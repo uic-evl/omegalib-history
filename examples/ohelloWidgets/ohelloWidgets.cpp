@@ -96,7 +96,7 @@ public:
 	AnimatedPlot(Engine* e): 
 		Widget(e),
 			myPhase(0),
-			myFrequency(0.01f),
+			myFrequency(0.01),
 			myTime(0),
 			myColor(Color::White),
 			myAmplitude(10)
@@ -166,17 +166,18 @@ public:
 		myCustomWidgetContainer->setStyle("border: 2 #ffffff; fill: #00000080");
 		myCustomWidgetContainer->setSize(Vector2f(400,140));
 		myCustomWidgetContainer->setAutosize(false);
+		myCustomWidgetContainer->setClippingEnabled(true);
 
 		myPlot1 = AnimatedPlot::create(myCustomWidgetContainer);
-		myPlot1->setPlotOptions(0, 20, 0.4f, Color::Red);
+		myPlot1->setPlotOptions(0, 40, 0.4, Color::Red);
 		myPlot1->setSize(Vector2f(400,140));
 
 		myPlot2 = AnimatedPlot::create(myCustomWidgetContainer);
-		myPlot2->setPlotOptions(7, 40, 0.3f, Color::Green);
+		myPlot2->setPlotOptions(7, 80, 0.3, Color::Green);
 		myPlot2->setSize(Vector2f(400,140));
 
 		myPlot3 = AnimatedPlot::create(myCustomWidgetContainer);
-		myPlot3->setPlotOptions(13, 60, 0.1f, Color::Blue);
+		myPlot3->setPlotOptions(13, 120, 0.1, Color::Blue);
 		myPlot3->setSize(Vector2f(400,140));
 	}
 
@@ -329,26 +330,26 @@ public:
 
 		// Turn the containers 3d surfaces and attach them to a node.
 		myPivot1 = new SceneNode(Engine::instance());
-		myPivot1->pitch(-0.6f);
-		myPivot1->yaw(-0.6f);
+		myPivot1->pitch(-0.6);
+		myPivot1->yaw(-0.6);
 
 		myPivot2 = new SceneNode(Engine::instance());
-		myPivot2->setPosition(0, 2, -1.5f);
-		myPivot2->pitch(-0.6f);
-		myPivot2->yaw(-0.6f);
+		myPivot2->setPosition(0, 2, -1.5);
+		myPivot2->pitch(-0.6);
+		myPivot2->yaw(-0.6);
 		myPivot2->addChild(myPivot1);
 
 		Container3dSettings& c3ds1 = myXformContainer1->get3dSettings();
 		c3ds1.enable3d = true;
 		c3ds1.node = myPivot1;
 		c3ds1.center = true; 
-		c3ds1.alpha = 0.6f;
+		c3ds1.alpha = 0.6;
 
 		Container3dSettings& c3ds2 = myXformContainer2->get3dSettings();
 		c3ds2.enable3d = true;
 		c3ds2.node = myPivot2;
 		c3ds2.center = true; 
-		c3ds2.alpha = 0.6f;
+		c3ds2.alpha = 0.6;
 	}
 
 	void update(const UpdateContext& ctx)
@@ -374,7 +375,7 @@ public:
 	virtual void initialize()
 	{
 		DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-		ds->setBackgroundColor(Color(0.1f, 0.1f, 0.15f));
+		ds->setBackgroundColor(Color(0.1,0.1,0.15));
 
 		// Create and initialize the UI management module.
 		myUiModule = UiModule::createAndInitialize();

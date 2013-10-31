@@ -94,6 +94,14 @@ bool CylindricalDisplayConfig::buildConfig(DisplayConfig& cfg, Setting& scfg)
 
 				// Save the tile viewport
 				//tc->viewport = Vector4f(tileViewportX, tileViewportY, tileViewportWidth, tileViewportHeight);
+				
+				// Compute this tile pixel offset.
+				// Note that the tile row index is inverted wrt. pixel coordinates 
+				// (tile row 0 is at the bottom of the cylinder, while pixel 
+				// row 0 is at the top). We take this into account to compute
+				// correct pixel offsets for each tile.
+				tc->offset[0] = tc->pixelSize[0] * x;
+				tc->offset[1] = tc->pixelSize[1] * (numSideTiles - y - 1);
 
 				tc->computeTileCorners();
 			}

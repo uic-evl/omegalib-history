@@ -62,6 +62,7 @@ Container::Container(Engine* server):
 		myVerticalAlign(AlignMiddle),
 		myGridRows(1),
 		myGridColumns(1),
+		myClipping(false),
 		myPixelOutputEnabled(false)
 {
 	// Containers have autosize enabled by default.
@@ -520,6 +521,18 @@ void Container::update(const omega::UpdateContext& context)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+bool Container::isClippingEnabled()
+{
+	return this->myClipping;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void Container::setClippingEnabled(bool value)
+{
+	this->myClipping = value;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 bool Container::rayToPointerEvent(const Event& inEvt, Event& outEvt)
 {
 	// Shortcut: if this container is not in 3D mode, just return the original event.
@@ -881,6 +894,39 @@ void ContainerRenderable::beginDraw(const DrawContext& context)
 	else
 	{
 		preDraw();
+		
+		// start stencil buffer for clipping
+		if(myOwner->isClippingEnabled())
+		{
+			float width = this->myOwner->getWidth();
+			float height = this->myOwner->getHeight();
+
+			glPushAttrib(GL_ENABLE_BIT);
+			glPushAttrib(GL_STENCIL_BUFFER_BIT);
+
+			glStencilMask(0x1);
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_STENCIL_TEST);
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+			glDepthMask(GL_FALSE);
+			glStencilFunc(GL_NEVER, 0x1, 0x1);
+			glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+ 
+			glClear(GL_STENCIL_BUFFER_BIT);
+			glColor4f(1.0, 1.0, 1.0, 1.0);
+			glBegin(GL_QUADS);
+				glVertex2f(0.0, 0.0);
+				glVertex2f(width, 0.0);
+				glVertex2f(width, height);
+				glVertex2f(0.0, height);
+			glEnd();
+		
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+			glDepthMask(GL_TRUE);
+			glStencilMask(0x0);
+		
+			glStencilFunc(GL_EQUAL, 0x1, 0x1);
+		}
 	}
 }
 
@@ -902,6 +948,13 @@ void ContainerRenderable::endDraw(const DrawContext& context)
 	}
 	else
 	{
+		// end stencil buffer for clipping
+		if(myOwner->isClippingEnabled())
+		{
+			glPopAttrib();
+			glPopAttrib();
+		}
+
 		postDraw();
 	}
 }

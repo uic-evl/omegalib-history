@@ -136,6 +136,12 @@ namespace omega
 	///////////////////////////////////////////////////////////////////////////
 	int omain(omega::ApplicationBase& app, int argc, char** argv)
 	{
+		// Always initialze the executable name using the name coming from
+		// the command line. NOTE: just using the application name as the
+		// executable name does not work on linux (application name misses
+		// the initial './')
+		app.setExecutableName(argv[0]);
+
 		// register the abort handler.
 		signal(SIGABRT, &abortHandler);
 

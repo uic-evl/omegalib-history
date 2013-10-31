@@ -228,6 +228,7 @@ Menu::Menu(const String& name, MenuManager* manager):
 
 	// By default menus are attached to the default camera.
 	my3dSettings.node = manager->getEngine()->getDefaultCamera();
+	firstHide = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -476,7 +477,11 @@ void Menu::hide()
 		// Play a sound based on menu's position
 		Ref<SoundInstance> hideSound = new SoundInstance(myManager->getHideMenuSound());
 		hideSound->setLocalPosition( my3dSettings.position );
-		hideSound->play();
+		
+		if( firstHide )
+			firstHide = false;
+		else
+			hideSound->play();
 	}
 }
 

@@ -45,7 +45,6 @@ namespace omega {
 
 	private:
 		// Navigation stuff.
-		float mySpeed;
 		float myStrafeMultiplier;
 		float myYawMultiplier;
 		float myPitchMultiplier;
@@ -53,6 +52,7 @@ namespace omega {
 		Vector3f mySpeedVector;
 		float myYaw;
 		float myPitch;
+		Quaternion myTorque;
 	};
 
 }; // namespace omega

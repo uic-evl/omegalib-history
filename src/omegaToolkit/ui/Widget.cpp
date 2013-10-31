@@ -105,7 +105,7 @@ Widget::~Widget()
 	{
 		dispose();
 	}
-	ofmsg("~Widget %1%", %myName);
+	//ofmsg("~Widget %1%", %myName);
 	mysWidgets[myId] = NULL;
 }
 

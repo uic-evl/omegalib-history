@@ -148,10 +148,22 @@ void MouseService::mouseButtonCallback(int button, int state, int x, int y)
 #endif
 		{
 			evt->reset(state ? Event::Down : Event::Up, Service::Pointer);
-			sButtonFlags = button;
 		}
 		evt->setPosition(x, y);
-		evt->setFlags(sButtonFlags);
+		// Note: buttons only contain active button flags, so we invoke
+		// setFlags first, to generate ButtonDown events that
+		// still contain the flag of the currently presset button.
+		// This is needed to make vent.isButtonDown(button) calls working.
+		if(state)
+		{
+			sButtonFlags = button;
+			evt->setFlags(sButtonFlags);
+		}
+		else
+		{
+			evt->setFlags(sButtonFlags);
+			sButtonFlags = button;
+		}
 
 		evt->setExtraDataType(Event::ExtraDataVector3Array);
 		evt->setExtraDataVector3(0, mysInstance->myPointerRay.getOrigin());
