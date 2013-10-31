@@ -305,6 +305,9 @@ void Engine::dispose()
     ImageUtils::internalDispose();
 	ModuleServices::disposeAll();
 
+	// Destroy pointers.
+	myPointers.clear();
+
 	// Clear renderer list.
 	myClients.clear();
 
