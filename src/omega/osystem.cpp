@@ -302,6 +302,9 @@ namespace omega
 			dm->addSource(new FilesystemDataSource(""));
 			dm->addSource(new FilesystemDataSource(dataPath));
 			dm->addSource(new FilesystemDataSource(dataPath + "/modules"));
+			// Set the root data dir as the data prefix. This way, we can 
+			// retrieve the root data dir later on (for instance, to pass it to other
+			// instances during cluster startup)
 			osetdataprefix(dataPath);
 			
 			ofmsg("::: %1%", %dataPath);
