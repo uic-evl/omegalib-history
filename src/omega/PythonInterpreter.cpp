@@ -192,6 +192,11 @@ void PythonInterpreter::initialize(const char* programName)
 		strcpy(pythonHome, pythonLibPath.c_str());
 		Py_SetPythonHome(pythonHome);
 	}
+	else
+	{
+		owarn("WARNING: could not find a local omegalib python installation. \n"
+			  "Omegalib will attempt to use the system python interpreter (if available)");
+	}
 
 	// initialize the statically linked modules
 	//CMakeLoadAllPythonModules();
@@ -240,24 +245,10 @@ void PythonInterpreter::initialize(const char* programName)
 	StringUtils::splitFilename(exePath, exeName, exeDir);
 	addPythonPath(exeDir.c_str());
 
-#ifdef OMEGA_HARDCODE_DATA_PATHS
-	addPythonPath(OMEGA_DATA_PATH);
-#endif
-
-#ifdef OMEGA_APPROOT_DIRECTORY
-	addPythonPath(OMEGA_APPROOT_DIRECTORY);
-#endif
-
-	// If we have an environment variable OMEGA_HOME, we use the modules directory
-	// from there as a module search path.
-	String dataPath = "";
-	char* omegaHome = getenv("OMEGA_HOME");
-	if(omegaHome != NULL) 
-	{
-		dataPath = ostr("%1%/modules", %omegaHome);
-		addPythonPath(dataPath.c_str());
-	}
-
+	// The data prexif string is set by omain to point to the data directory 
+	// used by this omegalib instance.
+	String modulePath = ogetdataprefix() + "/modules";
+	addPythonPath(modulePath.c_str());
 
 	if(myShellEnabled && SystemManager::instance()->isMaster())
 	{
@@ -273,6 +264,9 @@ void PythonInterpreter::initialize(const char* programName)
 	PyRun_SimpleString("from euclid import *");
 	if(myInitCommand != "") PyRun_SimpleString(myInitCommand.c_str());
 	
+	// Setup stats
+	StatsManager* sm = SystemManager::instance()->getStatsManager();
+	myUpdateTimeStat = sm->createStat("Script update", Stat::Time);
 	omsg("Python Interpreter initialized.");
 }
 
@@ -400,12 +394,6 @@ void PythonInterpreter::runFile(const String& filename, uint flags)
 	ofmsg("PythonInterpreter::runFile: running %1%", %filename);
 	// Substitute the OMEGA_DATA_ROOT and OMEGA_APP_ROOT macros in the path.
 	String path = filename;
-#ifdef OMEGA_HARDCODE_DATA_PATHS
-	path = StringUtils::replaceAll(path, "OMEGA_DATA_ROOT", OMEGA_DATA_PATH);
-#endif
-#ifdef OMEGA_APPROOT_DIRECTORY
-	path = StringUtils::replaceAll(path, "OMEGA_APP_ROOT", OMEGA_APPROOT_DIRECTORY);
-#endif
 	
 	String fullPath;
 	if(DataManager::findFile(path, fullPath))
@@ -531,6 +519,7 @@ void PythonInterpreter::unregisterAllCallbacks()
 ///////////////////////////////////////////////////////////////////////////////
 void PythonInterpreter::update(const UpdateContext& context) 
 {
+	myUpdateTimeStat->startTiming();
 	// Execute queued interactive commands first
 	if(myCommandQueue.size() != 0)
 	{
@@ -571,6 +560,7 @@ void PythonInterpreter::update(const UpdateContext& context)
 	}
 
 	Py_DECREF(arglist);
+	myUpdateTimeStat->stopTiming();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

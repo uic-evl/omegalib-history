@@ -289,6 +289,8 @@ void Engine::initialize()
 	StatsManager* sm = getSystemManager()->getStatsManager();
 	myHandleEventTimeStat = sm->createStat("Engine handleEvent", Stat::Time);
 	myUpdateTimeStat = sm->createStat("Engine update", Stat::Time);
+	mySceneUpdateTimeStat = sm->createStat("Scene transform update", Stat::Time);
+	myModuleUpdateTimeStat = sm->createStat("Modules update", Stat::Time);
 
 	myLock.unlock();
 }
@@ -306,6 +308,9 @@ void Engine::dispose()
 
     ImageUtils::internalDispose();
 	ModuleServices::disposeAll();
+
+	// Destroy pointers.
+	myPointers.clear();
 
 	// Clear renderer list.
 	myClients.clear();
@@ -469,10 +474,14 @@ void Engine::update(const UpdateContext& context)
 	getSystemManager()->getScriptInterpreter()->update(context);
 
 	// Then run update on modules
+	myModuleUpdateTimeStat->startTiming();
     ModuleServices::update(this, context);
+	myUpdateTimeStat->stopTiming();
 	
 	// Run update on the scene graph.
+	mySceneUpdateTimeStat->startTiming();
 	myScene->update(context);
+	mySceneUpdateTimeStat->stopTiming();
 
 	// Process sound / reconnect to sound server (if sound is enabled in config and failed on init)
 	if( soundEnv != NULL && soundManager->isSoundServerRunning() )

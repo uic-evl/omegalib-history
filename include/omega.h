@@ -44,4 +44,7 @@
 #include "omega/ImageUtils.h"
 #include "omega/TrackedObject.h"
 
+// Include the modules config file.
+#include "modulesConfig.h"
+
 #endif

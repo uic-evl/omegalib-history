@@ -167,6 +167,10 @@ namespace omegaToolkit {
 		String getStyleValue(const String& key, const String& defaultValue = "");
 		void setStyleValue(const String& key, const String& value);
 		void setScale(float value) { myScale = value; }
+		//! Sets the widget scale. Scale controls the visual appearance of a 
+		//! widget without changing its actual size or forcing a layout refresh 
+		//! of the widget container. Scale is indicated as a proportion of the
+		//! current widget size.
 		float getScale() { return myScale; }
 		void setAlpha(float value) { myAlpha = value; }
 		float getAlpha();

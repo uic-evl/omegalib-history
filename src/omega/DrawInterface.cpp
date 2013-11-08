@@ -65,7 +65,16 @@ void DrawInterface::beginDraw3D(const DrawContext& context)
 
     glMatrixMode(GL_MODELVIEW);
 
-	glViewport(context.viewport.x(), context.viewport.y(), context.viewport.width(), context.viewport.height());
+	const Rect& vp = context.viewport;
+
+	if(vp.max[0] < vp.min[0] || vp.max[1] < vp.min[1])
+	{
+		ofwarn("DrawInterface::beginDraw3D: invalid viewport %1% - %2%", %vp.min %vp.max);
+	}
+	else
+	{
+		glViewport(vp.x(), vp.y(), vp.width(), vp.height());
+	}
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -392,20 +401,14 @@ void DrawInterface::drawWireSphere(const Color& color, int segments, int slices)
 Font* DrawInterface::createFont(omega::String fontName, omega::String filename, int size)
 {
 	Font::lock();
-	//if(getFont(fontName))
-	//{
-	//	ofwarn("FontManager::createFont: font '%1%' already existing.", %fontName);
-	//	return getFont(fontName);
-	//}
+	String fontPath;
+	if(!DataManager::findFile(filename, fontPath))
+	{
+		ofwarn("DrawInterface::createFont: could not find font file %1%", %filename);
+		return NULL;
+	}
 
-	DataManager* dm = SystemManager::instance()->getDataManager();
-	DataInfo info = dm->getInfo(filename);
-	oassert(!info.isNull());
-	oassert(info.local);
-
-	FTFont* fontImpl = new FTTextureFont(info.path.c_str());
-
-	//delete data;
+	FTFont* fontImpl = new FTTextureFont(fontPath.c_str());
 
 	if(fontImpl->Error())
 	{
@@ -502,7 +505,11 @@ GLuint DrawInterface::makeShaderFromSource(const char* source, ShaderType Type)
     {
         infoLog = new char[infologLength];
         glGetShaderInfoLog(shaderId, infologLength, &charsWritten, infoLog);
-        omsg(infoLog);
+		// Print log only when it contains error messages.
+		if(strncmp(infoLog, "No errors.", 8))
+		{
+			omsg(infoLog);
+		}
         delete [] infoLog;
     }
 
@@ -527,7 +534,11 @@ GLuint DrawInterface::createProgram(GLuint vertextShader, GLuint fragmentShader)
     {
         infoLog = new char[infologLength];
         glGetProgramInfoLog(program, infologLength, &charsWritten, infoLog);
-        omsg(infoLog);
+		// Print log only when it contains error messages.
+		if(strncmp(infoLog, "No errors.", 8))
+		{
+			omsg(infoLog);
+		}
         delete [] infoLog;
     }
 

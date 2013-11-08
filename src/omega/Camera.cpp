@@ -250,7 +250,7 @@ void Camera::beginDraw(DrawContext& context)
 	}
 
 	context.updateViewport();
-	context.updateViewBounds(myViewPosition, myViewSize, canvasSize);
+	//context.updateViewBounds(myViewPosition, myViewSize, canvasSize);
 	context.setupInterleaver();
 	context.updateTransforms(
 		myHeadTransform, myViewTransform, 

@@ -217,7 +217,6 @@ void Widget::handleEvent(const Event& evt)
 			// In the future, we may add an option to selectively enable dispatch of those events.
 			else if(evt.getType() == Event::Down || evt.getType() == Event::Up)
 			{
-				// omsg("here 2");
 				dispatchUIEvent(evt);
 			}
 
@@ -227,24 +226,6 @@ void Widget::handleEvent(const Event& evt)
 	if(isPointerInteractionEnabled())
 	{
 		Vector2f pos2d = Vector2f(evt.getPosition().x(), evt.getPosition().y());
-		if(myActive)
-		{
-			//if(evt.getType() == Event::Zoom)
-			//{
-			//	float val = evt.getExtraDataInt(0);
-			//	if(val != 0)
-			//	{
-			//		float sc = 0.0f;
-			//		if(val < 0) sc = 0.9f;
-			//		else sc = 1.1f;
-
-			//		float width = mySize[0] * sc;
-			//		float height = mySize[1] * sc;
-
-			//		setSize(Vector2f(width, height));
-			//	}
-			//}
-		}
 		// NOTE: Drag move and end does not depend on the pointer actually being on
 		// the controller
 		if(myDraggable)
@@ -294,11 +275,6 @@ void Widget::handleEvent(const Event& evt)
 					}
 				}
 			}
-		}
-		else
-		{
-			//myDragging = false;
-			//myActive = false;
 		}
 	}
 }

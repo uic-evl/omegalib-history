@@ -71,7 +71,7 @@ namespace omega {
 		int getNumLines() { return myLines; }
 
 		void setDrawFlags(uint flags) { myDrawFlags = flags; }
-		uint getDrawFags() { return myDrawFlags; }
+		uint getDrawFlags() { return myDrawFlags; }
 
 	private:
 		int myLines;

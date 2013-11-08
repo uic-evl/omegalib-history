@@ -14,7 +14,7 @@ else()
 	# fix OpenSceneGraph libs
 	string(REPLACE ${OMEGA_BINARY_DIR} ${Omegalib_DIR} OSG_LIBS "${OSG_LIBS}")
 	# fix osgWorks libs	
-	string(REPLACE ${Omegalib_DIR}/src/osgWorks-prefix/src/osgWorks-build/lib ${Omegalib_DIR}/lib OSG_LIBS "${OSG_LIBS}")
+	string(REPLACE ${Omegalib_DIR}/modules/omegaOsg/osgWorks-prefix/src/osgWorks-build/lib ${Omegalib_DIR}/lib OSG_LIBS "${OSG_LIBS}")
 	#message("${OSG_LIBS}")
 	# fix osg include dir
 	string(REPLACE ${OMEGA_BINARY_DIR} ${Omegalib_DIR} OSG_INCLUDES "${OSG_INCLUDES}")
@@ -35,7 +35,14 @@ if(OMEGA_BINARY_DIR)
 	# in the future, just ${OMEGA_ROOT_DIR}/include will be needed, but for now, multiple paths 
 	# have to be specified. If building a project without Cmake, remember to specify ALL these directories
 	# as include paths for your compiler.
-	set(OMEGA_INCLUDE_DIRS ${OMICRON_INCLUDE_DIRS} ${OMEGA_BINARY_DIR}/include ${OMEGA_SOURCE_DIR}/include ${OMEGA_SOURCE_DIR}/external/include ${OSG_INCLUDES} ${PYTHON_INCLUDES})
+	set(OMEGA_INCLUDE_DIRS 
+		${OMICRON_INCLUDE_DIRS} 
+		${OMEGA_BINARY_DIR}/include 
+		${OMEGA_SOURCE_DIR}/include 
+		${OMEGA_SOURCE_DIR}/external/include  
+		${OMEGA_SOURCE_DIR}/modules
+		${OSG_INCLUDES} 
+		${PYTHON_INCLUDES})
 
 	# No debug libs in an install environment
 	if(INSTALL_ENVIRONMENT)

@@ -39,8 +39,9 @@
 #include <omegaVtk.h>
 #endif
 
-#ifdef OMEGA_BUILD_OSG_LIB
-#include <cyclops.h>
+#ifdef cyclops_ENABLED
+#include <cyclops/cyclops.h>
+using namespace cyclops;
 #endif
 
 #ifdef OMEGA_OS_WIN
@@ -55,10 +56,6 @@ using namespace omegaToolkit::ui;
 
 #ifdef OMEGA_BUILD_VTK_LIB
 using namespace omegaVtk;
-#endif
-
-#ifdef OMEGA_BUILD_OSG_LIB
-using namespace cyclops;
 #endif
 
 // The name of the script to launch automatically at startup
@@ -125,7 +122,7 @@ void OmegaViewer::initialize()
 
 	omegaToolkitPythonApiInit();
 
-#ifdef OMEGA_BUILD_OSG_LIB
+#ifdef cyclops_ENABLED
 	cyclopsPythonApiInit();
 #endif
 
@@ -288,8 +285,10 @@ int main(int argc, char** argv)
 	
 	// Legacy default script (new apps should use launch script instead)
 	oargs().newNamedString('s', "script", "script", "script to launch at startup", sDefaultScript);
+	oargs().newOptionalString("script","script to launch at startup",sDefaultScript);
 
 	Application<OmegaViewer> app(applicationName);
+	app.setExecutableName(argv[0]);
 
 #ifdef OMEGA_ENABLE_AUTO_UPDATE
 // Convert the omegalib version to wide char (two macros needed for the substitution to work)

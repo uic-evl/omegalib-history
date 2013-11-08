@@ -329,8 +329,12 @@ void EqualizerDisplaySystem::initialize(SystemManager* sys)
 					String cCurrentPath = ogetcwd();
 					executable = StringUtils::replaceAll(executable, "%d", cCurrentPath);
 				
+					// Setup the executable call. Note: we pass a-D argument to tell all
+					// instances what the main data directory is. We use ogetdataprefix
+					// because omain sets the data prefix to the root data dir during
+					// startup.
 					int port = myDisplayConfig.basePort + nc.port;
-					String cmd = ostr("%1% -c %2%@%3%:%4%", %executable %SystemManager::instance()->getAppConfig()->getFilename() %nc.hostname %port);
+					String cmd = ostr("%1% -c %2%@%3%:%4% -D %5%", %executable %SystemManager::instance()->getAppConfig()->getFilename() %nc.hostname %port %ogetdataprefix());
 					olaunch(cmd);
 				}
 			}
