@@ -188,6 +188,7 @@ void Engine::initialize()
 			int soundServerPort = Config::getIntValue("soundServerPort", s, 57120);
 
 			float volumeScale = Config::getFloatValue("volumeScale", s, 0.5);
+			bool soundDebug = Config::getBoolValue("debug", s, false);
 
 			// Config in seconds, function below in milliseconds
 			soundServerCheckDelay = Config::getFloatValue("soundServerReconnectDelay", s, 5) * 1000;
@@ -195,6 +196,7 @@ void Engine::initialize()
 			soundManager = new SoundManager(soundServerIP,soundServerPort);
 			soundEnv = soundManager->getSoundEnvironment();
 			soundManager->startSoundServer();
+			soundManager->showDebugInfo(soundDebug);
 
 			ofmsg("Engine: Checking if sound server is ready at %1% on port %2%... (Waiting for %3% seconds)", %soundServerIP %soundServerPort %(soundServerCheckDelay/1000));
 
