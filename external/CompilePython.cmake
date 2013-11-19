@@ -1,8 +1,10 @@
 ExternalProject_Add(Python
 	DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/python
-	URL "http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tgz"
+	URL "http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz"
 	UPDATE_COMMAND ""
 	CONFIGURE_COMMAND <SOURCE_DIR>/configure --with-universal-archs=intel --enable-universalsdk --enable-shared
+	CMAKE_ARGS
+		-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
 	BUILD_COMMAND "make"
 	INSTALL_COMMAND ""
 )
