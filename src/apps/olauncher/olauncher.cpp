@@ -80,6 +80,9 @@ void launch(const String& scriptName, const String& host, bool forceAssetRefresh
 
         Vector<String> fileVector = StringUtils::split(fileList, " ");
 
+        Ref<DataManager> dataManager = DataManager::getInstance();
+        dataManager->addSource(new FilesystemDataSource(scriptDir));
+
         // Run synchronization
         Ref<AssetCacheManager> acm = new AssetCacheManager();
         acm->addCacheHost(host);
@@ -87,9 +90,12 @@ void launch(const String& scriptName, const String& host, bool forceAssetRefresh
         acm->setCacheName(scriptFilename);
         acm->setForceOverwrite(forceAssetRefresh);
 
+        int scriptDirLength = scriptDir.length();
         foreach(String file, fileVector)
         {
-            acm->addFileToCacheList(file);
+            String relFilePath = file.substr(scriptDirLength);
+            relFilePath = "./" + relFilePath;
+            acm->addFileToCacheList(relFilePath);
         }
 
         acm->setVerbose(true);
